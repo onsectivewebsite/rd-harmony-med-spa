@@ -1,0 +1,5 @@
+{
+  "name": "RD Harmony Med Spa",
+  "description": "Premium med spa in Oakville offering advanced skincare, IV therapy, and aesthetic treatments.",
+  "requestFramePermissions": ["geolocation"]
+}

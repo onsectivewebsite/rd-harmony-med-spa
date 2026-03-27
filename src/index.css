@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-spa-bg: #F8FDF9;
+  --color-spa-ink: #1A1A1A;
+  --color-spa-primary: #119C47;
+  --color-spa-dark: #2E5B3E;
+  --color-spa-accent: #1FA455;
+  --color-spa-muted: #6B7280;
+  --color-spa-border: rgba(26, 26, 26, 0.08); /* slight opacity of text color */
+  
+  --shadow-spa: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-spa-hover: 0 20px 25px -5px rgb(17 156 71 / 0.08), 0 8px 10px -6px rgb(17 156 71 / 0.08);
+}
+
+@layer base {
+  body {
+    @apply bg-spa-bg text-spa-ink font-sans antialiased selection:bg-spa-primary/20 selection:text-spa-dark;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-medium;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-spa transition-shadow duration-300 hover:shadow-spa-hover;
+}
+
+.section-padding {
+  @apply py-20 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto;
+}
+
+.glow-emerald {
+  box-shadow: 0 0 30px rgba(17, 156, 71, 0.15);
+}
+
+.text-gradient-gold {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-spa-primary to-spa-accent;
+}
+
