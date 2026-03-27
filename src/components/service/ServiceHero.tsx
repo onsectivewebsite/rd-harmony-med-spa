@@ -32,7 +32,7 @@ const ServiceHero = ({ title, subtitle, duration, price, image }: ServiceHeroPro
             transition={{ duration: 0.8 }}
             className="space-y-6"
           >
-            <span className="text-emerald-600 text-xs uppercase tracking-[0.5em] font-bold block bg-white/30 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-white/20">
+            <span className="text-emerald-600 text-xs uppercase tracking-[0.5em] font-bold block bg-[#111111]/30 backdrop-blur-sm w-fit px-4 py-1.5 rounded-full border border-white/20">
               Premium Treatment
             </span>
             <h1 className="text-5xl md:text-8xl font-serif text-spa-ink leading-[1.1]">

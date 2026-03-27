@@ -30,24 +30,32 @@ const Chatbot = () => {
       suggestions: ['Hydrafacial', 'Oxygeneo', 'Chemical Peel']
     },
     'botox': {
-      text: "Botox is $11 per unit. We also offer Xeomin ($8/unit) and Dysport ($7/unit). Mobile service is available! Would you like to book an injection?",
-      suggestions: ['Book Botox', 'Xeomin Info', 'Mobile Service']
+      text: "Botox is $11 per unit. Mobile service is available! Would you like to book an injection?",
+      suggestions: ['Book Botox', 'Mobile Service']
     },
     'xeomin': {
       text: "Xeomin costs $8 per unit. It is a highly pure neurotoxin perfect for smoothing moderate to severe frown lines. We can even come to you!",
       suggestions: ['Book Xeomin', 'Compare Brands']
     },
     'dysport': {
-      text: "Dysport is $7 per unit and is known for its fast-acting results and natural look. Mobile appointments are available.",
-      suggestions: ['Book Dysport', 'Pricing List']
+      text: "Dysport goes for $7 per unit. It spreads a bit more quickly and provides an excellent alternative option. Ask our experts about it during a consultation!",
+      suggestions: ['Book Dysport', 'Differences']
     },
     'microneedling': {
       text: "Microneedling is $225 per session, or a Package of 3 for $550. We also offer it with premium boosters (Salmon DNA/NAD+/Exosomes) for $425.",
       suggestions: ['Pkg of 3 Deals', 'Boosters Info']
     },
     'prp': {
-      text: "PRP for the Face is $400 (3 for $900). PRP for Hair is $375 (3 for $850). Note: A $45 annual doctor's fee applies. Ready to rejuvenate?",
-      suggestions: ['PRP Hair', 'PRP Face', 'Doctor Fees']
+      text: "PRP Face is $400, PRP Hair is $375, and PRP Under Eye is $220. Packages of 3 are available for all. Note: A $45 annual doctor's fee applies.",
+      suggestions: ['PRP Hair', 'PRP Face', 'Under Eye']
+    },
+    'under eye': {
+      text: "PRP for Dark Under-Eye Circles uses your own plasma to revitalize the delicate skin. It's $220/session, or a package of 3 for $600.",
+      suggestions: ['Book Under-Eye PRP', 'PRP Face']
+    },
+    'electrolysis': {
+      text: "Electrolysis is an FDA-approved method for permanent hair removal, suitable for all hair and skin types. Prices start at $30 for 15 minutes.",
+      suggestions: ['Book Electrolysis', 'Waxing Options']
     },
     'iv therapy': {
       text: "Our IV drips include Wellness ($220), Glutathione ($190), Calories Burn ($250), and Iron Infusion ($275). Most have 'Package of 3' discounts!",
@@ -155,7 +163,7 @@ const Chatbot = () => {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-600/20 flex items-center justify-center hover:scale-110 transition-all active:scale-95 group"
       >
-        <div className="absolute -top-2 -right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center animate-bounce shadow-md">
+        <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#111111] rounded-full flex items-center justify-center animate-bounce shadow-md">
            <span className="w-2 h-2 bg-emerald-600 rounded-full" />
         </div>
         <MessageCircle size={30} />
@@ -167,23 +175,23 @@ const Chatbot = () => {
             initial={{ opacity: 0, y: 50, scale: 0.9, filter: 'blur(10px)' }}
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 50, scale: 0.9, filter: 'blur(10px)' }}
-            className="fixed bottom-28 right-8 z-[100] w-[380px] h-[600px] bg-white backdrop-blur-2xl border border-spa-border rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden shadow-emerald-600/10"
+            className="fixed bottom-28 right-8 z-[100] w-[380px] h-[600px] bg-[#111111] backdrop-blur-2xl border border-spa-border rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden shadow-emerald-600/10"
           >
             {/* Elegant Header */}
             <div className="p-6 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-2xl backdrop-blur-md flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-[#111111]/20 rounded-2xl backdrop-blur-md flex items-center justify-center text-white">
                   <Sparkles size={20} />
                 </div>
                 <div>
                   <h3 className="font-bold text-sm tracking-tight">RD Harmony Concierge</h3>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-sm" />
+                    <div className="w-1.5 h-1.5 bg-[#111111] rounded-full animate-pulse shadow-sm" />
                     <p className="text-[10px] font-bold uppercase tracking-wider opacity-90">Online & Ready</p>
                   </div>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center hover:bg-[#111111]/10 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -195,7 +203,7 @@ const Chatbot = () => {
                   <div className={`max-w-[85%] p-4 rounded-3xl text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
                       ? 'bg-emerald-600 text-white font-medium rounded-tr-none shadow-lg shadow-emerald-600/10'
-                      : 'bg-white border border-spa-border text-spa-ink rounded-tl-none font-light'
+                      : 'bg-[#111111] border border-spa-border text-spa-ink rounded-tl-none font-light'
                   }`}>
                     {msg.text}
                   </div>
@@ -206,7 +214,7 @@ const Chatbot = () => {
                          <button 
                            key={idx}
                            onClick={() => handleSend(s)}
-                           className="px-4 py-2 rounded-full border border-emerald-600/20 text-emerald-600 text-[10px] font-bold uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition-all bg-white shadow-sm"
+                           className="px-4 py-2 rounded-full border border-emerald-600/20 text-emerald-600 text-[10px] font-bold uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition-all bg-[#111111] shadow-sm"
                          >
                            {s}
                          </button>
@@ -229,7 +237,7 @@ const Chatbot = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-stone-50 p-6 rounded-[2rem] border border-spa-border space-y-4 shadow-inner"
+                  className="bg-[#1A1A1A] p-6 rounded-[2rem] border border-spa-border space-y-4 shadow-inner"
                 >
                   <div className="flex items-center gap-2 text-emerald-600">
                     <Ticket size={18} />
@@ -238,7 +246,7 @@ const Chatbot = () => {
                   <input
                     required
                     placeholder="Full Name"
-                    className="w-full bg-white border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all shadow-sm"
+                    className="w-full bg-[#111111] border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all shadow-sm"
                     value={ticketData.name}
                     onChange={e => setTicketData(prev => ({ ...prev, name: e.target.value }))}
                   />
@@ -246,7 +254,7 @@ const Chatbot = () => {
                     required
                     type="email"
                     placeholder="Email Address"
-                    className="w-full bg-white border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all shadow-sm"
+                    className="w-full bg-[#111111] border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all shadow-sm"
                     value={ticketData.email}
                     onChange={e => setTicketData(prev => ({ ...prev, email: e.target.value }))}
                   />
@@ -254,7 +262,7 @@ const Chatbot = () => {
                     required
                     placeholder="Your message..."
                     rows={3}
-                    className="w-full bg-white border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all resize-none shadow-sm"
+                    className="w-full bg-[#111111] border border-spa-border rounded-xl px-4 py-3 text-xs text-spa-ink focus:border-emerald-500 outline-none transition-all resize-none shadow-sm"
                     value={ticketData.message}
                     onChange={e => setTicketData(prev => ({ ...prev, message: e.target.value }))}
                   />
@@ -277,7 +285,7 @@ const Chatbot = () => {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-spa-border p-4 rounded-3xl rounded-tl-none shadow-sm">
+                  <div className="bg-[#111111] border border-spa-border p-4 rounded-3xl rounded-tl-none shadow-sm">
                      <div className="flex gap-1">
                         <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
                         <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
@@ -289,7 +297,7 @@ const Chatbot = () => {
             </div>
 
             {/* Premium Input Bar */}
-            <div className="p-6 bg-white border-t border-spa-border px-8">
+            <div className="p-6 bg-[#111111] border-t border-spa-border px-8">
               <div className="relative group">
                 <input
                   type="text"
@@ -298,7 +306,7 @@ const Chatbot = () => {
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Tell me about a service..."
                   disabled={showTicketForm}
-                  className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-6 pr-14 text-sm text-spa-ink focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-spa-ink/30 shadow-inner"
+                  className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-6 pr-14 text-sm text-spa-ink focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-spa-ink/30 shadow-inner"
                 />
                 <button
                   onClick={() => handleSend()}

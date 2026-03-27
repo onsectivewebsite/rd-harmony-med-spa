@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <div className="bg-spa-bg text-spa-ink">
       {/* Hero Section */}
-      <section className="relative min-h-screen pt-32 pb-20 flex items-center overflow-hidden bg-white">
+      <section className="relative min-h-screen pt-32 pb-20 flex items-center overflow-hidden bg-[#111111]">
         <div className="max-w-7xl mx-auto px-4 w-full h-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             
@@ -19,7 +19,7 @@ const Home = () => {
               transition={{ duration: 0.8 }}
               className="mt-8 lg:mt-0"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full text-emerald-700 text-[10px] uppercase tracking-[0.2em] font-bold mb-6 border border-emerald-100 shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-900/20 rounded-full text-emerald-700 text-[10px] uppercase tracking-[0.2em] font-bold mb-6 border border-emerald-100 shadow-sm">
                 <Sparkles size={12} /> Premium Care
               </div>
               <h1 className="text-5xl lg:text-7xl xl:text-8xl font-serif text-spa-ink mb-6 leading-[1.1]">
@@ -38,7 +38,7 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/free-consultation"
-                  className="bg-white border text-spa-ink border-spa-border hover:border-[#119C47] px-8 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all text-center hover:bg-emerald-50/50"
+                  className="bg-[#111111] border text-spa-ink border-spa-border hover:border-[#119C47] px-8 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all text-center hover:bg-emerald-900/20/50"
                 >
                   Free Consultation
                 </Link>
@@ -47,19 +47,19 @@ const Home = () => {
               {/* Trust Badges */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-spa-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#119C47] shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-emerald-900/20 flex items-center justify-center text-[#119C47] shrink-0">
                     <ShieldCheck size={18} />
                   </div>
                   <span className="text-xs uppercase tracking-wider font-bold text-spa-ink/70">FDA Approved<br/>Devices</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#119C47] shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-emerald-900/20 flex items-center justify-center text-[#119C47] shrink-0">
                     <Star size={18} />
                   </div>
                   <span className="text-xs uppercase tracking-wider font-bold text-spa-ink/70">Health Canada<br/>Certified</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#119C47] shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-emerald-900/20 flex items-center justify-center text-[#119C47] shrink-0">
                     <Sparkles size={18} />
                   </div>
                   <span className="text-xs uppercase tracking-wider font-bold text-spa-ink/70">Medical Grade<br/>Products</span>
@@ -89,7 +89,7 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-32 bg-stone-50">
+      <section className="py-32 bg-[#1A1A1A]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             <div className="space-y-6">
@@ -179,7 +179,7 @@ const Home = () => {
       </section>
 
       {/* Free Consultation CTA */}
-      <section className="py-24 bg-white overflow-hidden relative">
+      <section className="py-24 bg-[#111111] overflow-hidden relative">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-emerald-500/5 -z-1" />
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -192,7 +192,7 @@ const Home = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
               </div>
-              <div className="absolute -bottom-10 -right-10 bg-white p-8 rounded-[2.5rem] shadow-2xl border border-spa-border hidden md:block">
+              <div className="absolute -bottom-10 -right-10 bg-[#111111] p-8 rounded-[2.5rem] shadow-2xl border border-spa-border hidden md:block">
                  <Sparkles className="text-emerald-600 mb-4" size={32} />
                  <div className="text-xs uppercase tracking-[0.2em] font-bold text-spa-ink/40 mb-2">Limited Slots</div>
                  <div className="text-2xl font-serif text-spa-ink text-gradient-gold">Reserve Yours Today</div>
@@ -258,7 +258,7 @@ const Home = () => {
                 desc: 'We prioritize subtle enhancements that look and feel like you.' 
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-white border border-spa-border p-8 rounded-[2rem] hover:border-emerald-500/30 transition-all group shadow-sm">
+              <div key={i} className="bg-[#111111] border border-spa-border p-8 rounded-[2rem] hover:border-emerald-500/30 transition-all group shadow-sm">
                 <div className="mb-6 w-12 h-12 bg-spa-bg rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
@@ -287,7 +287,7 @@ const Home = () => {
       </section>
 
       {/* Map Section */}
-      <section className="py-32 bg-stone-50">
+      <section className="py-32 bg-[#1A1A1A]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div>
@@ -313,7 +313,7 @@ const Home = () => {
                 Get Directions <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="h-[500px] bg-white rounded-[2.5rem] overflow-hidden border border-spa-border relative shadow-sm">
+            <div className="h-[500px] bg-[#111111] rounded-[2.5rem] overflow-hidden border border-spa-border relative shadow-sm">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2899.434440366144!2d-79.6644!3d43.4418!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882b5cf696fe931b%3A0xc3f58a36d7a467f3!2s78%20Jones%20St%2C%20Oakville%2C%20ON%20L6L%206C5%2C%20Canada!5e0!3m2!1sen!2sus!4v1710892000000!5m2!1sen!2sus"
                 width="100%"

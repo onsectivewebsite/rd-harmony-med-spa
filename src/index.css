@@ -5,16 +5,16 @@
   --font-serif: "Playfair Display", serif;
   --font-sans: "Inter", sans-serif;
   
-  --color-spa-bg: #F8FDF9;
-  --color-spa-ink: #1A1A1A;
+  --color-spa-bg: #0A0A0A; /* Deep Black/Dark bg */
+  --color-spa-ink: #F9FAFB; /* Off-white text */
   --color-spa-primary: #119C47;
   --color-spa-dark: #2E5B3E;
   --color-spa-accent: #1FA455;
-  --color-spa-muted: #6B7280;
-  --color-spa-border: rgba(26, 26, 26, 0.08); /* slight opacity of text color */
+  --color-spa-muted: #9CA3AF; /* Lightened muted text for dark mode */
+  --color-spa-border: rgba(255, 255, 255, 0.1); /* light border against dark bg */
   
-  --shadow-spa: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-spa-hover: 0 20px 25px -5px rgb(17 156 71 / 0.08), 0 8px 10px -6px rgb(17 156 71 / 0.08);
+  --shadow-spa: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-spa-hover: 0 20px 25px -5px rgb(17 156 71 / 0.15), 0 8px 10px -6px rgb(17 156 71 / 0.15);
 }
 
 @layer base {
@@ -28,7 +28,7 @@
 }
 
 .glass-card {
-  @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-spa transition-shadow duration-300 hover:shadow-spa-hover;
+  @apply bg-[#111111]/80 backdrop-blur-xl border border-white/10 shadow-spa transition-shadow duration-300 hover:shadow-spa-hover;
 }
 
 .section-padding {

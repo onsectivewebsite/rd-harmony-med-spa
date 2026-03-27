@@ -25,7 +25,7 @@ const About = () => {
       </section>
 
       {/* Philosophy */}
-      <section className="py-32 bg-stone-50">
+      <section className="py-32 bg-[#1A1A1A]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
             <div className="relative">

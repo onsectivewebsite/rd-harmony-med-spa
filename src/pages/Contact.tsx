@@ -18,7 +18,7 @@ const Contact = () => {
 
             <div className="space-y-10">
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="w-12 h-12 bg-[#111111]/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
                   <MapPin size={20} />
                 </div>
                 <div>
@@ -34,7 +34,7 @@ const Contact = () => {
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                <div className="w-12 h-12 bg-[#111111] rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
                   <Phone size={20} />
                 </div>
                 <div>
@@ -45,7 +45,7 @@ const Contact = () => {
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="w-12 h-12 bg-[#111111]/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
                   <Mail size={20} />
                 </div>
                 <div>
@@ -56,7 +56,7 @@ const Contact = () => {
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                <div className="w-12 h-12 bg-[#111111] rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
                   <Clock size={20} />
                 </div>
                 <div>
@@ -67,10 +67,10 @@ const Contact = () => {
             </div>
 
             <div className="mt-12 flex gap-4">
-              <a href="#" className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-spa-ink/70 hover:text-emerald-600 hover:bg-emerald-600/10 transition-all shadow-sm">
+              <a href="#" className="w-12 h-12 rounded-2xl bg-[#111111] flex items-center justify-center text-spa-ink/70 hover:text-emerald-600 hover:bg-emerald-600/10 transition-all shadow-sm">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-spa-ink/70 hover:text-emerald-600 hover:bg-emerald-600/10 transition-all shadow-sm">
+              <a href="#" className="w-12 h-12 rounded-2xl bg-[#111111] flex items-center justify-center text-spa-ink/70 hover:text-emerald-600 hover:bg-emerald-600/10 transition-all shadow-sm">
                 <Facebook size={20} />
               </a>
             </div>
@@ -78,7 +78,7 @@ const Contact = () => {
 
           <div className="space-y-8">
             {/* Map Section */}
-            <div className="w-full aspect-square bg-white rounded-[2.5rem] overflow-hidden border border-spa-border relative shadow-sm">
+            <div className="w-full aspect-square bg-[#111111] rounded-[2.5rem] overflow-hidden border border-spa-border relative shadow-sm">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2899.434440366144!2d-79.6644!3d43.4418!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882b5cf696fe931b%3A0xc3f58a36d7a467f3!2s78%20Jones%20St%2C%20Oakville%2C%20ON%20L6L%206C5%2C%20Canada!5e0!3m2!1sen!2sus!4v1710892000000!5m2!1sen!2sus"
                 width="100%"

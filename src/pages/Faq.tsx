@@ -80,7 +80,7 @@ const Faq = () => {
               </h2>
               <div className="space-y-4">
                 {cat.questions.map((faq, i) => (
-                  <details key={i} className="group bg-white border border-spa-border rounded-2xl overflow-hidden hover:border-emerald-500/20 transition-all shadow-sm">
+                  <details key={i} className="group bg-[#111111] border border-spa-border rounded-2xl overflow-hidden hover:border-emerald-500/20 transition-all shadow-sm">
                     <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
                       <h3 className="text-spa-ink font-medium text-lg pr-8">{faq.q}</h3>
                       <div className="w-8 h-8 rounded-full border border-spa-border flex items-center justify-center text-spa-ink/40 group-open:rotate-180 transition-transform bg-spa-bg/50">

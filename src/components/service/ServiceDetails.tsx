@@ -11,7 +11,7 @@ interface ServiceExperienceProps {
 
 export const ServiceExperience = ({ experience, idealFor, name }: ServiceExperienceProps) => {
   return (
-    <section className="section-padding bg-stone-50 overflow-hidden relative">
+    <section className="section-padding bg-[#1A1A1A] overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-600/10 to-transparent" />
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -24,7 +24,7 @@ export const ServiceExperience = ({ experience, idealFor, name }: ServiceExperie
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />
             </div>
-            <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-[2.5rem] shadow-2xl border border-spa-border hidden md:block group-hover:translate-x-4 transition-transform">
+            <div className="absolute -bottom-10 -left-10 bg-[#111111] p-8 rounded-[2.5rem] shadow-2xl border border-spa-border hidden md:block group-hover:translate-x-4 transition-transform">
                <Sparkles className="text-emerald-600 mb-4" size={32} />
                <div className="text-xs uppercase tracking-[0.2em] font-bold text-spa-ink/40 mb-2">Sensory Feel</div>
                <div className="text-2xl font-serif text-spa-ink text-gradient-gold italic">Pure Excellence</div>
@@ -47,7 +47,7 @@ export const ServiceExperience = ({ experience, idealFor, name }: ServiceExperie
                 </h3>
                 <div className="flex flex-wrap gap-4">
                   {idealFor.map((item, i) => (
-                    <span key={i} className="bg-white px-6 py-3 rounded-full text-[11px] uppercase tracking-widest font-bold text-spa-ink/70 border border-spa-border hover:border-emerald-500/30 transition-all hover:bg-stone-50 shadow-sm">
+                    <span key={i} className="bg-[#111111] px-6 py-3 rounded-full text-[11px] uppercase tracking-widest font-bold text-spa-ink/70 border border-spa-border hover:border-emerald-500/30 transition-all hover:bg-[#1A1A1A] shadow-sm">
                       {item}
                     </span>
                   ))}
@@ -83,8 +83,8 @@ export const ServiceSafety = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {standards.map((s, i) => (
-            <div key={i} className="group p-10 bg-white/5 border border-white/10 rounded-[2.5rem] hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-center">
-              <div className="mx-auto w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-black transition-all shadow-xl mb-8">
+            <div key={i} className="group p-10 bg-[#111111]/5 border border-white/10 rounded-[2.5rem] hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-center">
+              <div className="mx-auto w-16 h-16 bg-[#111111]/5 rounded-2xl flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-black transition-all shadow-xl mb-8">
                 {s.icon}
               </div>
               <h3 className="text-xl font-serif mb-4">{s.title}</h3>
@@ -99,9 +99,9 @@ export const ServiceSafety = () => {
 
 export const ServiceCTA = ({ name }: { name: string }) => {
   return (
-    <section className="py-32 bg-white">
+    <section className="py-32 bg-[#111111]">
       <div className="max-w-5xl mx-auto px-4">
-        <div className="bg-stone-50 border border-spa-border p-12 md:p-24 rounded-[4rem] text-center relative overflow-hidden shadow-2xl group">
+        <div className="bg-[#1A1A1A] border border-spa-border p-12 md:p-24 rounded-[4rem] text-center relative overflow-hidden shadow-2xl group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity duration-1000" />
           <div className="relative z-10 scale-100 group-hover:scale-[1.02] transition-transform duration-700">
             <span className="text-emerald-600 text-xs uppercase tracking-[0.5em] font-bold block mb-8">Transform Your Look</span>
@@ -115,7 +115,7 @@ export const ServiceCTA = ({ name }: { name: string }) => {
               </Link>
               <Link 
                 to="/free-consultation"
-                className="bg-white border border-spa-border hover:border-emerald-600 text-spa-ink px-12 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all flex items-center justify-center hover:text-emerald-600 scale-100 hover:scale-105 shadow-sm"
+                className="bg-[#111111] border border-spa-border hover:border-emerald-600 text-spa-ink px-12 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all flex items-center justify-center hover:text-emerald-600 scale-100 hover:scale-105 shadow-sm"
               >
                 Not Sure? Get Consulted
               </Link>

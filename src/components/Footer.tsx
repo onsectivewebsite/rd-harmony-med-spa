@@ -19,10 +19,10 @@ const Footer = () => {
               Experience the Future of Aesthetic Care. We blend advanced medical technology with a refined, client-first approach to deliver exceptional results.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-spa-ink/40 hover:text-emerald-600 hover:border-emerald-600 transition-all bg-white shadow-sm">
+              <a href="#" className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-spa-ink/40 hover:text-emerald-600 hover:border-emerald-600 transition-all bg-[#111111] shadow-sm">
                 <Instagram size={18} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-spa-ink/40 hover:text-emerald-600 hover:border-emerald-600 transition-all bg-white shadow-sm">
+              <a href="#" className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-spa-ink/40 hover:text-emerald-600 hover:border-emerald-600 transition-all bg-[#111111] shadow-sm">
                 <Facebook size={18} />
               </a>
             </div>

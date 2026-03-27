@@ -142,7 +142,7 @@ const FreeConsultation = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16"
           >
             {highlights.map((h, i) => (
-              <div key={i} className="flex items-center justify-center gap-3 bg-white/50 backdrop-blur-sm border border-spa-border p-4 rounded-2xl">
+              <div key={i} className="flex items-center justify-center gap-3 bg-[#111111]/50 backdrop-blur-sm border border-spa-border p-4 rounded-2xl">
                 <div className="text-emerald-600">{h.icon}</div>
                 <span className="text-[11px] uppercase tracking-widest font-bold text-spa-ink/80">{h.text}</span>
               </div>
@@ -163,7 +163,7 @@ const FreeConsultation = () => {
             </Link>
             <Link 
               to="/services"
-              className="bg-white border border-spa-border hover:bg-stone-50 text-spa-ink px-10 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all flex items-center justify-center"
+              className="bg-[#111111] border border-spa-border hover:bg-[#1A1A1A] text-spa-ink px-10 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all flex items-center justify-center"
             >
               Explore All Services
             </Link>
@@ -172,7 +172,7 @@ const FreeConsultation = () => {
       </section>
 
       {/* Experience Section */}
-      <section className="section-padding bg-white">
+      <section className="section-padding bg-[#111111]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div className="relative">
@@ -212,8 +212,8 @@ const FreeConsultation = () => {
               
               <div className="grid grid-cols-1 gap-6 pt-6">
                 {exceptionalFeatures.map((f, i) => (
-                  <div key={i} className="flex gap-6 p-6 bg-stone-50 rounded-2xl border border-spa-border hover:shadow-lg transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+                  <div key={i} className="flex gap-6 p-6 bg-[#1A1A1A] rounded-2xl border border-spa-border hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 rounded-xl bg-[#111111] flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
                       {f.icon}
                     </div>
                     <div>
@@ -243,7 +243,7 @@ const FreeConsultation = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {safetyStandards.map((s, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-3xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-4">
+              <div key={i} className="bg-[#111111]/5 border border-white/10 p-8 rounded-3xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-4">
                 <ShieldCheck className="text-emerald-400" size={32} />
                 <p className="text-xs uppercase tracking-[0.2em] font-bold leading-relaxed">{s}</p>
               </div>
@@ -263,7 +263,7 @@ const FreeConsultation = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
             <div className="hidden md:block absolute top-[60px] left-0 w-full h-[2px] bg-emerald-600/10 -z-1" />
             {journeySteps.map((s, i) => (
-              <div key={i} className="relative bg-white p-10 rounded-[2.5rem] border border-spa-border shadow-sm hover:shadow-xl transition-all group">
+              <div key={i} className="relative bg-[#111111] p-10 rounded-[2.5rem] border border-spa-border shadow-sm hover:shadow-xl transition-all group">
                 <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-lg mb-8 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
                   {s.step}
                 </div>
@@ -276,7 +276,7 @@ const FreeConsultation = () => {
       </section>
 
       {/* Why Choose Section */}
-      <section className="section-padding bg-white relative">
+      <section className="section-padding bg-[#111111] relative">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             <div className="w-full lg:w-1/2 space-y-8">
@@ -285,7 +285,7 @@ const FreeConsultation = () => {
               <div className="grid grid-cols-1 gap-8 pt-8">
                 {reasonsToChoose.map((r, i) => (
                   <div key={i} className="flex gap-6 group">
-                    <div className="shrink-0 w-14 h-14 bg-stone-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+                    <div className="shrink-0 w-14 h-14 bg-[#1A1A1A] rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
                       {r.icon}
                     </div>
                     <div>
@@ -297,7 +297,7 @@ const FreeConsultation = () => {
               </div>
             </div>
             <div className="w-full lg:w-1/2">
-              <div className="bg-stone-50 p-12 rounded-[3rem] border border-spa-border shadow-2xl relative overflow-hidden group">
+              <div className="bg-[#1A1A1A] p-12 rounded-[3rem] border border-spa-border shadow-2xl relative overflow-hidden group">
                 <div className="relative z-10">
                   <Sparkles className="text-emerald-600 mb-8" size={48} />
                   <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold text-spa-ink/40 mb-4 block">Service Details</h3>
@@ -342,7 +342,7 @@ const FreeConsultation = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="section-padding bg-white">
+      <section className="section-padding bg-[#111111]">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-emerald-600 text-[10px] uppercase tracking-[0.5em] font-bold mb-6 block">Common Inquiries</span>
@@ -360,7 +360,7 @@ const FreeConsultation = () => {
       </section>
 
       {/* Brand Promise Section */}
-      <section className="py-24 bg-stone-50 border-y border-spa-border">
+      <section className="py-24 bg-[#1A1A1A] border-y border-spa-border">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <Sparkles className="text-emerald-600 mx-auto mb-8" size={40} />
           <h2 className="text-xs uppercase tracking-[0.5em] font-bold text-spa-ink/40 mb-6">Our Commitment to You</h2>

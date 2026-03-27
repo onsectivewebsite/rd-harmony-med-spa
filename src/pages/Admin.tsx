@@ -243,12 +243,12 @@ const Admin = () => {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-spa-bg flex items-center justify-center px-4 pt-20">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-spa-border p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#111111] border border-spa-border p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl">
           <div className="flex justify-center mb-8"><div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600"><Lock size={32} /></div></div>
           <h2 className="text-3xl font-serif text-spa-ink text-center mb-2">Admin Portal</h2>
           <form onSubmit={handleLogin} className="space-y-6 mt-8">
-            <input required type="text" placeholder="Username" className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.username} onChange={e => setLoginCreds({...loginCreds, username: e.target.value})} />
-            <input required type="password" placeholder="Password" className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.password} onChange={e => setLoginCreds({...loginCreds, password: e.target.value})} />
+            <input required type="text" placeholder="Username" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.username} onChange={e => setLoginCreds({...loginCreds, username: e.target.value})} />
+            <input required type="password" placeholder="Password" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.password} onChange={e => setLoginCreds({...loginCreds, password: e.target.value})} />
             {loginError && <p className="text-red-500 text-xs text-center font-bold">{loginError}</p>}
             <button type="submit" className="w-full bg-emerald-500 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">Sign In</button>
           </form>
@@ -260,13 +260,13 @@ const Admin = () => {
   return (
     <div className="bg-spa-bg min-h-screen pt-32 pb-20 flex">
       {/* Sidebar */}
-      <div className="w-64 fixed left-0 top-24 bottom-0 bg-white border-r border-spa-border p-6 flex flex-col gap-2 z-20">
+      <div className="w-64 fixed left-0 top-24 bottom-0 bg-[#111111] border-r border-spa-border p-6 flex flex-col gap-2 z-20">
         <h3 className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/40 mb-4 px-4">Menu</h3>
-        <button onClick={() => setActiveTab('appointments')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'appointments' ? 'bg-emerald-50 text-emerald-600' : 'text-spa-ink/60 hover:bg-stone-50'}`}><LayoutDashboard size={18} /> Appointments</button>
-        <button onClick={() => setActiveTab('clients')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'clients' ? 'bg-emerald-50 text-emerald-600' : 'text-spa-ink/60 hover:bg-stone-50'}`}><Users size={18} /> Client Manager</button>
-        <button onClick={() => setActiveTab('finances')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'finances' ? 'bg-emerald-50 text-emerald-600' : 'text-spa-ink/60 hover:bg-stone-50'}`}><DollarSign size={18} /> Cash Manager</button>
-        <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'reviews' ? 'bg-emerald-50 text-emerald-600' : 'text-spa-ink/60 hover:bg-stone-50'}`}><MessageSquare size={18} /> Review Manager</button>
-        <button onClick={() => setActiveTab('services')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'services' ? 'bg-emerald-50 text-emerald-600' : 'text-spa-ink/60 hover:bg-stone-50'}`}><Settings size={18} /> Pricing Config</button>
+        <button onClick={() => setActiveTab('appointments')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'appointments' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><LayoutDashboard size={18} /> Appointments</button>
+        <button onClick={() => setActiveTab('clients')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'clients' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><Users size={18} /> Client Manager</button>
+        <button onClick={() => setActiveTab('finances')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'finances' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><DollarSign size={18} /> Cash Manager</button>
+        <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'reviews' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><MessageSquare size={18} /> Review Manager</button>
+        <button onClick={() => setActiveTab('services')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'services' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><Settings size={18} /> Pricing Config</button>
         
         <div className="mt-auto">
           <button onClick={() => { sessionStorage.removeItem('rd_harmony_admin_auth'); setIsLoggedIn(false); }} className="w-full flex justify-center py-3 border border-spa-border rounded-xl text-xs font-bold text-spa-ink/50 hover:text-spa-ink transition-all">SIGN OUT</button>
@@ -287,18 +287,18 @@ const Admin = () => {
           )}
         </div>
 
-        <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-spa-border rounded-3xl shadow-xl overflow-hidden min-h-[500px]">
+        <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#111111] border border-spa-border rounded-3xl shadow-xl overflow-hidden min-h-[500px]">
           
           {/* APPOINTMENTS TAB */}
           {activeTab === 'appointments' && (
             <div className="p-6">
-              <input type="text" placeholder="Search appointments..." className="w-full max-w-sm bg-stone-50 border border-spa-border rounded-xl py-3 px-4 mb-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <input type="text" placeholder="Search appointments..." className="w-full max-w-sm bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 mb-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="border-b border-spa-border text-xs uppercase text-spa-ink/50"><th className="pb-3 px-4">Client</th><th className="pb-3 px-4">Service & Time</th><th className="pb-3 px-4">Price</th><th className="pb-3 px-4 text-right">Actions</th></tr></thead>
                   <tbody className="divide-y divide-spa-border">
                     {filteredAppointments.map(appt => (
-                      <tr key={appt.id} className="hover:bg-stone-50">
+                      <tr key={appt.id} className="hover:bg-[#1A1A1A]">
                         <td className="py-4 px-4"><div className="font-medium text-spa-ink">{appt.name}</div><div className="text-xs text-spa-ink/40">{appt.phone}</div></td>
                         <td className="py-4 px-4"><div className="font-medium text-emerald-600">{appt.service}</div><div className="text-xs text-spa-ink/40">{appt.date} at {appt.time}</div></td>
                         <td className="py-4 px-4 font-medium">{appt.price || '-'}</td>
@@ -321,13 +321,13 @@ const Admin = () => {
                   <thead><tr className="border-b border-spa-border text-xs uppercase text-spa-ink/50"><th className="pb-3 px-4">Name</th><th className="pb-3 px-4">Contact</th><th className="pb-3 px-4">Visits</th><th className="pb-3 px-4">Total Value</th><th className="pb-3 px-4 text-right">History</th></tr></thead>
                   <tbody className="divide-y divide-spa-border">
                     {clients.map((c, i) => (
-                      <tr key={i} className="hover:bg-stone-50">
+                      <tr key={i} className="hover:bg-[#1A1A1A]">
                         <td className="py-4 px-4 font-medium text-spa-ink">{c.name}</td>
                         <td className="py-4 px-4 text-sm text-spa-ink/60">{c.phone}<br/>{c.email}</td>
                         <td className="py-4 px-4 text-spa-ink/80">{c.visits}</td>
                         <td className="py-4 px-4 font-medium text-emerald-600">${c.totalSpent.toFixed(2)}</td>
                         <td className="py-4 px-4 text-right">
-                           <button onClick={() => setSelectedClientPhone(c.phone)} className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold hover:bg-emerald-100">View Data</button>
+                           <button onClick={() => setSelectedClientPhone(c.phone)} className="px-4 py-2 bg-emerald-900/20 text-emerald-600 rounded-lg text-xs font-bold hover:bg-emerald-100">View Data</button>
                         </td>
                       </tr>
                     ))}
@@ -343,11 +343,11 @@ const Admin = () => {
               <h3 className="text-xl font-serif text-spa-ink mb-6">Manage Client Reviews</h3>
               <div className="overflow-y-auto max-h-[600px] custom-scrollbar space-y-4 pr-2">
                 {allReviews.filter(r => !deletedReviewIds.includes(r.id)).map((rev) => (
-                  <div key={rev.id} className="border border-spa-border p-6 rounded-2xl bg-stone-50 flex justify-between gap-6 group">
+                  <div key={rev.id} className="border border-spa-border p-6 rounded-2xl bg-[#1A1A1A] flex justify-between gap-6 group">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-bold">{rev.name}</span>
-                        <span className="text-xs px-2 py-1 bg-white border border-spa-border rounded-full text-spa-ink/50">{rev.service}</span>
+                        <span className="text-xs px-2 py-1 bg-[#111111] border border-spa-border rounded-full text-spa-ink/50">{rev.service}</span>
                         <span className="text-emerald-500 font-bold ml-2">★ {rev.rating}/5</span>
                       </div>
                       <p className="text-spa-ink/80 text-sm leading-relaxed mb-2">"{rev.text}"</p>
@@ -373,11 +373,11 @@ const Admin = () => {
                   <div className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">Total Revenue</div>
                   <div className="text-5xl font-serif">${finances.totalRevenue.toFixed(2)}</div>
                 </div>
-                <div className="border border-spa-border rounded-3xl p-8 bg-stone-50">
+                <div className="border border-spa-border rounded-3xl p-8 bg-[#1A1A1A]">
                   <div className="text-spa-ink/50 text-sm font-bold uppercase tracking-widest mb-2">Completed Bookings</div>
                   <div className="text-5xl font-serif text-spa-ink">{finances.completedAppointments}</div>
                 </div>
-                <div className="border border-spa-border rounded-3xl p-8 bg-stone-50">
+                <div className="border border-spa-border rounded-3xl p-8 bg-[#1A1A1A]">
                   <div className="text-spa-ink/50 text-sm font-bold uppercase tracking-widest mb-2">Average Ticket</div>
                   <div className="text-5xl font-serif text-spa-ink">${finances.averageTicket.toFixed(2)}</div>
                 </div>
@@ -413,13 +413,13 @@ const Admin = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  {allServices.map(s => (
-                   <div key={s.id} className="border border-spa-border rounded-2xl p-6 bg-stone-50 flex justify-between items-center">
+                   <div key={s.id} className="border border-spa-border rounded-2xl p-6 bg-[#1A1A1A] flex justify-between items-center">
                      <div><h4 className="font-medium text-lg">{s.name}</h4><p className="text-xs text-spa-ink/40">Default: {s.price}</p></div>
                      <div className="relative w-32">
                         <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-ink/40" />
                         <input 
                           type="text" 
-                          className="w-full bg-white border border-spa-border rounded-lg py-2 pl-8 pr-3 outline-none focus:border-emerald-500 font-medium"
+                          className="w-full bg-[#111111] border border-spa-border rounded-lg py-2 pl-8 pr-3 outline-none focus:border-emerald-500 font-medium"
                           value={customPrices[s.id] || s.price}
                           onChange={(e) => handlePriceUpdate(s.id, e.target.value)}
                         />
@@ -436,7 +436,7 @@ const Admin = () => {
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-white p-10 rounded-3xl w-full max-w-2xl border border-spa-border">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#111111] p-10 rounded-3xl w-full max-w-2xl border border-spa-border">
               <h2 className="text-2xl font-serif mb-6">New Booking</h2>
               {modalError && <div className="text-red-500 mb-4 font-bold text-sm bg-red-50 p-3 rounded-lg">{modalError}</div>}
               <form onSubmit={handleCreateOffline} className="space-y-4">
@@ -470,7 +470,7 @@ const Admin = () => {
       <AnimatePresence>
         {showAddServiceModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-white p-10 rounded-3xl w-full max-w-xl border border-spa-border">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#111111] p-10 rounded-3xl w-full max-w-xl border border-spa-border">
               <h2 className="text-2xl font-serif mb-6">Create New Service</h2>
               <form onSubmit={handleAddService} className="space-y-4">
                 <input required placeholder="Service Name (e.g. Signature Facial)" className="border w-full py-3 px-4 rounded-xl" value={newService.name} onChange={e=>setNewService({...newService, name: e.target.value})} />
@@ -501,7 +501,7 @@ const Admin = () => {
       <AnimatePresence>
         {selectedClientPhone && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white p-8 rounded-3xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#111111] p-8 rounded-3xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
                <div className="flex justify-between items-center mb-6">
                  <div>
                    <h2 className="text-3xl font-serif">{clientHistory[0]?.name || 'Client History'}</h2>
@@ -512,13 +512,13 @@ const Admin = () => {
                
                <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                   {clientHistory.map(appt => (
-                    <div key={appt.id} className="border border-spa-border bg-stone-50 rounded-2xl p-6 flex justify-between items-center">
+                    <div key={appt.id} className="border border-spa-border bg-[#1A1A1A] rounded-2xl p-6 flex justify-between items-center">
                        <div>
                          <h4 className="text-xl font-serif text-emerald-600 mb-1">{appt.service}</h4>
                          <p className="text-xs font-bold text-spa-ink/40 tracking-widest uppercase">{appt.date} • {appt.time}</p>
                          <p className="font-medium mt-2">Paid: {appt.price || 'N/A'}</p>
                        </div>
-                       <button onClick={() => printInvoice(appt)} className="border border-emerald-600/30 text-emerald-600 bg-white hover:bg-emerald-50 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
+                       <button onClick={() => printInvoice(appt)} className="border border-emerald-600/30 text-emerald-600 bg-[#111111] hover:bg-emerald-900/20 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
                          <Printer size={14} /> Print PDF
                        </button>
                     </div>

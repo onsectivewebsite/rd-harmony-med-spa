@@ -61,7 +61,7 @@ const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white p-10 rounded-[2.5rem] border border-spa-border relative group hover:border-emerald-500/20 transition-all shadow-sm"
+              className="bg-[#111111] p-10 rounded-[2.5rem] border border-spa-border relative group hover:border-emerald-500/20 transition-all shadow-sm"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform">
                 <Quote size={80} className="text-emerald-600" />
@@ -104,7 +104,7 @@ const Testimonials = () => {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-white border border-spa-border p-12 rounded-[2.5rem] max-w-xl w-full shadow-2xl relative overflow-hidden"
+                className="bg-[#111111] border border-spa-border p-12 rounded-[2.5rem] max-w-xl w-full shadow-2xl relative overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-emerald-800" />
                 
@@ -137,7 +137,7 @@ const Testimonials = () => {
                           <input 
                             required 
                             placeholder="e.g. Mary Jane" 
-                            className="w-full bg-stone-50 border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none"
+                            className="w-full bg-[#1A1A1A] border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none"
                             value={newReview.name}
                             onChange={(e) => setNewReview({...newReview, name: e.target.value})}
                           />
@@ -147,7 +147,7 @@ const Testimonials = () => {
                           <input 
                             required 
                             placeholder="e.g. PRP Facial" 
-                            className="w-full bg-stone-50 border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none"
+                            className="w-full bg-[#1A1A1A] border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none"
                             value={newReview.service}
                             onChange={(e) => setNewReview({...newReview, service: e.target.value})}
                           />
@@ -156,7 +156,7 @@ const Testimonials = () => {
 
                       <div className="space-y-2">
                          <label className="text-[10px] uppercase tracking-widest text-spa-ink/40 font-bold ml-4">Overall Satisfaction</label>
-                        <select                           className="w-full bg-stone-50 border border-spa-border rounded-xl px-6 py-4 text-spa-ink hover:text-emerald-600 text-sm focus:border-emerald-500 transition-colors outline-none appearance-none"
+                        <select                           className="w-full bg-[#1A1A1A] border border-spa-border rounded-xl px-6 py-4 text-spa-ink hover:text-emerald-600 text-sm focus:border-emerald-500 transition-colors outline-none appearance-none"
                           value={newReview.rating}
                           onChange={(e) => setNewReview({...newReview, rating: Number(e.target.value)})}
                         >
@@ -171,7 +171,7 @@ const Testimonials = () => {
                         <textarea 
                           required 
                           rows={4} 
-                          placeholder="Describe your transformation..."                           className="w-full bg-stone-50 border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none resize-none"
+                          placeholder="Describe your transformation..."                           className="w-full bg-[#1A1A1A] border border-spa-border rounded-xl px-6 py-4 text-spa-ink text-sm focus:border-emerald-500 transition-colors outline-none resize-none"
                           value={newReview.text}
                           onChange={(e) => setNewReview({...newReview, text: e.target.value})}
                         />

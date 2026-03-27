@@ -25,7 +25,7 @@ const ServiceBenefits = ({ benefits }: ServiceBenefitsProps) => {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white p-10 rounded-[2.5rem] border border-spa-border hover:border-emerald-500/30 transition-all hover:shadow-xl group text-center"
+              className="bg-[#111111] p-10 rounded-[2.5rem] border border-spa-border hover:border-emerald-500/30 transition-all hover:shadow-xl group text-center"
             >
               <div className="mx-auto w-14 h-14 bg-emerald-500/5 rounded-2xl flex items-center justify-center text-emerald-600 mb-8 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
                 <CheckCircle2 size={24} />

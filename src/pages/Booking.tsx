@@ -83,7 +83,7 @@ const Booking = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white border border-spa-border p-12 rounded-3xl max-w-md text-center shadow-lg"
+          className="bg-[#111111] border border-spa-border p-12 rounded-3xl max-w-md text-center shadow-lg"
         >
           <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 mx-auto mb-8">
             <CheckCircle2 size={40} />
@@ -116,7 +116,7 @@ const Booking = () => {
 
             <div className="space-y-8">
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="w-12 h-12 bg-[#111111]/5 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
                   <Calendar size={20} />
                 </div>
                 <div>
@@ -125,7 +125,7 @@ const Booking = () => {
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                <div className="w-12 h-12 bg-[#111111] rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
                   <CheckCircle2 size={20} />
                 </div>
                 <div>
@@ -136,7 +136,7 @@ const Booking = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-spa-border p-8 md:p-12 rounded-[2rem] shadow-sm">
+          <div className="bg-[#111111] border border-spa-border p-8 md:p-12 rounded-[2rem] shadow-sm">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl mb-6 text-xs uppercase tracking-widest font-bold text-center">
                 {error}
@@ -151,7 +151,7 @@ const Booking = () => {
                     <input
                       required
                       type="text"
-                      className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
                       placeholder="Jane Doe"
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
@@ -165,7 +165,7 @@ const Booking = () => {
                     <input
                       required
                       type="tel"
-                      className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
                       placeholder="(905) 000-0000"
                       value={formData.phone}
                       onChange={e => setFormData({...formData, phone: e.target.value})}
@@ -181,7 +181,7 @@ const Booking = () => {
                   <input
                     required
                     type="email"
-                    className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
                     placeholder="jane@example.com"
                     value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
@@ -193,15 +193,15 @@ const Booking = () => {
                 <label className="text-[10px] uppercase tracking-widest text-spa-ink/50 font-bold ml-4">Select Service</label>
                 <select
                   required
-                  className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
+                  className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
                   value={formData.service}
                   onChange={e => setFormData({...formData, service: e.target.value})}
                 >
-                  <option value="" disabled className="bg-white">Choose a treatment</option>
+                  <option value="" disabled className="bg-[#111111]">Choose a treatment</option>
                   {allServices.map(s => {
                     const price = customPrices[s.id] || s.price;
                     return (
-                      <option key={s.id} value={s.name} className="bg-white">{s.name} - {price}</option>
+                      <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
                     );
                   })}
                 </select>
@@ -236,7 +236,7 @@ const Booking = () => {
                     <input
                       required
                       type="date"
-                      className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
                       value={formData.date}
                       onChange={e => setFormData({...formData, date: e.target.value})}
                     />
@@ -249,7 +249,7 @@ const Booking = () => {
                     <input
                       required
                       type="time"
-                      className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
                       value={formData.time}
                       onChange={e => setFormData({...formData, time: e.target.value})}
                     />
@@ -263,7 +263,7 @@ const Booking = () => {
                   <MessageSquare className="absolute left-4 top-6 text-spa-ink/20" size={16} />
                   <textarea
                     rows={4}
-                    className="w-full bg-stone-50 border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                    className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors resize-none"
                     placeholder="Tell us about your skin goals or specify mobile location..."
                     value={formData.message}
                     onChange={e => setFormData({...formData, message: e.target.value})}

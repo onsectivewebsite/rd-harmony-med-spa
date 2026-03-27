@@ -54,7 +54,7 @@ const Services = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="group bg-white border border-spa-border rounded-3xl overflow-hidden hover:border-emerald-500/30 transition-all flex flex-col shadow-sm"
+              className="group bg-[#111111] border border-spa-border rounded-3xl overflow-hidden hover:border-emerald-500/30 transition-all flex flex-col shadow-sm"
             >
               <div className="relative h-48 overflow-hidden">
                 <img 
@@ -64,11 +64,11 @@ const Services = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-60" />
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-emerald-600 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full border border-emerald-600/20">
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-emerald-600 bg-[#111111]/60 backdrop-blur-md px-3 py-1 rounded-full border border-emerald-600/20">
                     {service.category}
                   </span>
                   {service.isMobileAvailable && (
-                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold text-blue-600 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full border border-blue-600/20">
+                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold text-blue-600 bg-[#111111]/60 backdrop-blur-md px-3 py-1 rounded-full border border-blue-600/20">
                       <Smartphone size={10} /> Mobile
                     </span>
                   )}

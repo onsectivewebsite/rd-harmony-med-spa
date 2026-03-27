@@ -144,9 +144,9 @@ export const SERVICES: Service[] = [
     category: 'Skincare',
     isMobileAvailable: false,
     description: 'An advanced, clinically proven 3-in-1 skin rejuvenation treatment that goes beyond traditional facials by working both on the surface and deep within the skin.',
-    longDescription: 'OxyGeneo Facial is an advanced, clinically proven 3-in-1 skin rejuvenation treatment that goes beyond traditional facials by working both on the surface and deep within the skin. This innovative treatment combines exfoliation, natural oxygenation, and infusion of active nutrients to significantly improve skin health, texture, and radiance. Unlike standard oxygen facials that push oxygen onto the skin, OxyGeneo stimulates the body’s natural oxygenation process from within, resulting in superior absorption of active ingredients and longer-lasting results. At RD Harmony Med Spa, the treatment is enhanced using premium Bioline professional skincare formulations, ensuring maximum hydration, repair, and visible skin transformation. This facial is ideal for clients looking for immediate glow, deep nourishment, and long-term skin improvement without any downtime.',
+    longDescription: 'OxyGeneo Facial is an advanced, clinically proven 3-in-1 skin rejuvenation treatment that goes beyond traditional facials by working both on the surface and deep within the skin. This innovative treatment combines exfoliation, natural oxygenation, and infusion of active nutrients to significantly improve skin health, texture, and radiance. Unlike standard oxygen facials that push oxygen onto the skin, OxyGeneo stimulates the body’s natural oxygenation process from within, resulting in superior absorption of active ingredients and longer-lasting results. At RD Harmony Med Spa, the treatment utilizes OxyGeneo\'s proprietary products, ensuring maximum hydration, repair, and visible skin transformation. This facial is ideal for clients looking for immediate glow, deep nourishment, and long-term skin improvement without any downtime.',
     image: '/images/facial_oxygeneo.jpg',
-    technology: 'OxyGeneo advanced facial system, Capsugen exfoliation technology, Bioline Professional Skincare Products (Premium Italian Brand), Medical-grade serums and active ingredients.',
+    technology: 'OxyGeneo advanced facial system, Capsugen exfoliation technology, OxyGeneo specialized products, Medical-grade serums and active ingredients.',
     benefits: [
       'Boosts natural oxygen levels in the skin',
       'Deep exfoliation for smoother texture',
@@ -171,7 +171,7 @@ export const SERVICES: Service[] = [
     stepFlow: [
       { title: 'Step 1: Exfoliation (Capsugen Technology)', desc: 'A specialized capsule gently exfoliates the outer layer of the skin, removing dead cells and preparing it for treatment.' },
       { title: 'Step 2: Natural Oxygenation', desc: 'The interaction between the capsule and skin creates a CO₂-rich environment, triggering the body to send oxygen to the treated area. This improves blood circulation and cellular activity.' },
-      { title: 'Step 3: Nutrient Infusion', desc: 'Active ingredients, vitamins, and Bioline serums are infused deep into the skin, where they are absorbed more effectively due to increased oxygenation.' },
+      { title: 'Step 3: Nutrient Infusion', desc: 'Active ingredients, vitamins, and specialized OxyGeneo serums are infused deep into the skin, where they are absorbed more effectively due to increased oxygenation.' },
       { title: 'Step 4: Massage & Hydration', desc: 'A relaxing facial massage enhances circulation and lymphatic drainage, followed by hydration and protective skincare application.' }
     ],
     postCare: [
@@ -189,7 +189,7 @@ export const SERVICES: Service[] = [
       { q: 'When will I see results?', a: 'Results are visible immediately after the session.' }
     ],
     metaTitle: 'OxyGeneo Facial Treatment | Advanced Oxygen Skin Therapy | RD Harmony Med Spa',
-    metaDescription: 'Revitalize your skin with OxyGeneo Facial. Advanced exfoliation, oxygenation, and hydration using Bioline skincare. Book your session today.'
+    metaDescription: 'Revitalize your skin with OxyGeneo Facial. Advanced exfoliation, oxygenation, and hydration using specified OxyGeneo products. Book your session today.'
   },
   {
     id: 'microdermabrasion',
@@ -767,17 +767,17 @@ export const SERVICES: Service[] = [
   {
     id: 'waxing-brazilian',
     name: 'Brazilian Waxing',
-    heroTitle: 'Full Bikini Area Hair Removal with Precision',
-    heroSubtitle: 'Full Bikini Area Hair Removal with Precision',
+    heroTitle: 'Full Brazilian Area Hair Removal with Precision',
+    heroSubtitle: 'Full Brazilian Area Hair Removal with Precision',
     duration: '30 Minutes',
     price: '$30',
     category: 'Threading & Waxing',
     isMobileAvailable: false,
     image: '/images/svc_brazilian.jpg',
-    description: 'Brazilian Waxing removes hair from the front and back of the bikini area, providing smooth, clean skin.',
-    longDescription: 'Brazilian Waxing removes hair from the front and back of the bikini area, providing smooth, clean skin. Our gentle medical-grade wax ensures minimal irritation and high hygiene standards for this sensitive treatment, providing long-lasting confidence and smooth results.',
+    description: 'Brazilian Waxing removes hair from the front and back of the Brazilian area, providing smooth, clean skin.',
+    longDescription: 'Brazilian Waxing removes hair from the front and back of the Brazilian area, providing smooth, clean skin. Our gentle medical-grade wax ensures minimal irritation and high hygiene standards for this sensitive treatment, providing long-lasting confidence and smooth results.',
     benefits: [
-      'Complete hair removal from the bikini area',
+      'Complete hair removal from the Brazilian area',
       'Smooth skin for 3–4 weeks',
       'Hygienic and professional clinical standard',
       'Reduces ingrown hairs'
@@ -785,7 +785,7 @@ export const SERVICES: Service[] = [
     stepFlow: [
       { title: 'Consultation (3 min)', desc: 'Discuss comfort and sensitivity.' },
       { title: 'Prep (5 min)', desc: 'Cleanse area and apply pre-wax oil.' },
-      { title: 'Waxing (17 min)', desc: 'Remove hair from target bikini areas using strips or hard wax.' },
+      { title: 'Waxing (17 min)', desc: 'Remove hair from target Brazilian areas using strips or hard wax.' },
       { title: 'Soothe (5 min)', desc: 'Apply post-wax calming lotion.' }
     ],
     productsUsed: 'Medical-grade wax, Calming skin serums',
@@ -801,21 +801,21 @@ export const SERVICES: Service[] = [
     testimonials: [
       { quote: "Super professional and comfortable experience. Highly recommend!", author: "Sonia R." }
     ],
-    metaTitle: 'Brazilian Waxing | Full Bikini Hair Removal | RD Harmony Med Spa',
+    metaTitle: 'Brazilian Waxing | Full Brazilian Hair Removal | RD Harmony Med Spa',
     metaDescription: 'Professional Brazilian Waxing for complete, smooth hair removal. Gentle wax and expert care at RD Harmony Med Spa.'
   },
   {
     id: 'waxing-brazilian-numbing',
     name: 'Brazilian Waxing with Numbing Cream',
-    heroTitle: 'Painless, Full Bikini Hair Removal',
-    heroSubtitle: 'Painless, Full Bikini Hair Removal',
+    heroTitle: 'Painless, Full Brazilian Hair Removal',
+    heroSubtitle: 'Painless, Full Brazilian Hair Removal',
     duration: '45 Minutes',
     price: '$45',
     category: 'Threading & Waxing',
     isMobileAvailable: false,
     image: '/images/svc_brazilian_numb.jpg',
     description: 'For pain-sensitive clients, this service adds topical numbing cream to the Brazilian Waxing session.',
-    longDescription: 'For pain-sensitive clients, this service adds topical numbing cream to the Brazilian Waxing session. Ensures a comfortable, nearly pain-free hair removal process while maintaining the same smooth, clean results across the bikini area.',
+    longDescription: 'For pain-sensitive clients, this service adds topical numbing cream to the Brazilian Waxing session. Ensures a comfortable, nearly pain-free hair removal process while maintaining the same smooth, clean results across the Brazilian area.',
     benefits: [
       'Painless hair removal experience',
       'Ideal for first-time or sensitive clients',
@@ -844,7 +844,7 @@ export const SERVICES: Service[] = [
     longDescription: 'Microneedling is a minimally invasive procedure using the SkinPen, FDA and Health Canada-approved. Tiny needles create microchannels in the skin, stimulating collagen, improving texture, reducing fine lines, and enhancing absorption of serums. Ideal for skin rejuvenation, acne scars, and anti-aging.',
     image: '/images/svc_microneedle.jpg',
     technology: 'SkinPen (FDA & Health Canada Approved)',
-    productsUsed: 'Bioline restorative serums',
+    productsUsed: 'Hyaluronic acid serum',
     benefits: [
       'Reduces fine lines, scars, and pigmentation',
       'Improves elasticity, tone, and texture',
@@ -854,7 +854,7 @@ export const SERVICES: Service[] = [
       { title: 'Consultation (5 min)', desc: 'Skin assessment and goal discussion.' },
       { title: 'Preparation (5 min)', desc: 'Cleanse and apply topical numbing cream for comfort.' },
       { title: 'Microneedling (25 min)', desc: 'SkinPen safely glided across target areas to create micro-channels.' },
-      { title: 'Serum Application (5 min)', desc: 'Deep infusion of healing restorative serums.' },
+      { title: 'Serum Application (5 min)', desc: 'Deep infusion of hyaluronic acid serum.' },
       { title: 'Aftercare Discussion (5 min)', desc: 'Guidance and instructions for optimal clinical results.' }
     ],
     postCare: [
@@ -881,8 +881,8 @@ export const SERVICES: Service[] = [
     price: '$400',
     category: 'Medical',
     isMobileAvailable: true,
-    description: 'PRP uses platelet-rich plasma from your blood to stimulate collagen, reduce fine lines, and rejuvenate skin naturally.',
-    longDescription: 'PRP uses platelet-rich plasma from your blood to stimulate collagen, reduce fine lines, improve elasticity, and rejuvenate skin naturally. Ideal for non-surgical skin revitalization, this "liquid gold" treatment harnesses your own biology.',
+    description: 'Microneedling creates micro-injuries to stimulate natural healing, followed by PRP application for enhanced absorption and facial rejuvenation.',
+    longDescription: 'Microneedling involves using a specialized device with fine needles (SkinPen) to create tiny, controlled micro-injuries in the skin, stimulating the body’s natural healing response; PRP is then applied to the face, where it penetrates deeply through the microchannels created during the treatment for enhanced absorption and rejuvenation.',
     image: '/images/svc_prp_face.jpg',
     benefits: [
       'Stimulates collagen and elastin production',
@@ -924,11 +924,13 @@ export const SERVICES: Service[] = [
       'Minimally invasive, natural treatment'
     ],
     stepFlow: [
-      { title: 'Blood Draw (10 min)', desc: 'A professional sample of your blood is safely collected.' },
-      { title: 'Extraction (15 min)', desc: 'Centrifuge used to isolate concentrated growth factors.' },
-      { title: 'Activation (10 min)', desc: 'Preparation of the PRP for optimal follicular uptake.' },
-      { title: 'Injection (20 min)', desc: 'Precision micro-injections into thinning scalp areas.' },
-      { title: 'Post-Care (5 min)', desc: 'Provide post-care guidance and density tracking plan.' }
+      { title: '1. Consultation', desc: 'A thorough assessment is completed to evaluate hair loss, scalp condition, and suitability for PRP treatment.' },
+      { title: '2. Blood Collection', desc: 'A small amount of your blood is drawn, similar to a routine lab test.' },
+      { title: '3. PRP Preparation', desc: 'The blood is processed in a centrifuge to separate and concentrate the platelet-rich plasma (PRP).' },
+      { title: '4. Scalp Preparation', desc: 'The scalp is cleansed, and a topical numbing agent may be applied for comfort.' },
+      { title: '5. PRP Injections', desc: 'PRP is carefully injected into targeted areas of the scalp using fine needles to stimulate hair follicles.' },
+      { title: '6. Post-Treatment Care', desc: 'Aftercare instructions are provided to support optimal results, with minimal downtime expected.' },
+      { title: '7. Follow-Up Sessions', desc: 'A series of treatments is typically recommended for best results, along with maintenance sessions as needed.' }
     ],
     postCare: [
       'Avoid shampooing hair for 24 hours',
@@ -1021,15 +1023,15 @@ export const SERVICES: Service[] = [
   },
   {
     id: 'botox',
-    name: 'Botox / Xeomin / Dysport',
+    name: 'Botox',
     heroTitle: 'Smooth Dynamic Lines & Rejuvenate Appearance',
     heroSubtitle: 'Smooth Dynamic Lines & Rejuvenate Appearance',
-    duration: '30 Minutes',
-    price: '$11/unit (Botox)',
+    duration: '1 Hour',
+    price: '$11/unit',
     category: 'Injectables',
     isMobileAvailable: true,
     description: 'Neuromodulators that relax facial muscles to reduce dynamic wrinkles such as frown lines, crow’s feet, and forehead wrinkles.',
-    longDescription: 'Botox, Xeomin, and Dysport are neuromodulators that relax facial muscles to reduce dynamic wrinkles such as frown lines, crow’s feet, and forehead wrinkles. They restore a youthful, refreshed look without altering natural facial expressions, helping you maintain a natural, rested appearance.',
+    longDescription: 'Botox is a neuromodulator that relaxes facial muscles to reduce dynamic wrinkles such as frown lines, crow’s feet, and forehead wrinkles. It restores a youthful, refreshed look without altering natural facial expressions, helping you maintain a natural, rested appearance.',
     image: '/images/svc_botox.jpg',
     benefits: [
       'Smooths fine lines and dynamic wrinkles',
@@ -1043,7 +1045,7 @@ export const SERVICES: Service[] = [
       { title: 'Injection (15–20 min)', desc: 'Administer small units at targeted muscle points.' },
       { title: 'Observation (5 min)', desc: 'Post-procedure monitoring and aftercare discussion.' }
     ],
-    productsUsed: 'FDA-approved Botox®, Xeomin®, Dysport®; Sterile needles and syringes',
+    productsUsed: 'FDA-approved Botox®; Sterile needles and syringes',
     postCare: [
       'Avoid rubbing or massaging the treated area for 24 hours',
       'No strenuous exercise for 24 hours post-injection',
@@ -1061,15 +1063,15 @@ export const SERVICES: Service[] = [
     testimonials: [
       { quote: "Lines softened and my face feels refreshed and natural.", author: "Priya S." }
     ],
-    metaTitle: 'Botox, Xeomin, Dysport | Wrinkle Reduction | RD Harmony Med Spa',
-    metaDescription: 'Smooth dynamic lines and rejuvenate your appearance with professional Botox, Xeomin, or Dysport injections. Fast, safe, and natural results.'
+    metaTitle: 'Botox | Wrinkle Reduction | RD Harmony Med Spa',
+    metaDescription: 'Smooth dynamic lines and rejuvenate your appearance with professional Botox injections. Fast, safe, and natural results.'
   },
   {
     id: 'xeomin',
     name: 'Xeomin',
     heroTitle: 'Highly Purified Neurotoxin for Frown Lines',
     heroSubtitle: 'Highly Purified Neurotoxin for Frown Lines',
-    duration: '30 Minutes',
+    duration: '1 Hour',
     price: '$8/unit',
     category: 'Injectables',
     isMobileAvailable: true,
@@ -1109,7 +1111,7 @@ export const SERVICES: Service[] = [
     name: 'Dysport',
     heroTitle: 'Smooth Frown Lines Without Affecting Facial Expression',
     heroSubtitle: 'Smooth Frown Lines Without Affecting Facial Expression',
-    duration: '30 Minutes',
+    duration: '1 Hour',
     price: '$7/unit',
     category: 'Injectables',
     isMobileAvailable: true,
@@ -1141,6 +1143,7 @@ export const SERVICES: Service[] = [
     metaTitle: 'Dysport Treatment | Fast-Acting Wrinkle Relaxer | RD Harmony Med Spa',
     metaDescription: 'Smooth your lines while keeping your natural expressions. Dysport injections available at RD Harmony Med Spa. Fast-acting and effective.'
   },
+
   {
     id: 'iv-vitamin-wellness',
     name: 'IV Vitamin: Wellness',
@@ -1335,7 +1338,7 @@ export const SERVICES: Service[] = [
     name: 'Intravenous (IV) IRON Infusion',
     heroTitle: 'Vitality Restore. Iron Precision.',
     heroSubtitle: 'Vitality Restore. Iron Precision.',
-    duration: '1 Hr 30 Mins',
+    duration: '2 Hours',
     price: '$275',
     category: 'IV Therapy',
     isMobileAvailable: true,
@@ -1351,7 +1354,7 @@ export const SERVICES: Service[] = [
     stepFlow: [
       { title: 'Medical Review (10 min)', desc: 'Confirm blood work and iron levels.' },
       { title: 'Setup (10 min)', desc: 'Private monitored infusion setup.' },
-      { title: 'Iron Delivery (60 min)', desc: 'Controlled Venofer delivery for safety.' },
+      { title: 'Iron Delivery (120 min)', desc: 'Controlled Venofer delivery for safety.' },
       { title: 'Monitoring (10 min)', desc: 'Post-infusion observation for comfort.' }
     ],
     productsUsed: 'Venofer® Iron Sucrose, Sterile precision IV kits',
@@ -1390,7 +1393,7 @@ export const SERVICES: Service[] = [
       { title: 'Precision Shot (7 min)', desc: 'Concentrated intramuscular Vitamin B12 injection.' },
       { title: 'Post-Care (5 min)', desc: 'Guidelines for maintaining peak energy.' }
     ],
-    productsUsed: 'High-potency Vitamin B12 (Methylcobalamin)',
+    productsUsed: 'High-potency Vitamin B12 (Cyanocobalamin)',
     postCare: [
       'Stay active to help circulation',
       'Monitor your energy peaks over next 48h',
@@ -1458,4 +1461,69 @@ export const SERVICES: Service[] = [
     metaTitle: 'Lipotropic Fat Burning Injection | Lipo-Burn | RD Harmony Med Spa',
     metaDescription: 'Kickstart your metabolism with MIC + B12 Lipotropic injections. Professional fat-metabolizing agents for energy and weight management support.'
   },
+  {
+    id: 'prp-under-eye',
+    name: 'PRP for Dark Under-Eye Circles',
+    heroTitle: 'Revitalize and Brighten Under-Eye Areas',
+    heroSubtitle: 'Natural restoration for dark circles and hollows using your own plasma.',
+    duration: '1 Hour',
+    price: '$220 (Package of 3 for $600)',
+    category: 'Medical',
+    isMobileAvailable: true,
+    description: 'Uses platelet-rich plasma to stimulate cell regeneration, reducing dark circles and under-eye hollows.',
+    longDescription: 'PRP for Dark Under-Eye Circles is a targeted treatment that utilizes the powerful growth factors in your own blood to rejuvenate the delicate skin under your eyes. It improves skin thickness, stimulates collagen, and significantly reduces the appearance of dark circles and hollows safely and naturally.',
+    image: '/images/svc_prp_face.jpg',
+    benefits: [
+      'Reduces dark under-eye circles',
+      'Improves under-eye hollowness',
+      'Stimulates collagen for thicker, firmer skin',
+      '100% natural and safe'
+    ],
+    stepFlow: [
+      { title: '1. Consultation (5 min)', desc: 'Assess under-eye concerns and suitability.' },
+      { title: '2. Blood Collection (15 min)', desc: 'A small blood sample is drawn.' },
+      { title: '3. PRP Preparation (15 min)', desc: 'Centrifuge processing to isolate growth factors.' },
+      { title: '4. Precision Injection (20 min)', desc: 'Careful micro-injections of PRP into the tear trough area.' },
+      { title: '5. Post-Care (5 min)', desc: 'Soothing and aftercare instructions.' }
+    ],
+    postCare: [
+      'Avoid touching the area for 12 hours',
+      'Expect mild swelling or bruising',
+      'Avoid strenuous exercise for 24 hours'
+    ],
+    metaTitle: 'PRP for Dark Under-Eye Circles | RD Harmony Med Spa',
+    metaDescription: 'Eliminate dark circles naturally with targeted PRP treatments for the under-eye area. Safe, effective, and minimally invasive.'
+  },
+  {
+    id: 'electrolysis',
+    name: 'Electrolysis',
+    heroTitle: 'Permanent Hair Removal',
+    heroSubtitle: 'Safe, permanent hair removal for all skin and hair types.',
+    duration: '15 Minutes+',
+    price: 'Starting at $30',
+    category: 'Threading & Waxing',
+    isMobileAvailable: false,
+    description: 'Permanent hair removal suitable for all hair colors and skin types.',
+    longDescription: 'Electrolysis is an FDA-approved method for permanent hair removal. It works by targeting each hair follicle individually with a tiny electrical current, destroying its ability to produce hair. It is effective on all skin types and hair colors, making it a versatile option for any area of the body.',
+    image: '/images/image_6.jpg',
+    benefits: [
+      '100% permanent hair removal',
+      'Effective on all skin and hair colors',
+      'FDA-approved safety for hair removal',
+      'Ideal for small, stubborn areas'
+    ],
+    stepFlow: [
+      { title: 'Consultation', desc: 'Assess target area and determine session length.' },
+      { title: 'Preparation', desc: 'Cleanse the skin.' },
+      { title: 'Treatment', desc: 'Insert a fine probe into the hair follicle and apply current.' },
+      { title: 'Soothe', desc: 'Apply calming post-treatment lotion.' }
+    ],
+    postCare: [
+      'Avoid sun exposure on the treated area',
+      'Keep the area clean and avoid makeup for 24 hours',
+      'Do not pluck or wax between sessions'
+    ],
+    metaTitle: 'Electrolysis Permanent Hair Removal | RD Harmony Med Spa',
+    metaDescription: 'Achieve permanent hair removal with professional Electrolysis at RD Harmony Med Spa. Starting at just $30 for 15 minutes.'
+  }
 ];

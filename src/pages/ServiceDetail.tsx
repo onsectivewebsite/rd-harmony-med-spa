@@ -62,7 +62,7 @@ const ServiceDetail: React.FC = () => {
         </div>
         
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4 mt-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-xs uppercase tracking-widest font-bold mb-6 border border-white/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#111111]/10 backdrop-blur-md rounded-full text-white/90 text-xs uppercase tracking-widest font-bold mb-6 border border-white/20">
             <Tag size={12} /> {service.category}
           </div>
           <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 leading-tight drop-shadow-lg">
@@ -73,11 +73,11 @@ const ServiceDetail: React.FC = () => {
           </p>
           
           <div className="flex flex-wrap items-center justify-center gap-6 mb-12">
-            <div className="flex items-center gap-2 text-white/90 bg-white/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
+            <div className="flex items-center gap-2 text-white/90 bg-[#111111]/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
               <Clock size={16} className="text-spa-accent" />
               <span className="font-medium tracking-wide">{service.duration}</span>
             </div>
-            <div className="flex items-center gap-2 text-white/90 bg-white/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
+            <div className="flex items-center gap-2 text-white/90 bg-[#111111]/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
               <Tag size={16} className="text-spa-accent" />
               <span className="font-medium tracking-wide text-lg">{displayPrice}</span>
             </div>
@@ -90,7 +90,7 @@ const ServiceDetail: React.FC = () => {
       </section>
 
       {/* STICKY CTA ON SCROLL */}
-      <div className={`fixed top-20 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-spa-border shadow-sm transition-transform duration-300 ${showStickyCTA ? 'translate-y-0' : '-translate-y-[200%]'}`}>
+      <div className={`fixed top-20 left-0 right-0 z-40 bg-[#111111]/90 backdrop-blur-md border-b border-spa-border shadow-sm transition-transform duration-300 ${showStickyCTA ? 'translate-y-0' : '-translate-y-[200%]'}`}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="hidden md:block">
             <h3 className="font-serif text-lg text-spa-ink font-medium">{service.name}</h3>
@@ -124,7 +124,7 @@ const ServiceDetail: React.FC = () => {
             {/* 3. BENEFITS */}
             {service.benefits && service.benefits.length > 0 && (
               <section>
-                <div className="bg-white p-10 rounded-[2rem] border border-spa-border shadow-spa">
+                <div className="bg-[#111111] p-10 rounded-[2rem] border border-spa-border shadow-spa">
                   <h2 className="text-2xl font-serif text-spa-ink mb-8 flex items-center gap-3">
                     <CheckCircle2 className="text-spa-primary" /> Core Benefits
                   </h2>
@@ -151,7 +151,7 @@ const ServiceDetail: React.FC = () => {
                   <div className="space-y-12">
                     {service.stepFlow.map((step, i) => (
                       <div key={i} className="relative pl-16">
-                        <div className="absolute left-0 top-0 w-12 h-12 rounded-full bg-white border-2 border-spa-primary flex items-center justify-center text-spa-primary font-bold font-serif shadow-sm z-10">
+                        <div className="absolute left-0 top-0 w-12 h-12 rounded-full bg-[#111111] border-2 border-spa-primary flex items-center justify-center text-spa-primary font-bold font-serif shadow-sm z-10">
                           {i + 1}
                         </div>
                         <div>
@@ -195,7 +195,7 @@ const ServiceDetail: React.FC = () => {
 
             {/* 6. WHO IS IT FOR */}
             {(service.idealFor || service.skinConcern || service.precautions) && (
-              <div className="bg-white p-8 rounded-[2rem] border border-spa-border shadow-spa">
+              <div className="bg-[#111111] p-8 rounded-[2rem] border border-spa-border shadow-spa">
                 <h3 className="text-xl font-serif mb-6 flex items-center gap-3 text-spa-ink">
                   <Droplets className="text-spa-primary" size={20} /> Who It's For
                 </h3>
@@ -304,7 +304,7 @@ const ServiceDetail: React.FC = () => {
 
       {/* 8. AFTERCARE */}
       {service.postCare && service.postCare.length > 0 && (
-        <section className="bg-white py-24 border-t border-spa-border">
+        <section className="bg-[#111111] py-24 border-t border-spa-border">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <span className="text-spa-primary text-[10px] uppercase tracking-[0.5em] font-bold block mb-4">Post-Treatment</span>
             <h2 className="text-3xl md:text-5xl font-serif text-spa-ink mb-16">Aftercare Instructions</h2>
@@ -329,7 +329,7 @@ const ServiceDetail: React.FC = () => {
             <h2 className="text-3xl md:text-5xl font-serif text-spa-ink mb-16 text-center">Frequently Asked Questions</h2>
             <div className="space-y-4">
               {service.faqs.map((faq, i) => (
-                <div key={i} className="bg-white p-8 rounded-[1.5rem] border border-spa-border shadow-sm">
+                <div key={i} className="bg-[#111111] p-8 rounded-[1.5rem] border border-spa-border shadow-sm">
                   <h4 className="text-xl font-medium text-spa-ink mb-4">{faq.q}</h4>
                   <p className="text-spa-ink/70 leading-relaxed italic">"{faq.a}"</p>
                 </div>
@@ -361,7 +361,7 @@ const ServiceDetail: React.FC = () => {
              service.id === 'waxing-full-leg' ? 'Smooth Legs, Long-Lasting Confidence' :
              service.id === 'waxing-half-leg' ? 'Targeted Smoothness in Half the Time' :
              service.id === 'waxing-underarms' ? 'Smooth, Hair-Free Underarms for Weeks' :
-             service.id.startsWith('waxing-brazilian') ? 'Smooth and Confident Bikini Area' :
+             service.id.startsWith('waxing-brazilian') ? 'Smooth and Confident Brazilian Area' :
              service.id.startsWith('microneedling') ? 'Stimulate Collagen, Renew Your Skin' :
              service.id.startsWith('prp-') ? 'Natural Regeneration Starts Here' :
              'Your Skin Transformation Starts Here'}
@@ -384,7 +384,7 @@ const ServiceDetail: React.FC = () => {
              service.id === 'waxing-full-leg' ? 'Book your professional full leg waxing today for smooth, hair-free legs.' :
              service.id === 'waxing-half-leg' ? 'Book your half leg waxing today for quick and targeted results.' :
              service.id === 'waxing-underarms' ? 'Book your underarm waxing today for smooth, hair-free skin.' :
-             service.id.startsWith('waxing-brazilian') ? 'Book your professional Brazilian waxing today for a smooth and confident bikini area.' :
+             service.id.startsWith('waxing-brazilian') ? 'Book your professional Brazilian waxing today for a smooth and confident Brazilian area.' :
              service.id === 'microneedling' ? 'Book your FDA-approved SkinPen microneedling session today.' :
              service.id === 'microneedling-boosters' ? 'Enhance your results with microneedling and specialized bio-boosters.' :
              service.id === 'prp-face' ? 'Rejuvenate your skin naturally with Platelet Rich Plasma therapy.' :
@@ -405,7 +405,7 @@ const ServiceDetail: React.FC = () => {
                service.id.startsWith('prp-') ? 'Start Regeneration' :
                'Book Now'}
             </Link>
-            <Link to="/contact" className="px-12 py-5 border border-white/20 text-white rounded-full text-sm uppercase tracking-widest font-bold hover:bg-white/10 transition-all text-center">
+            <Link to="/contact" className="px-12 py-5 border border-white/20 text-white rounded-full text-sm uppercase tracking-widest font-bold hover:bg-[#111111]/10 transition-all text-center">
               Free Consultation
             </Link>
           </div>

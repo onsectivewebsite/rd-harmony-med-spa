@@ -11,7 +11,7 @@ interface ServiceAboutProps {
 
 const ServiceAbout = ({ description, name, category, technology }: ServiceAboutProps) => {
   return (
-    <section className="py-24 bg-white relative">
+    <section className="py-24 bg-[#111111] relative">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
           <div className="space-y-12">
@@ -26,10 +26,10 @@ const ServiceAbout = ({ description, name, category, technology }: ServiceAboutP
             </div>
 
             {technology && (
-              <div className="bg-stone-50 border border-spa-border p-12 rounded-[3.5rem] group hover:shadow-2xl transition-all relative overflow-hidden">
+              <div className="bg-[#1A1A1A] border border-spa-border p-12 rounded-[3.5rem] group hover:shadow-2xl transition-all relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-emerald-500/10 transition-colors duration-700" />
                 <div className="flex items-center gap-6 mb-8 group/icon">
-                  <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all transform group-hover/icon:rotate-[15deg] duration-500">
+                  <div className="w-16 h-16 bg-[#111111] rounded-2xl shadow-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all transform group-hover/icon:rotate-[15deg] duration-500">
                     <Sparkles size={32} />
                   </div>
                   <div>
@@ -56,7 +56,7 @@ const ServiceAbout = ({ description, name, category, technology }: ServiceAboutP
              </div>
              {/* Decorative frames */}
              <div className="absolute top-10 -right-10 w-full h-full border border-spa-border rounded-[4.5rem] -z-1 group-hover:translate-x-4 group-hover:-translate-y-4 transition-transform duration-1000" />
-             <div className="absolute -bottom-10 -left-10 w-full h-full bg-stone-50 rounded-[4.5rem] -z-1 group-hover:-translate-x-4 group-hover:translate-y-4 transition-transform duration-1000 opacity-50" />
+             <div className="absolute -bottom-10 -left-10 w-full h-full bg-[#1A1A1A] rounded-[4.5rem] -z-1 group-hover:-translate-x-4 group-hover:translate-y-4 transition-transform duration-1000 opacity-50" />
           </div>
         </div>
       </div>

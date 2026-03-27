@@ -26,7 +26,7 @@ const ServiceFAQ = ({ faqs, name }: ServiceFAQProps) => {
   const items = faqs || defaultFaqs;
 
   return (
-    <section className="section-padding bg-white relative">
+    <section className="section-padding bg-[#111111] relative">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-20">
           <HelpCircle className="text-emerald-600 mx-auto mb-6" size={40} />
@@ -36,7 +36,7 @@ const ServiceFAQ = ({ faqs, name }: ServiceFAQProps) => {
 
         <div className="space-y-8">
           {items.map((faq, i) => (
-            <div key={i} className="group p-10 bg-stone-50 border border-spa-border rounded-[2.5rem] hover:bg-white hover:border-emerald-600/20 hover:shadow-2xl transition-all duration-500">
+            <div key={i} className="group p-10 bg-[#1A1A1A] border border-spa-border rounded-[2.5rem] hover:bg-[#111111] hover:border-emerald-600/20 hover:shadow-2xl transition-all duration-500">
               <div className="flex gap-6">
                 <div className="shrink-0 w-8 h-8 rounded-full bg-emerald-600/10 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
                   <ChevronRight size={16} className="group-hover:rotate-90 transition-transform duration-500" />
