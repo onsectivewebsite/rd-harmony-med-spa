@@ -1472,7 +1472,7 @@ export const SERVICES: Service[] = [
     isMobileAvailable: true,
     description: 'Uses platelet-rich plasma to stimulate cell regeneration, reducing dark circles and under-eye hollows.',
     longDescription: 'PRP for Dark Under-Eye Circles is a targeted treatment that utilizes the powerful growth factors in your own blood to rejuvenate the delicate skin under your eyes. It improves skin thickness, stimulates collagen, and significantly reduces the appearance of dark circles and hollows safely and naturally.',
-    image: '/images/svc_prp_face.jpg',
+    image: '/images/svc_prp_undereye.jpg',
     benefits: [
       'Reduces dark under-eye circles',
       'Improves under-eye hollowness',
@@ -1505,7 +1505,7 @@ export const SERVICES: Service[] = [
     isMobileAvailable: false,
     description: 'Permanent hair removal suitable for all hair colors and skin types.',
     longDescription: 'Electrolysis is an FDA-approved method for permanent hair removal. It works by targeting each hair follicle individually with a tiny electrical current, destroying its ability to produce hair. It is effective on all skin types and hair colors, making it a versatile option for any area of the body.',
-    image: '/images/laser_waxing.jpg',
+    image: '/images/svc_electrolysis.jpg',
     benefits: [
       '100% permanent hair removal',
       'Effective on all skin and hair colors',
