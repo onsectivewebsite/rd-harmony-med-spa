@@ -178,7 +178,7 @@ const FreeConsultation = () => {
             <div className="relative">
               <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <img 
-                  src="/images/image_0.jpg" 
+                  src="/images/doctor_patient.jpg"
                   alt="Aesthetic Consultation" 
                   className="w-full h-full object-cover"
                 />

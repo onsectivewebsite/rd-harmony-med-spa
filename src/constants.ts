@@ -985,7 +985,7 @@ export const SERVICES: Service[] = [
     isMobileAvailable: false,
     description: 'NANO & OMBRE Brows are semi-permanent eyebrow treatments designed to create full, defined, and symmetrical brows using precision techniques.',
     longDescription: 'NANO & OMBRE Brows are semi-permanent eyebrow treatments designed to create full, defined, and symmetrical brows using precision techniques. NANO brows mimic individual hair strokes, while OMBRE provides soft shading for depth. Ideal for clients seeking low-maintenance, flawless brows with lasting artistic symmetry.',
-    image: '/images/svc_nanobrows.jpg',
+    image: '/images/eyebrow_detail.png',
     benefits: [
       'Long-lasting (12–24 months) semi-permanent results',
       'Natural, defined, and symmetrical brows',
@@ -1505,7 +1505,7 @@ export const SERVICES: Service[] = [
     isMobileAvailable: false,
     description: 'Permanent hair removal suitable for all hair colors and skin types.',
     longDescription: 'Electrolysis is an FDA-approved method for permanent hair removal. It works by targeting each hair follicle individually with a tiny electrical current, destroying its ability to produce hair. It is effective on all skin types and hair colors, making it a versatile option for any area of the body.',
-    image: '/images/image_6.jpg',
+    image: '/images/laser_waxing.jpg',
     benefits: [
       '100% permanent hair removal',
       'Effective on all skin and hair colors',

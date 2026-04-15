@@ -6,9 +6,24 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+async function killPort(port: number) {
+  const { execSync } = await import("child_process");
+  try {
+    const pids = execSync(`lsof -ti:${port}`, { encoding: "utf-8" }).trim();
+    if (pids) {
+      execSync(`kill -9 ${pids.split("\n").join(" ")}`);
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  } catch {}
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Kill any existing processes on ports we need
+  await killPort(PORT);
+  await killPort(24678);
 
   app.use(express.json());
 

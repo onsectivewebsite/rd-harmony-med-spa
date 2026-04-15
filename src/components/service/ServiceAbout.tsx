@@ -48,7 +48,7 @@ const ServiceAbout = ({ description, name, category, technology }: ServiceAboutP
           <div className="relative group lg:pl-12">
              <div className="aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl relative shadow-emerald-500/5 z-10 transition-transform duration-700 group-hover:scale-[0.98]">
                <img 
-                 src="/images/image_10.jpg" 
+                 src="/images/skin_care_clinical.jpg"
                  alt="Aesthetic Precision" 
                  className="w-full h-full object-cover"
                />

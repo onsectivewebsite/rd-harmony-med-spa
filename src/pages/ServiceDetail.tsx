@@ -54,7 +54,7 @@ const ServiceDetail: React.FC = () => {
       <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img 
-            src={service.image || '/images/image_12.jpg'} 
+            src={service.image || '/images/beauty_proc.jpg'} 
             alt={service.name}
             className="w-full h-full object-cover object-center scale-105"
           />

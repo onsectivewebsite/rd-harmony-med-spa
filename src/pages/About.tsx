@@ -31,7 +31,7 @@ const About = () => {
             <div className="relative">
               <div className="aspect-[4/5] rounded-[3rem] overflow-hidden">
                 <img
-                  src="/images/image_13.jpg"
+                  src="/images/spa_env.jpg"
                   alt="Professional Med Spa Treatment"
                   className="w-full h-full object-cover"
                 />

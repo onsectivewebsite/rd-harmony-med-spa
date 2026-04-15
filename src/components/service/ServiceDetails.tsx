@@ -19,7 +19,7 @@ export const ServiceExperience = ({ experience, idealFor, name }: ServiceExperie
             <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl relative shadow-emerald-500/5">
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
               <img 
-                src="/images/image_12.jpg" 
+                src="/images/clinical_ease.jpg"
                 alt="Clinic Experience" 
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />

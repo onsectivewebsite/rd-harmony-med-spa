@@ -76,7 +76,7 @@ const Home = () => {
             >
               <div className="relative rounded-t-[10rem] rounded-b-[2rem] overflow-hidden aspect-[4/5] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-[8px] border-white z-10">
                 <img 
-                  src="/images/image_11.jpg" 
+                  src="/images/facial_detail.jpg"
                   alt="Medical Aesthetic Treatment"
                   className="w-full h-full object-cover"
                 />
@@ -141,17 +141,17 @@ const Home = () => {
               {
                 title: 'Hydrafacial',
                 desc: 'The ultimate skin rejuvenation treatment for instant radiance and deep hydration.',
-                img: '/images/image_5.jpg'
+                img: '/images/facial_hydrafacial.jpg'
               },
               {
                 title: 'NANO & OMBRE Brows',
                 desc: 'Achieve perfectly shaped and defined eyebrows with advanced semi-permanent techniques.',
-                img: '/images/image_7.jpg'
+                img: '/images/eyebrow_detail.png'
               },
               {
                 title: 'Botox & Injectables',
                 desc: 'Precision treatments including Botox, Xeomin, and Dysport to smooth and rejuvenate.',
-                img: '/images/image_2.jpg'
+                img: '/images/medical_injection.jpg'
               }
             ].map((item, i) => (
               <motion.div
@@ -186,7 +186,7 @@ const Home = () => {
             <div className="relative group">
               <div className="aspect-[16/9] rounded-[3rem] overflow-hidden shadow-2xl relative">
                 <img 
-                  src="/images/image_0.jpg" 
+                  src="/images/consult_room.jpg"
                   alt="Clinical Consultation" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
