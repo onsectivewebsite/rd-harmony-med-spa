@@ -18,6 +18,7 @@ const Booking = () => {
     message: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
   const [allServices, setAllServices] = useState(SERVICES);
 
@@ -45,36 +46,46 @@ const Booking = () => {
     }
   }, [location]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Availability Check Logic (Mock)
-    const existingBookings = JSON.parse(localStorage.getItem('rd_harmony_appointments') || '[]');
-    const isConflict = existingBookings.some((b: any) => b.date === formData.date && b.time === formData.time);
-
-    if (isConflict) {
-      setError('Sorry, this time slot is already taken. Please choose another time.');
-      return;
-    }
+    setLoading(true);
 
     const chosenService = allServices.find(s => s.name === formData.service);
     const servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
 
-    // Save to LocalStorage for Admin Panel
-    const newAppointment = {
-      ...formData,
-      id: Date.now().toString(),
-      status: 'confirmed',
-      createdAt: new Date().toISOString(),
-      price: servicePrice
-    };
-    localStorage.setItem('rd_harmony_appointments', JSON.stringify([...existingBookings, newAppointment]));
-    
-    // Simulate Email Confirmation
-    console.log(`Sending confirmation email to ${formData.email}...`);
-    
-    setSubmitted(true);
+    try {
+      const response = await fetch('/api/book.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, price: servicePrice })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setError(result.message || 'Failed to book appointment. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Also save to localStorage for Admin Panel
+      const existingBookings = JSON.parse(localStorage.getItem('rd_harmony_appointments') || '[]');
+      const newAppointment = {
+        ...formData,
+        id: result.booking_id?.toString() || Date.now().toString(),
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        price: servicePrice
+      };
+      localStorage.setItem('rd_harmony_appointments', JSON.stringify([...existingBookings, newAppointment]));
+
+      setSubmitted(true);
+    } catch {
+      setError('Unable to connect to the server. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -273,9 +284,10 @@ const Booking = () => {
 
               <button
                 type="submit"
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 rounded-2xl text-sm uppercase tracking-widest font-bold transition-all transform hover:scale-[1.02]"
+                disabled={loading}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/50 disabled:cursor-not-allowed text-white py-5 rounded-2xl text-sm uppercase tracking-widest font-bold transition-all transform hover:scale-[1.02] disabled:hover:scale-100"
               >
-                Confirm Booking
+                {loading ? 'Booking...' : 'Confirm Booking'}
               </button>
             </form>
           </div>
