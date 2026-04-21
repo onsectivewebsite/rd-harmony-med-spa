@@ -55,10 +55,10 @@ const Booking = () => {
     const servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
 
     try {
-      const response = await fetch('/api/book.php', {
+      const response = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, price: servicePrice })
+        body: JSON.stringify({ ...formData, price: servicePrice }),
       });
 
       const result = await response.json();
@@ -76,7 +76,7 @@ const Booking = () => {
         id: result.booking_id?.toString() || Date.now().toString(),
         status: 'confirmed',
         createdAt: new Date().toISOString(),
-        price: servicePrice
+        price: servicePrice,
       };
       localStorage.setItem('rd_harmony_appointments', JSON.stringify([...existingBookings, newAppointment]));
 
