@@ -1,13 +1,23 @@
-import { Resend } from 'resend';
+import nodemailer, { type Transporter } from 'nodemailer';
 
-let client: Resend | null = null;
+let transporter: Transporter | null = null;
 
-function getClient(): Resend {
-  if (client) return client;
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error('RESEND_API_KEY is not set.');
-  client = new Resend(key);
-  return client;
+function getTransporter(): Transporter {
+  if (transporter) return transporter;
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    throw new Error('SMTP credentials are not configured (SMTP_HOST, SMTP_USER, SMTP_PASS).');
+  }
+
+  const port = Number(SMTP_PORT) || 465;
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port,
+    secure: port === 465, // true for implicit SSL (465), false for STARTTLS (587)
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  });
+  return transporter;
 }
 
 export async function sendMail(opts: {
@@ -16,17 +26,12 @@ export async function sendMail(opts: {
   html: string;
   replyTo?: string;
 }): Promise<void> {
-  const from = process.env.MAIL_FROM;
-  if (!from) throw new Error('MAIL_FROM is not set.');
-
-  const { error } = await getClient().emails.send({
+  const from = process.env.MAIL_FROM || process.env.SMTP_USER!;
+  await getTransporter().sendMail({
     from,
-    to: [opts.to],
+    to: opts.to,
     subject: opts.subject,
     html: opts.html,
     replyTo: opts.replyTo,
   });
-  if (error) {
-    throw new Error(`Resend error: ${error.message || JSON.stringify(error)}`);
-  }
 }
