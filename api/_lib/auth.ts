@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from 'crypto';
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 

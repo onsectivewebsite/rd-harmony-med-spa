@@ -89,7 +89,7 @@ const Admin = () => {
   const loadBookings = useCallback(async (token: string) => {
     setBookingsError('');
     try {
-      const res = await fetch('/api/admin-bookings', {
+      const res = await fetch('/api/admin?action=bookings', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
@@ -143,7 +143,7 @@ const Admin = () => {
     resetAuthMessages();
     setAuthBusy(true);
     try {
-      const res = await fetch('/api/admin-login', {
+      const res = await fetch('/api/admin?action=login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginCreds),
@@ -169,7 +169,7 @@ const Admin = () => {
     resetAuthMessages();
     setAuthBusy(true);
     try {
-      const res = await fetch('/api/admin-verify-otp', {
+      const res = await fetch('/api/admin?action=verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ challenge_id: challengeId, code: otp }),
@@ -199,7 +199,7 @@ const Admin = () => {
     resetAuthMessages();
     setAuthBusy(true);
     try {
-      const res = await fetch('/api/admin-request-reset', {
+      const res = await fetch('/api/admin?action=request-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: forgotUsername }),
@@ -226,7 +226,7 @@ const Admin = () => {
     }
     setAuthBusy(true);
     try {
-      const res = await fetch('/api/admin-reset-password', {
+      const res = await fetch('/api/admin?action=reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: resetToken, password: resetPassword }),
@@ -267,7 +267,7 @@ const Admin = () => {
     const prev = appointments;
     setAppointments(appointments.filter(a => a.id !== id));
     try {
-      const res = await fetch(`/api/admin-bookings?id=${encodeURIComponent(id)}`, {
+      const res = await fetch(`/api/admin?action=bookings&id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -301,7 +301,7 @@ const Admin = () => {
     const servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
 
     try {
-      const res = await fetch('/api/admin-bookings', {
+      const res = await fetch('/api/admin?action=bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
