@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema } from './_db';
-import { sendMail } from './_mailer';
-import { reminderEmail, type BookingData } from './_templates';
+import { sql, ensureSchema } from './_db.js';
+import { sendMail } from './_mailer.js';
+import { reminderEmail, type BookingData } from './_templates.js';
 
 type ReminderKey = '30d' | '7d' | '1d';
 type BookingRow = BookingData & { id: number };

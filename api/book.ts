@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema, generateBookingNumber } from './_db';
-import { sendMail } from './_mailer';
+import { sql, ensureSchema, generateBookingNumber } from './_db.js';
+import { sendMail } from './_mailer.js';
 import {
   bookingConfirmationEmail,
   bookingNotificationEmail,
   type BookingData,
-} from './_templates';
+} from './_templates.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
