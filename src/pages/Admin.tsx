@@ -112,12 +112,15 @@ const Admin = () => {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    const rt = url.searchParams.get('reset');
+    let rt = url.searchParams.get('reset');
+    if (!rt) {
+      const m = /reset=([a-f0-9]{32,})/i.exec(window.location.href);
+      if (m) rt = m[1];
+    }
     if (rt) {
       setResetToken(rt);
       setAuthStep('reset');
-      url.searchParams.delete('reset');
-      window.history.replaceState({}, '', url.toString());
+      window.history.replaceState({}, '', '/admin');
     }
 
     const token = sessionStorage.getItem(TOKEN_KEY);
