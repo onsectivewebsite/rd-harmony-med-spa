@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema, generateBookingNumber } from '../_lib/db';
-import { readBearer, verifySession } from '../_lib/auth';
-import { parseBody } from '../_lib/http';
+import { sql, ensureSchema, generateBookingNumber } from './_lib/db';
+import { readBearer, verifySession } from './_lib/auth';
+import { parseBody } from './_lib/http';
 
 interface BookingRow {
   id: number;

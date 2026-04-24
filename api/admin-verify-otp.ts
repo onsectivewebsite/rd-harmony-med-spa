@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema } from '../_lib/db';
-import { hashToken, issueSession } from '../_lib/auth';
-import { parseBody } from '../_lib/http';
+import { sql, ensureSchema } from './_lib/db';
+import { hashToken, issueSession } from './_lib/auth';
+import { parseBody } from './_lib/http';
 
 const MAX_ATTEMPTS = 5;
 

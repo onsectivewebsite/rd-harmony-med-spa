@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema } from '../_lib/db';
-import { sendMail } from '../_lib/mailer';
-import { adminOtpEmail } from '../_lib/templates';
-import { verifyPassword, hashToken, randomNumericCode } from '../_lib/auth';
-import { parseBody } from '../_lib/http';
+import { sql, ensureSchema } from './_lib/db';
+import { sendMail } from './_lib/mailer';
+import { adminOtpEmail } from './_lib/templates';
+import { verifyPassword, hashToken, randomNumericCode } from './_lib/auth';
+import { parseBody } from './_lib/http';
 
 const OTP_TTL_MINUTES = 10;
 
