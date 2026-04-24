@@ -262,11 +262,59 @@ async function handleBookings(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'PATCH') {
     const body = parseBody(req) || {};
-    const status = typeof body.status === 'string' ? body.status.trim() : '';
-    if (!['confirmed', 'completed', 'cancelled', 'no_show'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
+    const updates: Record<string, string | null> = {};
+
+    if (typeof body.status === 'string') {
+      const s = body.status.trim();
+      if (!['confirmed', 'completed', 'cancelled', 'no_show'].includes(s)) {
+        return res.status(400).json({ success: false, message: 'Invalid status' });
+      }
+      updates.status = s;
     }
-    await sql`UPDATE bookings SET status = ${status} WHERE id = ${id}`;
+    if (typeof body.name === 'string' && body.name.trim()) updates.name = body.name.trim();
+    if (typeof body.email === 'string') updates.email = body.email.trim().toLowerCase();
+    if (typeof body.phone === 'string' && body.phone.trim()) updates.phone = body.phone.trim();
+    if (typeof body.service === 'string' && body.service.trim()) updates.service = body.service.trim();
+    if (body.service_type === 'Mobile' || body.service_type === 'In-Clinic') {
+      updates.service_type = body.service_type;
+    }
+    if (typeof body.appointment_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.appointment_date)) {
+      updates.appointment_date = body.appointment_date;
+    }
+    if (typeof body.appointment_time === 'string' && /^\d{2}:\d{2}$/.test(body.appointment_time)) {
+      updates.appointment_time = body.appointment_time;
+    }
+    if (typeof body.price === 'string') updates.price = body.price.trim() || null;
+    if (typeof body.notes === 'string') updates.notes = body.notes.trim() || null;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: 'Nothing to update' });
+    }
+
+    for (const [col, val] of Object.entries(updates)) {
+      if (col === 'appointment_date') {
+        await sql`UPDATE bookings SET appointment_date = ${val}::date WHERE id = ${id}`;
+      } else if (col === 'appointment_time') {
+        await sql`UPDATE bookings SET appointment_time = ${val}::time WHERE id = ${id}`;
+      } else if (col === 'status') {
+        await sql`UPDATE bookings SET status = ${val} WHERE id = ${id}`;
+      } else if (col === 'name') {
+        await sql`UPDATE bookings SET name = ${val} WHERE id = ${id}`;
+      } else if (col === 'email') {
+        await sql`UPDATE bookings SET email = ${val} WHERE id = ${id}`;
+      } else if (col === 'phone') {
+        await sql`UPDATE bookings SET phone = ${val} WHERE id = ${id}`;
+      } else if (col === 'service') {
+        await sql`UPDATE bookings SET service = ${val} WHERE id = ${id}`;
+      } else if (col === 'service_type') {
+        await sql`UPDATE bookings SET service_type = ${val} WHERE id = ${id}`;
+      } else if (col === 'price') {
+        await sql`UPDATE bookings SET price = ${val} WHERE id = ${id}`;
+      } else if (col === 'notes') {
+        await sql`UPDATE bookings SET notes = ${val} WHERE id = ${id}`;
+      }
+    }
+
     return res.status(200).json({ success: true });
   }
 

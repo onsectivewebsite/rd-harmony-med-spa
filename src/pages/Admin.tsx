@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound } from 'lucide-react';
+import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X } from 'lucide-react';
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
 
@@ -74,6 +74,12 @@ const Admin = () => {
 
   const [selectedClientPhone, setSelectedClientPhone] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editing, setEditing] = useState<Appointment | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const [newAppt, setNewAppt] = useState({
     name: '',
@@ -267,6 +273,7 @@ const Admin = () => {
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm('Delete this booking? This cannot be undone.')) return;
     const prev = appointments;
     setAppointments(appointments.filter(a => a.id !== id));
     try {
@@ -282,6 +289,84 @@ const Admin = () => {
       setAppointments(prev);
       setBookingsError('Could not delete that booking.');
     }
+  };
+
+  const handleStatusChange = async (id: string, status: string) => {
+    const prev = appointments;
+    setAppointments(appointments.map(a => a.id === id ? { ...a, status } : a));
+    try {
+      const res = await fetch(`/api/admin?action=bookings&id=${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        setAppointments(prev);
+        setBookingsError('Could not update status.');
+      }
+    } catch {
+      setAppointments(prev);
+      setBookingsError('Could not update status.');
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    setEditBusy(true);
+    setEditError('');
+    try {
+      const res = await fetch(`/api/admin?action=bookings&id=${encodeURIComponent(editing.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({
+          name: editing.name,
+          email: editing.email,
+          phone: editing.phone,
+          service: editing.service,
+          service_type: editing.type,
+          appointment_date: editing.date,
+          appointment_time: editing.time,
+          price: editing.price || '',
+          notes: editing.message || '',
+          status: editing.status,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setEditError(data.message || 'Failed to update booking.');
+        return;
+      }
+      setEditing(null);
+      loadBookings(authToken);
+    } catch {
+      setEditError('Unable to reach the server.');
+    } finally {
+      setEditBusy(false);
+    }
+  };
+
+  const exportCsv = () => {
+    const rows = [
+      ['Booking #', 'Status', 'Name', 'Phone', 'Email', 'Service', 'Type', 'Date', 'Time', 'Price', 'Notes'],
+      ...filteredAppointments.map(a => [
+        a.bookingNumber || '', a.status, a.name, a.phone, a.email, a.service,
+        a.type, a.date, a.time, a.price || '', (a.message || '').replace(/\s+/g, ' '),
+      ]),
+    ];
+    const csv = rows.map(r =>
+      r.map(cell => {
+        const s = String(cell ?? '');
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      }).join(',')
+    ).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleDeleteReview = (id: number) => {
@@ -404,11 +489,34 @@ const Admin = () => {
     win.document.close();
   };
 
-  const filteredAppointments = appointments.filter(a =>
-    a.phone.includes(searchQuery) ||
-    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (a.bookingNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAppointments = appointments.filter(a => {
+    const q = searchQuery.toLowerCase();
+    const matchesQuery = !q ||
+      a.phone.includes(q) ||
+      a.name.toLowerCase().includes(q) ||
+      (a.bookingNumber || '').toLowerCase().includes(q) ||
+      (a.email || '').toLowerCase().includes(q);
+    const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
+    const matchesFrom = !dateFrom || a.date >= dateFrom;
+    const matchesTo = !dateTo || a.date <= dateTo;
+    return matchesQuery && matchesStatus && matchesFrom && matchesTo;
+  });
+
+  const statusCounts = useMemo(() => {
+    const counts = { all: appointments.length, confirmed: 0, completed: 0, cancelled: 0, no_show: 0 } as Record<string, number>;
+    appointments.forEach(a => { counts[a.status] = (counts[a.status] || 0) + 1; });
+    return counts;
+  }, [appointments]);
+
+  const statusClasses = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      case 'completed': return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+      case 'cancelled': return 'bg-red-500/10 text-red-400 border-red-500/30';
+      case 'no_show': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      default: return 'bg-spa-ink/5 text-spa-ink/60 border-spa-border';
+    }
+  };
   const clientHistory = appointments.filter(a => a.phone === selectedClientPhone);
 
   const parsePrice = (priceStr?: string) => parseFloat((priceStr || '0').replace(/[^0-9.]/g, '')) || 0;
@@ -536,9 +644,14 @@ const Admin = () => {
             <p className="text-spa-ink/50">Manage your med-spa platform seamlessly.</p>
           </div>
           {activeTab === 'appointments' && (
-             <button onClick={() => setShowAddModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-lg">
-               <Plus size={16} /> New Booking
-             </button>
+            <div className="flex gap-3">
+              <button onClick={exportCsv} disabled={filteredAppointments.length === 0} className="border border-spa-border text-spa-ink/70 hover:text-emerald-400 hover:border-emerald-500/40 disabled:opacity-40 px-5 py-3 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2">
+                <Download size={14} /> Export CSV
+              </button>
+              <button onClick={() => setShowAddModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-lg">
+                <Plus size={16} /> New Booking
+              </button>
+            </div>
           )}
         </div>
 
@@ -547,13 +660,32 @@ const Admin = () => {
           {activeTab === 'appointments' && (
             <div className="p-6">
               {bookingsError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{bookingsError}</div>}
-              <input type="text" placeholder="Search by name, phone, or booking #..." className="w-full max-w-sm bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 mb-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+
+              <div className="flex flex-wrap gap-2 mb-5">
+                {(['all', 'confirmed', 'completed', 'cancelled', 'no_show'] as const).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    className={`px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold border transition-all ${statusFilter === s ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-spa-border text-spa-ink/60 hover:border-emerald-500/40'}`}
+                  >
+                    {s.replace('_', ' ')} <span className="ml-1 opacity-60">{statusCounts[s] || 0}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                <input type="text" placeholder="Search name / phone / booking # / email" className="md:col-span-2 bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 text-sm text-spa-ink focus:outline-none focus:border-emerald-500" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <input type="date" className="bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 text-sm text-spa-ink focus:outline-none focus:border-emerald-500" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+                <input type="date" className="bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 text-sm text-spa-ink focus:outline-none focus:border-emerald-500" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="border-b border-spa-border text-xs uppercase text-spa-ink/50">
                     <th className="pb-3 px-4">Booking #</th>
                     <th className="pb-3 px-4">Client</th>
                     <th className="pb-3 px-4">Service & Time</th>
+                    <th className="pb-3 px-4">Status</th>
                     <th className="pb-3 px-4">Price</th>
                     <th className="pb-3 px-4 text-right">Actions</th>
                   </tr></thead>
@@ -561,16 +693,40 @@ const Admin = () => {
                     {filteredAppointments.map(appt => (
                       <tr key={appt.id} className="hover:bg-[#1A1A1A]">
                         <td className="py-4 px-4 font-mono text-xs text-emerald-600">{appt.bookingNumber || '-'}</td>
-                        <td className="py-4 px-4"><div className="font-medium text-spa-ink">{appt.name}</div><div className="text-xs text-spa-ink/40">{appt.phone}</div></td>
-                        <td className="py-4 px-4"><div className="font-medium text-emerald-600">{appt.service}</div><div className="text-xs text-spa-ink/40">{appt.date} at {appt.time}</div></td>
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-spa-ink">{appt.name}</div>
+                          <div className="text-xs text-spa-ink/40">{appt.phone}</div>
+                          {appt.email && <div className="text-xs text-spa-ink/30">{appt.email}</div>}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-emerald-600">{appt.service}</div>
+                          <div className="text-xs text-spa-ink/40">{appt.date} at {appt.time}</div>
+                          <div className="text-[10px] text-spa-ink/30 uppercase tracking-widest">{appt.type}</div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <select
+                            value={appt.status}
+                            onChange={e => handleStatusChange(appt.id, e.target.value)}
+                            className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full border appearance-none cursor-pointer ${statusClasses(appt.status)}`}
+                          >
+                            <option value="confirmed" className="bg-[#111111]">Confirmed</option>
+                            <option value="completed" className="bg-[#111111]">Completed</option>
+                            <option value="cancelled" className="bg-[#111111]">Cancelled</option>
+                            <option value="no_show" className="bg-[#111111]">No Show</option>
+                          </select>
+                        </td>
                         <td className="py-4 px-4 font-medium">{appt.price || '-'}</td>
                         <td className="py-4 px-4 text-right">
-                          <button onClick={() => handleDelete(appt.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
+                          <div className="inline-flex gap-1">
+                            <button onClick={() => setEditing(appt)} title="Edit" className="text-spa-ink/60 hover:text-emerald-400 p-2 rounded-lg"><Pencil size={16}/></button>
+                            <button onClick={() => printInvoice(appt)} title="Invoice" className="text-spa-ink/60 hover:text-emerald-400 p-2 rounded-lg"><Printer size={16}/></button>
+                            <button onClick={() => handleDelete(appt.id)} title="Delete" className="text-red-500/80 hover:text-red-500 p-2 rounded-lg"><Trash2 size={16}/></button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                     {filteredAppointments.length === 0 && (
-                      <tr><td colSpan={5} className="py-10 px-4 text-center text-spa-ink/40 italic">No bookings yet.</td></tr>
+                      <tr><td colSpan={6} className="py-10 px-4 text-center text-spa-ink/40 italic">No bookings match these filters.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -786,6 +942,56 @@ const Admin = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {editing && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#111111] p-8 rounded-3xl w-full max-w-2xl border border-spa-border max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-serif text-spa-ink">Edit Booking</h2>
+                  {editing.bookingNumber && <p className="text-xs font-mono text-emerald-400 mt-1">{editing.bookingNumber}</p>}
+                </div>
+                <button onClick={() => setEditing(null)} className="text-spa-ink/40 hover:text-spa-ink p-1"><X size={20} /></button>
+              </div>
+              {editError && <div className="text-red-500 mb-4 font-bold text-sm bg-red-500/10 p-3 rounded-lg">{editError}</div>}
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <input required placeholder="Client Name" className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+                  <input required placeholder="Phone" className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.phone} onChange={e => setEditing({ ...editing, phone: e.target.value })} />
+                </div>
+                <input type="email" placeholder="Email" className="w-full bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.email} onChange={e => setEditing({ ...editing, email: e.target.value })} />
+                <select required className="w-full bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.service} onChange={e => setEditing({ ...editing, service: e.target.value })}>
+                  {allServices.map(s => <option key={s.id} value={s.name} className="bg-[#111111]">{s.name}</option>)}
+                </select>
+                <div className="grid grid-cols-3 gap-4">
+                  <select className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.type} onChange={e => setEditing({ ...editing, type: e.target.value })}>
+                    <option value="In-Clinic" className="bg-[#111111]">In-Clinic</option>
+                    <option value="Mobile" className="bg-[#111111]">Mobile</option>
+                  </select>
+                  <input required type="date" className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.date} onChange={e => setEditing({ ...editing, date: e.target.value })} />
+                  <input required type="time" className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.time} onChange={e => setEditing({ ...editing, time: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <input placeholder="Price (e.g. $150)" className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.price || ''} onChange={e => setEditing({ ...editing, price: e.target.value })} />
+                  <select className="bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500" value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value })}>
+                    <option value="confirmed" className="bg-[#111111]">Confirmed</option>
+                    <option value="completed" className="bg-[#111111]">Completed</option>
+                    <option value="cancelled" className="bg-[#111111]">Cancelled</option>
+                    <option value="no_show" className="bg-[#111111]">No Show</option>
+                  </select>
+                </div>
+                <textarea rows={3} placeholder="Notes" className="w-full bg-[#1A1A1A] border border-spa-border py-3 px-4 rounded-xl text-spa-ink focus:outline-none focus:border-emerald-500 resize-none" value={editing.message} onChange={e => setEditing({ ...editing, message: e.target.value })} />
+                <div className="flex gap-4 pt-4">
+                  <button type="button" onClick={() => setEditing(null)} className="flex-1 border border-spa-border py-3 rounded-xl font-bold text-spa-ink/60 hover:text-spa-ink">Cancel</button>
+                  <button type="submit" disabled={editBusy} className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white py-3 rounded-xl font-bold">{editBusy ? 'Saving…' : 'Save Changes'}</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
