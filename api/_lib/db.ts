@@ -1,17 +1,34 @@
-import { neon } from '@neondatabase/serverless';
+import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
 import { hashPassword } from './auth';
 
-const connectionString =
-  process.env.POSTGRES_URL ||
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_PRISMA_URL ||
-  '';
-
-if (!connectionString) {
-  console.warn('No Postgres connection string set (POSTGRES_URL / DATABASE_URL).');
+function getConnectionString(): string {
+  return (
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    ''
+  );
 }
 
-export const sql = neon(connectionString);
+let _sql: NeonQueryFunction<false, false> | null = null;
+function getSql(): NeonQueryFunction<false, false> {
+  if (_sql) return _sql;
+  const cs = getConnectionString();
+  if (!cs) {
+    throw new Error('Database connection string is not configured (set POSTGRES_URL in Vercel env vars).');
+  }
+  _sql = neon(cs);
+  return _sql;
+}
+
+export const sql = new Proxy(function () {} as unknown as NeonQueryFunction<false, false>, {
+  apply(_t, _thisArg, args) {
+    return (getSql() as unknown as (...a: unknown[]) => unknown)(...args);
+  },
+  get(_t, prop, receiver) {
+    return Reflect.get(getSql() as unknown as object, prop, receiver);
+  },
+}) as NeonQueryFunction<false, false>;
 
 let schemaReady: Promise<void> | null = null;
 
