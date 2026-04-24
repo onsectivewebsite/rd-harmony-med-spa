@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema } from './_lib/db';
+import { sql, ensureSchema, generateBookingNumber } from './_lib/db';
 import { sendMail } from './_lib/mailer';
 import {
   bookingConfirmationEmail,
@@ -73,9 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       RETURNING id
     `) as Array<{ id: number }>;
     const bookingId = inserted[0].id;
+    const bookingNumber = generateBookingNumber(bookingId, dateS);
+    await sql`UPDATE bookings SET booking_number = ${bookingNumber} WHERE id = ${bookingId}`;
 
     const bookingData: BookingData = {
       id: bookingId,
+      booking_number: bookingNumber,
       name: nameS,
       email: emailS,
       phone: phoneS,
@@ -90,12 +93,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const mailResults = await Promise.allSettled([
       sendMail({
         to: emailS,
-        subject: 'Booking Confirmed - RD Harmony Med Spa',
+        subject: `Booking Confirmed (${bookingNumber}) - RD Harmony Med Spa`,
         html: bookingConfirmationEmail(bookingData),
       }),
       sendMail({
         to: process.env.MAIL_TO_BIZ || emailS,
-        subject: `New Booking: ${serviceS} - ${nameS}`,
+        subject: `New Booking ${bookingNumber}: ${serviceS} - ${nameS}`,
         html: bookingNotificationEmail(bookingData),
         replyTo: emailS,
       }),
@@ -111,6 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       booking_id: bookingId,
+      booking_number: bookingNumber,
       email_sent: mailResults[0].status === 'fulfilled',
       message: 'Appointment booked successfully.',
     });

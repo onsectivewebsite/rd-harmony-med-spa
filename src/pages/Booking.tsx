@@ -7,6 +7,7 @@ import { Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle2 } from 
 const Booking = () => {
   const location = useLocation();
   const [submitted, setSubmitted] = useState(false);
+  const [bookingNumber, setBookingNumber] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -69,17 +70,7 @@ const Booking = () => {
         return;
       }
 
-      // Also save to localStorage for Admin Panel
-      const existingBookings = JSON.parse(localStorage.getItem('rd_harmony_appointments') || '[]');
-      const newAppointment = {
-        ...formData,
-        id: result.booking_id?.toString() || Date.now().toString(),
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        price: servicePrice,
-      };
-      localStorage.setItem('rd_harmony_appointments', JSON.stringify([...existingBookings, newAppointment]));
-
+      setBookingNumber(result.booking_number || '');
       setSubmitted(true);
     } catch {
       setError('Unable to connect to the server. Please try again later.');
@@ -100,11 +91,16 @@ const Booking = () => {
             <CheckCircle2 size={40} />
           </div>
           <h2 className="text-3xl font-serif text-spa-ink mb-4">Reservation Confirmed!</h2>
+          {bookingNumber && (
+            <div className="mb-6 inline-block px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs uppercase tracking-widest font-bold">
+              Booking # {bookingNumber}
+            </div>
+          )}
           <p className="text-spa-ink/50 mb-8 leading-relaxed">
             Thank you, {formData.name}. Your appointment for {formData.service} on {formData.date} at {formData.time} has been confirmed. A confirmation email has been sent to {formData.email}.
           </p>
           <button
-            onClick={() => setSubmitted(false)}
+            onClick={() => { setSubmitted(false); setBookingNumber(''); }}
             className="text-emerald-600 text-xs uppercase tracking-widest font-bold hover:text-spa-ink transition-colors"
           >
             Book another service

@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, User, Phone, Mail, Trash2, Plus, CheckCircle2, Lock, LogIn, AlertCircle, Users, LayoutDashboard, DollarSign, Settings, FileText, Printer, Save, MessageSquare } from 'lucide-react';
+import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound } from 'lucide-react';
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
 
 interface Appointment {
   id: string;
+  bookingNumber?: string;
   name: string;
   email: string;
   phone: string;
@@ -19,27 +20,61 @@ interface Appointment {
   price?: string;
 }
 
+type AuthStep = 'password' | 'otp' | 'forgot' | 'reset';
+
+const TOKEN_KEY = 'rd_harmony_admin_token';
+
+function normalizeBooking(raw: any): Appointment {
+  return {
+    id: String(raw.id),
+    bookingNumber: raw.booking_number || undefined,
+    name: raw.name,
+    email: raw.email,
+    phone: raw.phone,
+    service: raw.service,
+    type: raw.service_type,
+    date: raw.appointment_date,
+    time: raw.appointment_time,
+    message: raw.notes || '',
+    status: raw.status || 'confirmed',
+    createdAt: raw.created_at || new Date().toISOString(),
+    price: raw.price || undefined,
+  };
+}
+
 const Admin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authToken, setAuthToken] = useState<string>('');
+  const [authStep, setAuthStep] = useState<AuthStep>('password');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authInfo, setAuthInfo] = useState('');
   const [loginCreds, setLoginCreds] = useState({ username: '', password: '' });
-  const [loginError, setLoginError] = useState('');
-  
+  const [otp, setOtp] = useState('');
+  const [challengeId, setChallengeId] = useState<number | null>(null);
+  const [emailHint, setEmailHint] = useState('');
+  const [forgotUsername, setForgotUsername] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetConfirm, setResetConfirm] = useState('');
+
   const [activeTab, setActiveTab] = useState<'appointments'|'clients'|'reviews'|'services'|'finances'>('appointments');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [bookingsError, setBookingsError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  
+
   const [allReviews, setAllReviews] = useState<any[]>([]);
   const [deletedReviewIds, setDeletedReviewIds] = useState<number[]>([]);
 
   const [allServices, setAllServices] = useState(SERVICES);
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   const [newService, setNewService] = useState({ name: '', category: 'Treatment', price: '', duration: '', description: '' });
-  
+
   const [selectedClientPhone, setSelectedClientPhone] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   const [newAppt, setNewAppt] = useState({
     name: '',
     email: '',
@@ -51,33 +86,171 @@ const Admin = () => {
   });
   const [modalError, setModalError] = useState('');
 
+  const loadBookings = useCallback(async (token: string) => {
+    setBookingsError('');
+    try {
+      const res = await fetch('/api/admin/bookings', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        setIsLoggedIn(false);
+        setAuthToken('');
+        return;
+      }
+      const data = await res.json();
+      if (!data.success) {
+        setBookingsError(data.message || 'Failed to load bookings');
+        return;
+      }
+      const rows: Appointment[] = (data.bookings || []).map(normalizeBooking);
+      setAppointments(rows);
+    } catch {
+      setBookingsError('Unable to reach the server.');
+    }
+  }, []);
+
   useEffect(() => {
-    const sessionAuth = sessionStorage.getItem('rd_harmony_admin_auth');
-    if (sessionAuth === 'true') setIsLoggedIn(true);
+    const url = new URL(window.location.href);
+    const rt = url.searchParams.get('reset');
+    if (rt) {
+      setResetToken(rt);
+      setAuthStep('reset');
+      url.searchParams.delete('reset');
+      window.history.replaceState({}, '', url.toString());
+    }
 
-    const data = JSON.parse(localStorage.getItem('rd_harmony_appointments') || '[]');
-    setAppointments(data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    if (token) {
+      setAuthToken(token);
+      setIsLoggedIn(true);
+      loadBookings(token);
+    }
 
-    const prices = JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}');
-    setCustomPrices(prices);
-
+    setCustomPrices(JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}'));
     const savedCustomServices = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
     setAllServices([...SERVICES, ...savedCustomServices]);
 
     const newReviews = JSON.parse(localStorage.getItem('rd_harmony_new_reviews') || '[]');
     setAllReviews([...newReviews, ...baseTestimonials]);
     setDeletedReviewIds(JSON.parse(localStorage.getItem('rd_harmony_deleted_reviews') || '[]'));
-  }, []);
+  }, [loadBookings]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const resetAuthMessages = () => { setAuthError(''); setAuthInfo(''); };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginCreds.username === 'admin' && loginCreds.password === 'admin123') {
-      setIsLoggedIn(true);
-      sessionStorage.setItem('rd_harmony_admin_auth', 'true');
-      setLoginError('');
-    } else {
-      setLoginError('Invalid credentials');
+    resetAuthMessages();
+    setAuthBusy(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginCreds),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setAuthError(data.message || 'Invalid credentials');
+        return;
+      }
+      setChallengeId(data.challenge_id);
+      setEmailHint(data.email_hint || '');
+      setAuthStep('otp');
+      setAuthInfo(`We emailed a 6-digit code to ${data.email_hint}. It expires in ${data.ttl_minutes} minutes.`);
+    } catch {
+      setAuthError('Unable to reach the server. Please try again.');
+    } finally {
+      setAuthBusy(false);
     }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    resetAuthMessages();
+    setAuthBusy(true);
+    try {
+      const res = await fetch('/api/admin/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: challengeId, code: otp }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setAuthError(data.message || 'Incorrect code');
+        return;
+      }
+      sessionStorage.setItem(TOKEN_KEY, data.token);
+      setAuthToken(data.token);
+      setIsLoggedIn(true);
+      setAuthStep('password');
+      setLoginCreds({ username: '', password: '' });
+      setOtp('');
+      setChallengeId(null);
+      loadBookings(data.token);
+    } catch {
+      setAuthError('Unable to reach the server. Please try again.');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    resetAuthMessages();
+    setAuthBusy(true);
+    try {
+      const res = await fetch('/api/admin/request-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: forgotUsername }),
+      });
+      const data = await res.json();
+      setAuthInfo(data.message || 'If that account exists, a reset link has been sent.');
+    } catch {
+      setAuthError('Unable to reach the server. Please try again.');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    resetAuthMessages();
+    if (resetPassword.length < 10) {
+      setAuthError('Password must be at least 10 characters.');
+      return;
+    }
+    if (resetPassword !== resetConfirm) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      const res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: resetToken, password: resetPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setAuthError(data.message || 'Password reset failed.');
+        return;
+      }
+      setAuthInfo('Password updated. You can now sign in with your new password.');
+      setResetPassword(''); setResetConfirm(''); setResetToken('');
+      setAuthStep('password');
+    } catch {
+      setAuthError('Unable to reach the server. Please try again.');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    setAuthToken('');
+    setIsLoggedIn(false);
+    setAppointments([]);
   };
 
   const handlePriceUpdate = (serviceId: string, newPrice: string) => {
@@ -90,10 +263,22 @@ const Admin = () => {
     setTimeout(() => setShowSaveSuccess(false), 2000);
   };
 
-  const handleDelete = (id: string) => {
-    const updated = appointments.filter(a => a.id !== id);
-    setAppointments(updated);
-    localStorage.setItem('rd_harmony_appointments', JSON.stringify(updated));
+  const handleDelete = async (id: string) => {
+    const prev = appointments;
+    setAppointments(appointments.filter(a => a.id !== id));
+    try {
+      const res = await fetch(`/api/admin/bookings?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) {
+        setAppointments(prev);
+        setBookingsError('Could not delete that booking.');
+      }
+    } catch {
+      setAppointments(prev);
+      setBookingsError('Could not delete that booking.');
+    }
   };
 
   const handleDeleteReview = (id: number) => {
@@ -102,34 +287,49 @@ const Admin = () => {
     localStorage.setItem('rd_harmony_deleted_reviews', JSON.stringify(updated));
   };
 
-  // Available Time Slots for Manual Booking
   const availableTimeSlots = useMemo(() => {
     const allSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
     if (!newAppt.date) return allSlots;
     return allSlots.filter(t => !appointments.some(a => a.date === newAppt.date && a.time === t));
   }, [newAppt.date, appointments]);
 
-  const handleCreateOffline = (e: React.FormEvent) => {
+  const handleCreateOffline = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalError('');
 
     const chosenService = allServices.find(s => s.name === newAppt.service);
     const servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
 
-    const appt: Appointment = {
-      ...newAppt,
-      id: Date.now().toString(),
-      message: 'Offline/Walk-in Booking',
-      status: 'confirmed',
-      createdAt: new Date().toISOString(),
-      email: newAppt.email || 'walkin@rdharmony.ca',
-      price: servicePrice
-    };
-    const updated = [appt, ...appointments];
-    setAppointments(updated);
-    localStorage.setItem('rd_harmony_appointments', JSON.stringify(updated));
-    setShowAddModal(false);
-    setNewAppt({ name: '', email: '', phone: '', service: '', type: 'In-Clinic', date: '', time: '' });
+    try {
+      const res = await fetch('/api/admin/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          name: newAppt.name,
+          email: newAppt.email,
+          phone: newAppt.phone,
+          service: newAppt.service,
+          service_type: newAppt.type,
+          appointment_date: newAppt.date,
+          appointment_time: newAppt.time,
+          price: servicePrice,
+          notes: 'Offline/Walk-in Booking',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setModalError(data.message || 'Failed to create booking.');
+        return;
+      }
+      setShowAddModal(false);
+      setNewAppt({ name: '', email: '', phone: '', service: '', type: 'In-Clinic', date: '', time: '' });
+      loadBookings(authToken);
+    } catch {
+      setModalError('Unable to reach the server.');
+    }
   };
 
   const handleAddService = (e: React.FormEvent) => {
@@ -140,9 +340,9 @@ const Admin = () => {
     const updatedCustom = [...savedCustomServices, srv];
     localStorage.setItem('rd_harmony_custom_added_services', JSON.stringify(updatedCustom));
     setAllServices([...SERVICES, ...updatedCustom]);
-    
+
     handlePriceUpdate(id, newService.price);
-    
+
     setShowAddServiceModal(false);
     setNewService({ name: '', category: 'Treatment', price: '', duration: '', description: '' });
   };
@@ -150,8 +350,9 @@ const Admin = () => {
   const printInvoice = (appt: Appointment) => {
     const win = window.open('', '_blank');
     if (!win) return;
+    const invoiceNumber = appt.bookingNumber || `INV-${appt.id}`;
     win.document.write(`
-      <html><head><title>Invoice - ${appt.id}</title>
+      <html><head><title>Invoice - ${invoiceNumber}</title>
       <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1a1a1a; }
         .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
@@ -159,20 +360,17 @@ const Admin = () => {
         .tagline { color: #666; font-size: 14px; margin-bottom: 40px; }
         .details { margin-top: 30px; display: flex; justify-content: space-between; gap: 40px; }
         .details h3 { margin-bottom: 10px; font-size: 16px; color: #333; }
-        
         table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; margin-top: 40px; }
         table td { padding: 12px; vertical-align: top; }
         table tr.heading td { background: #119C47; color: white; font-weight: bold; }
         table tr.item td { border-bottom: 1px solid #eee; }
         table tr.total td:nth-child(2) { border-top: 2px solid #eee; font-weight: bold; font-size: 24px; color: #119C47; }
-        
         .footer { margin-top: 60px; text-align: center; color: #888; font-size: 12px; }
       </style>
       </head><body>
         <div class="invoice-box">
           <h1>RD Harmony Med Spa</h1>
           <div class="tagline">Premium Medical Aesthetics & Wellness</div>
-          
           <div class="details">
             <div>
               <h3>Invoice To:</h3>
@@ -182,30 +380,19 @@ const Admin = () => {
             </div>
             <div style="text-align: right;">
               <h3>Invoice Details:</h3>
-              Invoice #: INV-${appt.id}<br>
+              Invoice #: ${invoiceNumber}<br>
               Date: ${appt.date}<br>
               Time: ${appt.time}
             </div>
           </div>
-          
           <table>
-            <tr class="heading">
-              <td>Treatment Description</td>
-              <td style="text-align: right;">Amount Paid</td>
-            </tr>
-            <tr class="item">
-              <td>${appt.service}<br><small style="color: #666">${appt.type}</small></td>
-              <td style="text-align: right;">${appt.price || '$0.00'}</td>
-            </tr>
-            <tr class="total">
-              <td></td>
-              <td style="text-align: right;">Total: ${appt.price || '$0.00'}</td>
-            </tr>
+            <tr class="heading"><td>Treatment Description</td><td style="text-align: right;">Amount Paid</td></tr>
+            <tr class="item"><td>${appt.service}<br><small style="color: #666">${appt.type}</small></td><td style="text-align: right;">${appt.price || '$0.00'}</td></tr>
+            <tr class="total"><td></td><td style="text-align: right;">Total: ${appt.price || '$0.00'}</td></tr>
           </table>
-          
           <div class="footer">
             Thank you for choosing RD Harmony Med Spa.<br>
-            For any questions, contact us at contact@rdharmony.ca or (647) 819-1892.
+            For any questions, contact us at bookings@rdharmonymedspa.com or (647) 819-1892.
           </div>
         </div>
         <script>window.print(); setTimeout(() => window.close(), 500);</script>
@@ -214,10 +401,13 @@ const Admin = () => {
     win.document.close();
   };
 
-  // Computed Data
-  const filteredAppointments = appointments.filter(a => a.phone.includes(searchQuery) || a.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredAppointments = appointments.filter(a =>
+    a.phone.includes(searchQuery) ||
+    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (a.bookingNumber || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const clientHistory = appointments.filter(a => a.phone === selectedClientPhone);
-  
+
   const parsePrice = (priceStr?: string) => parseFloat((priceStr || '0').replace(/[^0-9.]/g, '')) || 0;
 
   const finances = useMemo(() => {
@@ -237,21 +427,85 @@ const Admin = () => {
       c.visits += 1;
       if (new Date(a.createdAt) > new Date(c.lastVisit)) c.lastVisit = a.createdAt;
     });
-    return Array.from(map.values()).sort((a,b) => b.totalSpent - a.totalSpent);
+    return Array.from(map.values()).sort((a, b) => b.totalSpent - a.totalSpent);
   }, [appointments]);
 
   if (!isLoggedIn) {
+    const showBanner = authInfo || authError;
     return (
       <div className="min-h-screen bg-spa-bg flex items-center justify-center px-4 pt-20">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#111111] border border-spa-border p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl">
-          <div className="flex justify-center mb-8"><div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600"><Lock size={32} /></div></div>
-          <h2 className="text-3xl font-serif text-spa-ink text-center mb-2">Admin Portal</h2>
-          <form onSubmit={handleLogin} className="space-y-6 mt-8">
-            <input required type="text" placeholder="Username" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.username} onChange={e => setLoginCreds({...loginCreds, username: e.target.value})} />
-            <input required type="password" placeholder="Password" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none" value={loginCreds.password} onChange={e => setLoginCreds({...loginCreds, password: e.target.value})} />
-            {loginError && <p className="text-red-500 text-xs text-center font-bold">{loginError}</p>}
-            <button type="submit" className="w-full bg-emerald-500 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">Sign In</button>
-          </form>
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600">
+              {authStep === 'reset' ? <KeyRound size={32} /> : authStep === 'otp' ? <ShieldCheck size={32} /> : <Lock size={32} />}
+            </div>
+          </div>
+
+          <h2 className="text-3xl font-serif text-spa-ink text-center mb-2">
+            {authStep === 'reset' ? 'Set a New Password' : authStep === 'otp' ? 'Two-Factor Verification' : authStep === 'forgot' ? 'Forgot Password' : 'Admin Portal'}
+          </h2>
+          <p className="text-center text-xs text-spa-ink/50 mb-4">
+            {authStep === 'otp' && `Code sent to ${emailHint}`}
+            {authStep === 'forgot' && 'Enter your username to receive a reset link.'}
+            {authStep === 'reset' && 'Choose a strong password (min. 10 characters).'}
+            {authStep === 'password' && 'Secured with two-step verification.'}
+          </p>
+
+          {showBanner && (
+            <div className={`text-center text-xs font-bold p-3 mb-4 rounded-xl border ${authError ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+              {authError || authInfo}
+            </div>
+          )}
+
+          {authStep === 'password' && (
+            <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-6">
+              <input required type="text" placeholder="Username" autoComplete="username" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none text-spa-ink" value={loginCreds.username} onChange={e => setLoginCreds({ ...loginCreds, username: e.target.value })} />
+              <input required type="password" placeholder="Password" autoComplete="current-password" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none text-spa-ink" value={loginCreds.password} onChange={e => setLoginCreds({ ...loginCreds, password: e.target.value })} />
+              <button type="submit" disabled={authBusy} className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/40 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">
+                {authBusy ? 'Sending code…' : 'Continue'}
+              </button>
+              <button type="button" onClick={() => { resetAuthMessages(); setAuthStep('forgot'); }} className="w-full text-xs uppercase tracking-widest font-bold text-spa-ink/50 hover:text-emerald-400">
+                Forgot password?
+              </button>
+            </form>
+          )}
+
+          {authStep === 'otp' && (
+            <form onSubmit={handleOtpSubmit} className="space-y-4 mt-6">
+              <input required type="text" inputMode="numeric" pattern="\d{6}" maxLength={6} placeholder="123456" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 text-center font-mono text-2xl tracking-[0.5em] focus:border-emerald-500 outline-none text-spa-ink" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+              <button type="submit" disabled={authBusy || otp.length !== 6} className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/40 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">
+                {authBusy ? 'Verifying…' : 'Verify & Sign In'}
+              </button>
+              <button type="button" onClick={() => { resetAuthMessages(); setAuthStep('password'); setOtp(''); setChallengeId(null); }} className="w-full text-xs uppercase tracking-widest font-bold text-spa-ink/50 hover:text-emerald-400">
+                Back
+              </button>
+            </form>
+          )}
+
+          {authStep === 'forgot' && (
+            <form onSubmit={handleForgotSubmit} className="space-y-4 mt-6">
+              <input required type="text" placeholder="Username" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none text-spa-ink" value={forgotUsername} onChange={e => setForgotUsername(e.target.value)} />
+              <button type="submit" disabled={authBusy} className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/40 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">
+                {authBusy ? 'Sending…' : 'Email me a reset link'}
+              </button>
+              <button type="button" onClick={() => { resetAuthMessages(); setAuthStep('password'); }} className="w-full text-xs uppercase tracking-widest font-bold text-spa-ink/50 hover:text-emerald-400">
+                Back to sign in
+              </button>
+            </form>
+          )}
+
+          {authStep === 'reset' && (
+            <form onSubmit={handleResetSubmit} className="space-y-4 mt-6">
+              <input required type="password" placeholder="New password" autoComplete="new-password" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none text-spa-ink" value={resetPassword} onChange={e => setResetPassword(e.target.value)} />
+              <input required type="password" placeholder="Confirm new password" autoComplete="new-password" className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-6 focus:border-emerald-500 outline-none text-spa-ink" value={resetConfirm} onChange={e => setResetConfirm(e.target.value)} />
+              <button type="submit" disabled={authBusy} className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/40 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold">
+                {authBusy ? 'Updating…' : 'Update password'}
+              </button>
+              <button type="button" onClick={() => { resetAuthMessages(); setAuthStep('password'); setResetToken(''); setResetPassword(''); setResetConfirm(''); }} className="w-full text-xs uppercase tracking-widest font-bold text-spa-ink/50 hover:text-emerald-400">
+                Back to sign in
+              </button>
+            </form>
+          )}
         </motion.div>
       </div>
     );
@@ -259,7 +513,6 @@ const Admin = () => {
 
   return (
     <div className="bg-spa-bg min-h-screen pt-32 pb-20 flex">
-      {/* Sidebar */}
       <div className="w-64 fixed left-0 top-24 bottom-0 bg-[#111111] border-r border-spa-border p-6 flex flex-col gap-2 z-20">
         <h3 className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/40 mb-4 px-4">Menu</h3>
         <button onClick={() => setActiveTab('appointments')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'appointments' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><LayoutDashboard size={18} /> Appointments</button>
@@ -267,13 +520,12 @@ const Admin = () => {
         <button onClick={() => setActiveTab('finances')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'finances' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><DollarSign size={18} /> Cash Manager</button>
         <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'reviews' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><MessageSquare size={18} /> Review Manager</button>
         <button onClick={() => setActiveTab('services')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'services' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><Settings size={18} /> Pricing Config</button>
-        
+
         <div className="mt-auto">
-          <button onClick={() => { sessionStorage.removeItem('rd_harmony_admin_auth'); setIsLoggedIn(false); }} className="w-full flex justify-center py-3 border border-spa-border rounded-xl text-xs font-bold text-spa-ink/50 hover:text-spa-ink transition-all">SIGN OUT</button>
+          <button onClick={handleSignOut} className="w-full flex justify-center py-3 border border-spa-border rounded-xl text-xs font-bold text-spa-ink/50 hover:text-spa-ink transition-all">SIGN OUT</button>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="ml-64 flex-1 px-8 lg:px-12">
         <div className="flex justify-between items-end mb-10">
           <div>
@@ -288,17 +540,24 @@ const Admin = () => {
         </div>
 
         <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#111111] border border-spa-border rounded-3xl shadow-xl overflow-hidden min-h-[500px]">
-          
-          {/* APPOINTMENTS TAB */}
+
           {activeTab === 'appointments' && (
             <div className="p-6">
-              <input type="text" placeholder="Search appointments..." className="w-full max-w-sm bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 mb-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              {bookingsError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{bookingsError}</div>}
+              <input type="text" placeholder="Search by name, phone, or booking #..." className="w-full max-w-sm bg-[#1A1A1A] border border-spa-border rounded-xl py-3 px-4 mb-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
-                  <thead><tr className="border-b border-spa-border text-xs uppercase text-spa-ink/50"><th className="pb-3 px-4">Client</th><th className="pb-3 px-4">Service & Time</th><th className="pb-3 px-4">Price</th><th className="pb-3 px-4 text-right">Actions</th></tr></thead>
+                  <thead><tr className="border-b border-spa-border text-xs uppercase text-spa-ink/50">
+                    <th className="pb-3 px-4">Booking #</th>
+                    <th className="pb-3 px-4">Client</th>
+                    <th className="pb-3 px-4">Service & Time</th>
+                    <th className="pb-3 px-4">Price</th>
+                    <th className="pb-3 px-4 text-right">Actions</th>
+                  </tr></thead>
                   <tbody className="divide-y divide-spa-border">
                     {filteredAppointments.map(appt => (
                       <tr key={appt.id} className="hover:bg-[#1A1A1A]">
+                        <td className="py-4 px-4 font-mono text-xs text-emerald-600">{appt.bookingNumber || '-'}</td>
                         <td className="py-4 px-4"><div className="font-medium text-spa-ink">{appt.name}</div><div className="text-xs text-spa-ink/40">{appt.phone}</div></td>
                         <td className="py-4 px-4"><div className="font-medium text-emerald-600">{appt.service}</div><div className="text-xs text-spa-ink/40">{appt.date} at {appt.time}</div></td>
                         <td className="py-4 px-4 font-medium">{appt.price || '-'}</td>
@@ -307,13 +566,15 @@ const Admin = () => {
                         </td>
                       </tr>
                     ))}
+                    {filteredAppointments.length === 0 && (
+                      <tr><td colSpan={5} className="py-10 px-4 text-center text-spa-ink/40 italic">No bookings yet.</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
 
-          {/* CLIENT MANAGER TAB */}
           {activeTab === 'clients' && (
             <div className="p-6">
               <div className="overflow-x-auto">
@@ -337,7 +598,6 @@ const Admin = () => {
             </div>
           )}
 
-          {/* REVIEWS MANAGER TAB */}
           {activeTab === 'reviews' && (
             <div className="p-6">
               <h3 className="text-xl font-serif text-spa-ink mb-6">Manage Client Reviews</h3>
@@ -365,7 +625,6 @@ const Admin = () => {
             </div>
           )}
 
-          {/* CASH MANAGER FINANCES TAB */}
           {activeTab === 'finances' && (
             <div className="p-10">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -386,7 +645,7 @@ const Admin = () => {
               <div className="space-y-4">
                  {appointments.slice(0, 5).map(a => (
                    <div key={a.id} className="flex justify-between items-center p-4 border border-spa-border rounded-xl">
-                     <div><div className="font-medium text-emerald-600">{a.service}</div><div className="text-xs text-spa-ink/50">{a.name} • {a.date}</div></div>
+                     <div><div className="font-medium text-emerald-600">{a.service}</div><div className="text-xs text-spa-ink/50">{a.name} • {a.date} {a.bookingNumber ? `• ${a.bookingNumber}` : ''}</div></div>
                      <div className="font-bold text-lg">{a.price || '$0.00'}</div>
                    </div>
                  ))}
@@ -394,7 +653,6 @@ const Admin = () => {
             </div>
           )}
 
-          {/* SERVICE PRICING Config TAB */}
           {activeTab === 'services' && (
             <div className="p-8">
               <div className="flex justify-between items-end mb-8">
@@ -417,8 +675,8 @@ const Admin = () => {
                      <div><h4 className="font-medium text-lg">{s.name}</h4><p className="text-xs text-spa-ink/40">Default: {s.price}</p></div>
                      <div className="relative w-32">
                         <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-ink/40" />
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           className="w-full bg-[#111111] border border-spa-border rounded-lg py-2 pl-8 pr-3 outline-none focus:border-emerald-500 font-medium"
                           value={customPrices[s.id] || s.price}
                           onChange={(e) => handlePriceUpdate(s.id, e.target.value)}
@@ -432,18 +690,18 @@ const Admin = () => {
         </motion.div>
       </div>
 
-      {/* Manual Booking Modal */}
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#111111] p-10 rounded-3xl w-full max-w-2xl border border-spa-border">
               <h2 className="text-2xl font-serif mb-6">New Booking</h2>
-              {modalError && <div className="text-red-500 mb-4 font-bold text-sm bg-red-50 p-3 rounded-lg">{modalError}</div>}
+              {modalError && <div className="text-red-500 mb-4 font-bold text-sm bg-red-500/10 p-3 rounded-lg">{modalError}</div>}
               <form onSubmit={handleCreateOffline} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <input required placeholder="Client Name" className="border py-3 px-4 rounded-xl" value={newAppt.name} onChange={e=>setNewAppt({...newAppt, name: e.target.value})}/>
                   <input required placeholder="Phone Number" className="border py-3 px-4 rounded-xl" value={newAppt.phone} onChange={e=>setNewAppt({...newAppt, phone: e.target.value})}/>
                 </div>
+                <input placeholder="Email (optional)" type="email" className="border w-full py-3 px-4 rounded-xl" value={newAppt.email} onChange={e=>setNewAppt({...newAppt, email: e.target.value})} />
                 <select required className="border w-full py-3 px-4 rounded-xl" value={newAppt.service} onChange={e=>setNewAppt({...newAppt, service: e.target.value})}>
                   <option value="" disabled>Select Service</option>
                   {allServices.map(s => <option key={s.id} value={s.name}>{s.name} ({customPrices[s.id]||s.price})</option>)}
@@ -466,7 +724,6 @@ const Admin = () => {
         )}
       </AnimatePresence>
 
-      {/* Add New Service Modal */}
       <AnimatePresence>
         {showAddServiceModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -486,7 +743,6 @@ const Admin = () => {
                   <option value="Other">Other</option>
                 </select>
                 <textarea placeholder="Short Description" className="border w-full py-3 px-4 rounded-xl resize-none" rows={3} value={newService.description} onChange={e=>setNewService({...newService, description: e.target.value})} />
-                
                 <div className="flex gap-4 pt-4">
                    <button type="button" onClick={()=>setShowAddServiceModal(false)} className="flex-1 border py-3 rounded-xl font-bold text-spa-ink/50">Cancel</button>
                    <button type="submit" className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">Save Service</button>
@@ -497,7 +753,6 @@ const Admin = () => {
         )}
       </AnimatePresence>
 
-      {/* Client History & Invoice Modal */}
       <AnimatePresence>
         {selectedClientPhone && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
@@ -509,12 +764,12 @@ const Admin = () => {
                  </div>
                  <button onClick={()=>setSelectedClientPhone(null)} className="font-bold text-spa-ink/40 hover:text-spa-ink">Close</button>
                </div>
-               
                <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                   {clientHistory.map(appt => (
                     <div key={appt.id} className="border border-spa-border bg-[#1A1A1A] rounded-2xl p-6 flex justify-between items-center">
                        <div>
                          <h4 className="text-xl font-serif text-emerald-600 mb-1">{appt.service}</h4>
+                         {appt.bookingNumber && <p className="text-[10px] font-mono text-emerald-400/80 mb-1">{appt.bookingNumber}</p>}
                          <p className="text-xs font-bold text-spa-ink/40 tracking-widest uppercase">{appt.date} • {appt.time}</p>
                          <p className="font-medium mt-2">Paid: {appt.price || 'N/A'}</p>
                        </div>
