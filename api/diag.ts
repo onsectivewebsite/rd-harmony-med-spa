@@ -1,23 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import * as templates from './_lib/templates';
+import * as mailer from './_lib/mailer';
+import * as http from './_lib/http';
+import * as auth from './_lib/auth';
+import * as db from './_lib/db';
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
-  const results: Record<string, { ok: boolean; error?: string }> = {};
-
-  const tryLoad = async (name: string, loader: () => Promise<unknown>) => {
-    try {
-      await loader();
-      results[name] = { ok: true };
-    } catch (err) {
-      results[name] = { ok: false, error: err instanceof Error ? `${err.name}: ${err.message}` : String(err) };
-    }
-  };
-
-  await tryLoad('templates', () => import('./_lib/templates'));
-  await tryLoad('mailer', () => import('./_lib/mailer'));
-  await tryLoad('http', () => import('./_lib/http'));
-  await tryLoad('auth', () => import('./_lib/auth'));
-  await tryLoad('db', () => import('./_lib/db'));
-
   return res.status(200).json({
     node: process.version,
     env: {
@@ -32,6 +20,12 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       ADMIN_USERNAME: process.env.ADMIN_USERNAME || null,
       APP_URL: process.env.APP_URL || null,
     },
-    modules: results,
+    modules: {
+      templates: Object.keys(templates).slice(0, 3),
+      mailer: Object.keys(mailer).slice(0, 3),
+      http: Object.keys(http).slice(0, 3),
+      auth: Object.keys(auth).slice(0, 3),
+      db: Object.keys(db).slice(0, 3),
+    },
   });
 }
