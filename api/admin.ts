@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, ensureSchema, generateBookingNumber } from './_lib/db';
-import { sendMail } from './_lib/mailer';
-import { adminOtpEmail, adminResetEmail } from './_lib/templates';
+import { sql, ensureSchema, generateBookingNumber } from './_db';
+import { sendMail } from './_mailer';
+import { adminOtpEmail, adminResetEmail } from './_templates';
 import {
   verifyPassword,
   hashPassword,
@@ -11,8 +11,8 @@ import {
   issueSession,
   verifySession,
   readBearer,
-} from './_lib/auth';
-import { parseBody } from './_lib/http';
+} from './_auth';
+import { parseBody } from './_http';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;

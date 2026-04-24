@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sendMail } from './_lib/mailer';
+import { sendMail } from './_mailer';
 import {
   enquiryConfirmationEmail,
   enquiryNotificationEmail,
   type EnquiryData,
-} from './_lib/templates';
+} from './_templates';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

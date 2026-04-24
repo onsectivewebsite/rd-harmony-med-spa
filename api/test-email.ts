@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sendMail } from './_lib/mailer';
+import { sendMail } from './_mailer';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const expected = process.env.CRON_SECRET;

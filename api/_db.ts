@@ -1,5 +1,5 @@
 import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
-import { hashPassword } from './auth';
+import { hashPassword } from './_auth';
 
 function getConnectionString(): string {
   return (

@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import * as templates from './_lib/templates';
-import * as mailer from './_lib/mailer';
-import * as http from './_lib/http';
-import * as auth from './_lib/auth';
-import * as db from './_lib/db';
+import * as templates from './_templates';
+import * as mailer from './_mailer';
+import * as http from './_http';
+import * as auth from './_auth';
+import * as db from './_db';
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({
