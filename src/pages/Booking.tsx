@@ -4,6 +4,19 @@ import { useLocation } from 'react-router-dom';
 import { SERVICES } from '../constants';
 import { Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle2 } from 'lucide-react';
 
+const TIME_SLOTS: { value: string; label: string }[] = (() => {
+  const slots: { value: string; label: string }[] = [];
+  for (let h = 9; h <= 18; h++) {
+    for (const m of [0, 30]) {
+      const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const period = h >= 12 ? 'PM' : 'AM';
+      const hour12 = h % 12 === 0 ? 12 : h % 12;
+      slots.push({ value, label: `${hour12}:${String(m).padStart(2, '0')} ${period}` });
+    }
+  }
+  return slots;
+})();
+
 const Booking = () => {
   const location = useLocation();
   const [submitted, setSubmitted] = useState(false);
@@ -252,14 +265,18 @@ const Booking = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest text-spa-ink/50 font-bold ml-4">Preferred Time</label>
                   <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-ink/20" size={16} />
-                    <input
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-spa-ink/20 pointer-events-none" size={16} />
+                    <select
                       required
-                      type="time"
-                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 pl-12 pr-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
                       value={formData.time}
                       onChange={e => setFormData({...formData, time: e.target.value})}
-                    />
+                    >
+                      <option value="" disabled className="bg-[#111111]">Choose a time</option>
+                      {TIME_SLOTS.map(slot => (
+                        <option key={slot.value} value={slot.value} className="bg-[#111111]">{slot.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
