@@ -13,6 +13,8 @@ import {
   readBearer,
 } from './_auth.js';
 import { parseBody } from './_http.js';
+import { templateForServiceName } from './_consent.js';
+import { uploadBytes } from './_blob.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -34,6 +36,10 @@ function resetBaseUrl(req: VercelRequest): string {
 
 function requireAuth(req: VercelRequest): boolean {
   return Boolean(verifySession(readBearer(req.headers.authorization)));
+}
+
+function getSession(req: VercelRequest) {
+  return verifySession(readBearer(req.headers.authorization));
 }
 
 async function handleLogin(req: VercelRequest, res: VercelResponse) {
@@ -209,13 +215,17 @@ async function handleBookings(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET') {
     const rows = (await sql`
-      SELECT id, booking_number, name, email, phone, service, service_type,
-             to_char(appointment_date, 'YYYY-MM-DD') AS appointment_date,
-             to_char(appointment_time, 'HH24:MI')   AS appointment_time,
-             price, notes, status, created_at
-        FROM bookings
-       ORDER BY created_at DESC
-    `) as BookingRow[];
+      SELECT b.id, b.booking_number, b.name, b.email, b.phone, b.service, b.service_type,
+             to_char(b.appointment_date, 'YYYY-MM-DD') AS appointment_date,
+             to_char(b.appointment_time, 'HH24:MI')   AS appointment_time,
+             b.price, b.notes, b.status, b.created_at,
+             c.status     AS consent_status,
+             c.file_url   AS consent_file_url,
+             c.file_mime  AS consent_file_mime
+        FROM bookings b
+        LEFT JOIN consents c ON c.booking_id = b.id
+       ORDER BY b.created_at DESC
+    `) as Array<BookingRow & { consent_status: string | null; consent_file_url: string | null; consent_file_mime: string | null }>;
     return res.status(200).json({ success: true, bookings: rows });
   }
 
@@ -321,6 +331,104 @@ async function handleBookings(req: VercelRequest, res: VercelResponse) {
   return res.status(405).json({ success: false, message: 'Method not allowed' });
 }
 
+async function handleConsents(req: VercelRequest, res: VercelResponse) {
+  const session = getSession(req);
+  if (!session) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+  if (req.method === 'GET') {
+    const bookingIdParam = req.query.booking_id ? Number(req.query.booking_id) : null;
+    if (bookingIdParam) {
+      const rows = (await sql`
+        SELECT c.id, c.booking_id, c.token, c.template_id, c.status,
+               c.form_data, c.file_url, c.file_mime, c.signature_url,
+               c.filled_at, c.uploaded_by, c.created_at
+          FROM consents c
+         WHERE c.booking_id = ${bookingIdParam}
+         ORDER BY c.created_at DESC
+         LIMIT 1
+      `) as Array<Record<string, unknown>>;
+      return res.status(200).json({ success: true, consent: rows[0] || null });
+    }
+    const rows = (await sql`
+      SELECT c.id, c.booking_id, c.template_id, c.status,
+             c.file_url, c.file_mime, c.filled_at, c.uploaded_by, c.created_at,
+             b.booking_number, b.name AS client_name, b.service,
+             to_char(b.appointment_date, 'YYYY-MM-DD') AS appointment_date
+        FROM consents c
+        JOIN bookings b ON b.id = c.booking_id
+       ORDER BY c.created_at DESC
+    `) as Array<Record<string, unknown>>;
+    return res.status(200).json({ success: true, consents: rows });
+  }
+
+  return res.status(405).json({ success: false, message: 'Method not allowed' });
+}
+
+async function handleConsentUpload(req: VercelRequest, res: VercelResponse) {
+  const session = getSession(req);
+  if (!session) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method not allowed' });
+
+  const body = parseBody(req);
+  const bookingId = Number(body?.booking_id);
+  const mime = String(body?.mime || '').toLowerCase();
+  const base64 = String(body?.base64 || '');
+  if (!bookingId || !base64) {
+    return res.status(400).json({ success: false, message: 'booking_id and base64 are required' });
+  }
+  if (!['application/pdf', 'image/jpeg', 'image/png'].includes(mime)) {
+    return res.status(400).json({ success: false, message: 'File must be PDF, JPG, or PNG' });
+  }
+
+  const bookings = (await sql`SELECT id, service FROM bookings WHERE id = ${bookingId} LIMIT 1`) as Array<{ id: number; service: string }>;
+  const booking = bookings[0];
+  if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+
+  let bytes: Uint8Array;
+  try {
+    bytes = new Uint8Array(Buffer.from(base64, 'base64'));
+  } catch {
+    return res.status(400).json({ success: false, message: 'Invalid base64' });
+  }
+  if (bytes.length === 0 || bytes.length > 5_000_000) {
+    return res.status(413).json({ success: false, message: 'File must be between 1 byte and 5 MB' });
+  }
+
+  const existing = (await sql`SELECT id FROM consents WHERE booking_id = ${bookingId} LIMIT 1`) as Array<{ id: number }>;
+  let consentId: number;
+  if (existing.length === 0) {
+    const tplId = templateForServiceName(booking.service).template?.id || '';
+    const token = randomToken(24);
+    const inserted = (await sql`
+      INSERT INTO consents (booking_id, token, template_id, status)
+      VALUES (${bookingId}, ${token}, ${tplId}, 'pending')
+      RETURNING id
+    `) as Array<{ id: number }>;
+    consentId = inserted[0].id;
+  } else {
+    consentId = existing[0].id;
+  }
+
+  const ext = mime === 'application/pdf' ? 'pdf' : mime === 'image/jpeg' ? 'jpg' : 'png';
+  const url = await uploadBytes(
+    `consents/${bookingId}/upload-${Date.now()}.${ext}`,
+    bytes,
+    mime,
+  );
+
+  await sql`
+    UPDATE consents SET
+      status = 'uploaded',
+      file_url = ${url},
+      file_mime = ${mime},
+      uploaded_by = ${session.u},
+      filled_at = NOW()
+    WHERE id = ${consentId}
+  `;
+
+  return res.status(200).json({ success: true, file_url: url });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const action = String(req.query.action || '');
   try {
@@ -331,6 +439,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'request-reset': return handleRequestReset(req, res);
       case 'reset-password': return handleResetPassword(req, res);
       case 'bookings': return handleBookings(req, res);
+      case 'consents': return handleConsents(req, res);
+      case 'consent-upload': return handleConsentUpload(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });
     }
   } catch (err) {

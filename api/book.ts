@@ -6,6 +6,9 @@ import {
   bookingNotificationEmail,
   type BookingData,
 } from './_templates.js';
+import { templateForServiceName } from './_consent.js';
+import { randomToken } from './_auth.js';
+import { appBaseUrl } from './_http.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -90,11 +93,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       notes: notesS,
     };
 
+    let consentUrl: string | undefined;
+    const tplLookup = templateForServiceName(serviceS);
+    if (tplLookup.template) {
+      const consentToken = randomToken(24);
+      await sql`
+        INSERT INTO consents (booking_id, token, template_id, status)
+        VALUES (${bookingId}, ${consentToken}, ${tplLookup.template.id}, 'pending')
+      `;
+      consentUrl = `${appBaseUrl(req)}/consent/${consentToken}`;
+    }
+
     const mailResults = await Promise.allSettled([
       sendMail({
         to: emailS,
         subject: `Booking Confirmed (${bookingNumber}) - RD Harmony Med Spa`,
-        html: bookingConfirmationEmail(bookingData),
+        html: bookingConfirmationEmail(bookingData, consentUrl),
       }),
       sendMail({
         to: process.env.MAIL_TO_BIZ || emailS,

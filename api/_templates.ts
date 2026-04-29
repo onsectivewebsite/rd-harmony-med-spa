@@ -80,7 +80,7 @@ ${rows.map(([k, v]) => `<tr>
 </table>`;
 }
 
-export function bookingConfirmationEmail(b: BookingData): string {
+export function bookingConfirmationEmail(b: BookingData, consentUrl?: string): string {
   const rows: Array<[string, string]> = [];
   if (b.booking_number) rows.push(['Booking #', b.booking_number]);
   rows.push(
@@ -90,6 +90,20 @@ export function bookingConfirmationEmail(b: BookingData): string {
     ['Time', formatTime(b.appointment_time)],
     ['Price', b.price || 'To be confirmed'],
   );
+  const consentBlock = consentUrl ? `
+<div style="margin:24px 0;padding:20px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;">
+<p style="margin:0 0 8px;font-size:14px;color:#065f46;font-weight:600;">One quick step before your visit:</p>
+<p style="margin:0 0 12px;font-size:14px;color:#065f46;line-height:1.6;">
+Please complete your treatment consent form online before you arrive. It only takes 2&ndash;3 minutes.
+</p>
+<p style="margin:0;text-align:center;">
+<a href="${esc(consentUrl)}" style="display:inline-block;padding:12px 24px;background:#10b981;color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Complete Consent Form</a>
+</p>
+<p style="margin:12px 0 0;font-size:11px;color:#047857;line-height:1.5;word-break:break-all;">
+Or copy this link: ${esc(consentUrl)}
+</p>
+</div>
+  ` : '';
   return layout('Booking Confirmed', `
 <p style="margin:0 0 12px;font-size:16px;color:#111827;">Hi ${esc(b.name)},</p>
 <p style="margin:0 0 12px;font-size:15px;color:#374151;line-height:1.6;">
@@ -97,6 +111,7 @@ Thank you for booking with <strong>${esc(BIZ_NAME)}</strong>. Your appointment h
 </p>
 ${b.booking_number ? `<p style="margin:0 0 12px;font-size:14px;color:#374151;">Please keep your booking number for reference: <strong>${esc(b.booking_number)}</strong>.</p>` : ''}
 ${detailsTable(rows)}
+${consentBlock}
 <p style="margin:16px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
 Need to reschedule or cancel? Please call us at <strong>${esc(BIZ_PHONE)}</strong> at least 24 hours before your appointment.
 </p>

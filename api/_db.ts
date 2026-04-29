@@ -90,6 +90,25 @@ export function ensureSchema() {
         )
       `;
 
+      await sql`
+        CREATE TABLE IF NOT EXISTS consents (
+          id SERIAL PRIMARY KEY,
+          booking_id INTEGER NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+          token TEXT NOT NULL UNIQUE,
+          template_id TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'pending',
+          form_data JSONB,
+          signature_url TEXT,
+          file_url TEXT,
+          file_mime TEXT,
+          filled_at TIMESTAMPTZ,
+          filled_ip TEXT,
+          uploaded_by TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+      await sql`CREATE INDEX IF NOT EXISTS consents_booking_id_idx ON consents(booking_id)`;
+
       const username = process.env.ADMIN_USERNAME || 'admin';
       const email = process.env.ADMIN_EMAIL || process.env.MAIL_TO_BIZ || '';
       const existing = (await sql`SELECT id FROM admin_users WHERE username = ${username} LIMIT 1`) as Array<{ id: number }>;

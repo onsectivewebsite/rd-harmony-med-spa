@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X } from 'lucide-react';
+import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X, Upload, FileText, Clock as ClockIcon } from 'lucide-react';
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
 
@@ -18,6 +18,8 @@ interface Appointment {
   status: string;
   createdAt: string;
   price?: string;
+  consentStatus?: 'pending' | 'filled' | 'uploaded' | null;
+  consentFileUrl?: string | null;
 }
 
 type AuthStep = 'password' | 'otp' | 'forgot' | 'reset';
@@ -39,6 +41,8 @@ function normalizeBooking(raw: any): Appointment {
     status: raw.status || 'confirmed',
     createdAt: raw.created_at || new Date().toISOString(),
     price: raw.price || undefined,
+    consentStatus: raw.consent_status || null,
+    consentFileUrl: raw.consent_file_url || null,
   };
 }
 
@@ -369,6 +373,69 @@ const Admin = () => {
     URL.revokeObjectURL(url);
   };
 
+  const consentFileInputRef = useRef<HTMLInputElement | null>(null);
+  const consentTargetIdRef = useRef<string | null>(null);
+  const [consentUploadBusy, setConsentUploadBusy] = useState(false);
+  const [consentUploadError, setConsentUploadError] = useState('');
+
+  const triggerConsentUpload = (bookingId: string) => {
+    consentTargetIdRef.current = bookingId;
+    setConsentUploadError('');
+    consentFileInputRef.current?.click();
+  };
+
+  const handleConsentFileChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    const bookingId = consentTargetIdRef.current;
+    consentTargetIdRef.current = null;
+    if (!file || !bookingId) return;
+
+    if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
+      setConsentUploadError('File must be PDF, JPG, or PNG.');
+      return;
+    }
+    if (file.size > 5_000_000) {
+      setConsentUploadError('File must be 5 MB or smaller.');
+      return;
+    }
+
+    setConsentUploadBusy(true);
+    try {
+      const buf = await file.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buf);
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const base64 = btoa(binary);
+
+      const res = await fetch('/api/admin?action=consent-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ booking_id: Number(bookingId), mime: file.type, base64 }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setConsentUploadError(data.message || 'Upload failed.');
+        return;
+      }
+      loadBookings(authToken);
+    } catch {
+      setConsentUploadError('Could not reach the server.');
+    } finally {
+      setConsentUploadBusy(false);
+    }
+  };
+
+  const consentBadge = (status?: string | null) => {
+    if (status === 'filled') return { label: 'Filled', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
+    if (status === 'uploaded') return { label: 'Uploaded', cls: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
+    if (status === 'pending') return { label: 'Pending', cls: 'bg-amber-500/10 text-amber-400 border-amber-500/30' };
+    return { label: 'None', cls: 'bg-spa-ink/5 text-spa-ink/40 border-spa-border' };
+  };
+
   const handleDeleteReview = (id: number) => {
     const updated = [...deletedReviewIds, id];
     setDeletedReviewIds(updated);
@@ -660,6 +727,15 @@ const Admin = () => {
           {activeTab === 'appointments' && (
             <div className="p-6">
               {bookingsError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{bookingsError}</div>}
+              {consentUploadError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{consentUploadError}</div>}
+              {consentUploadBusy && <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-bold text-center inline-flex items-center justify-center gap-2 w-full"><ClockIcon size={14} /> Uploading consent…</div>}
+              <input
+                ref={consentFileInputRef}
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                onChange={handleConsentFileChosen}
+                className="hidden"
+              />
 
               <div className="flex flex-wrap gap-2 mb-5">
                 {(['all', 'confirmed', 'completed', 'cancelled', 'no_show'] as const).map(s => (
@@ -686,6 +762,7 @@ const Admin = () => {
                     <th className="pb-3 px-4">Client</th>
                     <th className="pb-3 px-4">Service & Time</th>
                     <th className="pb-3 px-4">Status</th>
+                    <th className="pb-3 px-4">Consent</th>
                     <th className="pb-3 px-4">Price</th>
                     <th className="pb-3 px-4 text-right">Actions</th>
                   </tr></thead>
@@ -715,6 +792,37 @@ const Admin = () => {
                             <option value="no_show" className="bg-[#111111]">No Show</option>
                           </select>
                         </td>
+                        <td className="py-4 px-4">
+                          {(() => {
+                            const badge = consentBadge(appt.consentStatus);
+                            return (
+                              <div className="flex flex-col items-start gap-1.5">
+                                <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full border ${badge.cls}`}>
+                                  {badge.label}
+                                </span>
+                                <div className="flex gap-1.5">
+                                  {appt.consentFileUrl && (
+                                    <a
+                                      href={appt.consentFileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[10px] uppercase tracking-widest font-bold text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1"
+                                    >
+                                      <FileText size={11} /> View
+                                    </a>
+                                  )}
+                                  <button
+                                    onClick={() => triggerConsentUpload(appt.id)}
+                                    disabled={consentUploadBusy}
+                                    className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 hover:text-emerald-400 inline-flex items-center gap-1 disabled:opacity-40"
+                                  >
+                                    <Upload size={11} /> {appt.consentFileUrl ? 'Replace' : 'Upload'}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </td>
                         <td className="py-4 px-4 font-medium">{appt.price || '-'}</td>
                         <td className="py-4 px-4 text-right">
                           <div className="inline-flex gap-1">
@@ -726,7 +834,7 @@ const Admin = () => {
                       </tr>
                     ))}
                     {filteredAppointments.length === 0 && (
-                      <tr><td colSpan={6} className="py-10 px-4 text-center text-spa-ink/40 italic">No bookings match these filters.</td></tr>
+                      <tr><td colSpan={7} className="py-10 px-4 text-center text-spa-ink/40 italic">No bookings match these filters.</td></tr>
                     )}
                   </tbody>
                 </table>
