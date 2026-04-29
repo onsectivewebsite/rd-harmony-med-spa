@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X, Upload, FileText, Clock as ClockIcon } from 'lucide-react';
+import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X, Upload, FileText, Clock as ClockIcon, Send, Search } from 'lucide-react';
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
 
@@ -429,6 +429,83 @@ const Admin = () => {
     }
   };
 
+  const [consentNotice, setConsentNotice] = useState('');
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  interface ClientConsent {
+    id: number;
+    booking_id: number;
+    booking_number: string | null;
+    service: string;
+    appointment_date: string;
+    appointment_time: string;
+    status: string;
+    file_url: string | null;
+    file_mime: string | null;
+    filled_at: string | null;
+    form_data: Record<string, unknown> | null;
+    template: { id: string; title: string; fields: Array<{ type: string; key?: string; label?: string; options?: string[]; text?: string }> } | null;
+  }
+  const [clientConsents, setClientConsents] = useState<ClientConsent[]>([]);
+  const [consentSearch, setConsentSearch] = useState('');
+  const [expandedConsents, setExpandedConsents] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!selectedClientPhone || !authToken) {
+      setClientConsents([]);
+      setExpandedConsents(new Set());
+      setConsentSearch('');
+      return;
+    }
+    fetch(`/api/admin?action=consents-by-client&phone=${encodeURIComponent(selectedClientPhone)}`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    })
+      .then(r => r.json())
+      .then(d => { if (d.success) setClientConsents(d.consents || []); })
+      .catch(() => { /* non-fatal */ });
+  }, [selectedClientPhone, authToken]);
+
+  const toggleConsentExpansion = (id: number) => {
+    setExpandedConsents(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const formatAnswer = (field: { type: string; options?: string[] }, value: unknown): string => {
+    if (value == null) return '—';
+    if (field.type === 'yesno') return value === true ? 'Yes' : value === false ? 'No' : String(value);
+    if (field.type === 'checklist') return Array.isArray(value) ? (value.length === 0 ? '—' : value.join(', ')) : String(value);
+    const s = String(value).trim();
+    return s.length === 0 ? '—' : s;
+  };
+
+  const resendConsent = async (bookingId: string) => {
+    setConsentUploadError('');
+    setConsentNotice('');
+    setResendingId(bookingId);
+    try {
+      const res = await fetch('/api/admin?action=consent-resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ booking_id: Number(bookingId) }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setConsentUploadError(data.message || 'Could not resend consent link.');
+        return;
+      }
+      setConsentNotice(`Consent link emailed to ${data.sent_to}.`);
+      loadBookings(authToken);
+      setTimeout(() => setConsentNotice(''), 4000);
+    } catch {
+      setConsentUploadError('Could not reach the server.');
+    } finally {
+      setResendingId(null);
+    }
+  };
+
   const consentBadge = (status?: string | null) => {
     if (status === 'filled') return { label: 'Filled', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' };
     if (status === 'uploaded') return { label: 'Uploaded', cls: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
@@ -728,6 +805,7 @@ const Admin = () => {
             <div className="p-6">
               {bookingsError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{bookingsError}</div>}
               {consentUploadError && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">{consentUploadError}</div>}
+              {consentNotice && <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-bold text-center">{consentNotice}</div>}
               {consentUploadBusy && <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-bold text-center inline-flex items-center justify-center gap-2 w-full"><ClockIcon size={14} /> Uploading consent…</div>}
               <input
                 ref={consentFileInputRef}
@@ -818,6 +896,16 @@ const Admin = () => {
                                   >
                                     <Upload size={11} /> {appt.consentFileUrl ? 'Replace' : 'Upload'}
                                   </button>
+                                  {appt.consentStatus !== 'filled' && appt.consentStatus !== 'uploaded' && (
+                                    <button
+                                      onClick={() => resendConsent(appt.id)}
+                                      disabled={resendingId === appt.id}
+                                      title="Email the consent link to this client"
+                                      className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 hover:text-emerald-400 inline-flex items-center gap-1 disabled:opacity-40"
+                                    >
+                                      <Send size={11} /> {resendingId === appt.id ? 'Sending…' : 'Resend'}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1032,6 +1120,7 @@ const Admin = () => {
                  <button onClick={()=>setSelectedClientPhone(null)} className="font-bold text-spa-ink/40 hover:text-spa-ink">Close</button>
                </div>
                <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  <h3 className="text-xs uppercase tracking-widest text-spa-ink/40 font-bold">Appointment History</h3>
                   {clientHistory.map(appt => (
                     <div key={appt.id} className="border border-spa-border bg-[#1A1A1A] rounded-2xl p-6 flex justify-between items-center">
                        <div>
@@ -1045,6 +1134,87 @@ const Admin = () => {
                        </button>
                     </div>
                   ))}
+
+                  <div className="border-t border-spa-border pt-4 mt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xs uppercase tracking-widest text-spa-ink/40 font-bold">Medical History &amp; Consents</h3>
+                      <span className="text-[10px] text-spa-ink/40">{clientConsents.length} record{clientConsents.length === 1 ? '' : 's'}</span>
+                    </div>
+                    {clientConsents.length > 0 && (
+                      <div className="relative mb-4">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-spa-ink/40" />
+                        <input
+                          type="text"
+                          placeholder="Search across all consents (e.g. allergy, blood thinner, retin)"
+                          value={consentSearch}
+                          onChange={e => setConsentSearch(e.target.value)}
+                          className="w-full bg-[#1A1A1A] border border-spa-border rounded-xl py-2.5 pl-9 pr-3 text-sm text-spa-ink focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    )}
+                    {clientConsents.length === 0 && (
+                      <p className="text-spa-ink/40 italic text-sm py-4">No consent records on file.</p>
+                    )}
+                    {clientConsents.map(c => {
+                      const isExpanded = expandedConsents.has(c.id);
+                      const fields = c.template?.fields || [];
+                      const formData = c.form_data || {};
+                      const q = consentSearch.trim().toLowerCase();
+                      const visibleFields = fields.filter(f => {
+                        if (f.type === 'note') return false;
+                        if (!q) return true;
+                        const label = (f.label || '').toLowerCase();
+                        const ans = formatAnswer(f, formData[f.key as string]).toLowerCase();
+                        return label.includes(q) || ans.includes(q);
+                      });
+                      const matchCount = q ? visibleFields.length : null;
+                      const badge = consentBadge(c.status);
+                      return (
+                        <div key={c.id} className="border border-spa-border bg-[#1A1A1A] rounded-2xl p-5 mb-3">
+                          <div className="flex items-start justify-between gap-3 flex-wrap">
+                            <div>
+                              <h4 className="text-base font-serif text-emerald-500">{c.service}</h4>
+                              {c.booking_number && <p className="text-[10px] font-mono text-emerald-400/70 mb-1">{c.booking_number}</p>}
+                              <p className="text-xs text-spa-ink/40">{c.appointment_date} • {c.appointment_time}</p>
+                              {c.template && <p className="text-xs text-spa-ink/40 mt-1">Form: {c.template.title}</p>}
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full border ${badge.cls}`}>{badge.label}</span>
+                              {c.file_url && (
+                                <a href={c.file_url} target="_blank" rel="noopener noreferrer" className="text-[10px] uppercase tracking-widest font-bold text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1">
+                                  <FileText size={11} /> View
+                                </a>
+                              )}
+                              {c.template && c.form_data && (
+                                <button
+                                  onClick={() => toggleConsentExpansion(c.id)}
+                                  className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 hover:text-emerald-400"
+                                >
+                                  {isExpanded ? 'Collapse' : (q ? `Show ${matchCount} match${matchCount === 1 ? '' : 'es'}` : 'Expand')}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          {(isExpanded || (q && (matchCount ?? 0) > 0)) && c.template && c.form_data && (
+                            <div className="mt-4 pt-4 border-t border-spa-border space-y-3">
+                              {visibleFields.length === 0 && q && (
+                                <p className="text-spa-ink/40 italic text-sm">No matches in this form.</p>
+                              )}
+                              {visibleFields.map(f => {
+                                const ans = formatAnswer(f, formData[f.key as string]);
+                                return (
+                                  <div key={f.key} className="flex flex-col">
+                                    <span className="text-[10px] uppercase tracking-widest text-spa-ink/40 font-bold">{f.label}</span>
+                                    <span className="text-sm text-spa-ink/85 whitespace-pre-wrap">{ans}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                </div>
              </motion.div>
           </div>

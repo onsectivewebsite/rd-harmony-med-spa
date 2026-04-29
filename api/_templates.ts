@@ -198,6 +198,25 @@ If you did not request a reset, you can ignore this email and your password will
   `, '#10b981');
 }
 
+export function consentLinkEmail(b: BookingData, consentUrl: string): string {
+  return layout('Please complete your consent form', `
+<p style="margin:0 0 12px;font-size:16px;color:#111827;">Hi ${esc(b.name)},</p>
+<p style="margin:0 0 12px;font-size:15px;color:#374151;line-height:1.6;">
+This is a quick reminder to complete your treatment consent form before your <strong>${esc(b.service)}</strong> appointment${b.appointment_date ? ` on ${esc(formatDate(b.appointment_date))} at ${esc(formatTime(b.appointment_time))}` : ''}.
+</p>
+<p style="margin:0 0 20px;font-size:14px;color:#374151;line-height:1.6;">
+It only takes 2&ndash;3 minutes and saves time when you arrive.
+</p>
+<p style="text-align:center;margin:24px 0;">
+<a href="${esc(consentUrl)}" style="display:inline-block;padding:14px 28px;background:#10b981;color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Complete Consent Form</a>
+</p>
+<p style="margin:0 0 12px;font-size:12px;color:#6b7280;line-height:1.6;word-break:break-all;">
+Or paste this link into your browser:<br>${esc(consentUrl)}
+</p>
+${b.booking_number ? `<p style="margin:16px 0 0;font-size:12px;color:#6b7280;">Booking #: <strong>${esc(b.booking_number)}</strong></p>` : ''}
+  `);
+}
+
 export function reminderEmail(b: BookingData, window: '30d' | '7d' | '1d'): string {
   const labels = { '30d': 'in 1 month', '7d': 'in 1 week', '1d': 'tomorrow' } as const;
   const accents = { '30d': '#6366f1', '7d': '#f59e0b', '1d': '#ef4444' } as const;

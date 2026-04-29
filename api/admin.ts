@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, ensureSchema, generateBookingNumber } from './_db.js';
 import { sendMail } from './_mailer.js';
-import { adminOtpEmail, adminResetEmail } from './_templates.js';
+import { adminOtpEmail, adminResetEmail, consentLinkEmail, type BookingData } from './_templates.js';
+import { appBaseUrl } from './_http.js';
 import {
   verifyPassword,
   hashPassword,
@@ -13,7 +14,7 @@ import {
   readBearer,
 } from './_auth.js';
 import { parseBody } from './_http.js';
-import { templateForServiceName } from './_consent.js';
+import { templateForServiceName, TEMPLATES } from './_consent.js';
 import { uploadBytes } from './_blob.js';
 
 const OTP_TTL_MINUTES = 10;
@@ -429,6 +430,95 @@ async function handleConsentUpload(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ success: true, file_url: url });
 }
 
+async function handleConsentsByClient(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Method not allowed' });
+
+  const phone = String(req.query.phone || '').trim();
+  if (!phone) return res.status(400).json({ success: false, message: 'phone is required' });
+
+  const rows = (await sql`
+    SELECT c.id, c.booking_id, c.template_id, c.status, c.form_data,
+           c.file_url, c.file_mime, c.signature_url, c.filled_at, c.uploaded_by, c.created_at,
+           b.booking_number, b.service,
+           to_char(b.appointment_date, 'YYYY-MM-DD') AS appointment_date,
+           to_char(b.appointment_time, 'HH24:MI')   AS appointment_time
+      FROM consents c
+      JOIN bookings b ON b.id = c.booking_id
+     WHERE b.phone = ${phone}
+     ORDER BY b.appointment_date DESC, b.appointment_time DESC
+  `) as Array<Record<string, unknown> & { template_id: string }>;
+
+  const enriched = rows.map(r => {
+    const tpl = TEMPLATES[r.template_id];
+    return {
+      ...r,
+      template: tpl ? { id: tpl.id, title: tpl.title, fields: tpl.fields } : null,
+    };
+  });
+
+  return res.status(200).json({ success: true, consents: enriched });
+}
+
+async function handleConsentResend(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method not allowed' });
+
+  const body = parseBody(req);
+  const bookingId = Number(body?.booking_id);
+  if (!bookingId) return res.status(400).json({ success: false, message: 'booking_id is required' });
+
+  const bookings = (await sql`
+    SELECT id, booking_number, name, email, phone, service, service_type,
+           to_char(appointment_date, 'YYYY-MM-DD') AS appointment_date,
+           to_char(appointment_time, 'HH24:MI')   AS appointment_time,
+           price, notes
+      FROM bookings WHERE id = ${bookingId} LIMIT 1
+  `) as Array<BookingData & { service_type: string }>;
+  const booking = bookings[0];
+  if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
+  if (!booking.email || !/.+@.+\..+/.test(booking.email)) {
+    return res.status(400).json({ success: false, message: 'Booking has no valid email on file.' });
+  }
+
+  const tplLookup = templateForServiceName(booking.service);
+  if (!tplLookup.template) {
+    return res.status(400).json({ success: false, message: 'This service does not require a consent form.' });
+  }
+
+  const existing = (await sql`
+    SELECT id, token, status FROM consents WHERE booking_id = ${bookingId} LIMIT 1
+  `) as Array<{ id: number; token: string; status: string }>;
+
+  let token: string;
+  if (existing[0]) {
+    if (existing[0].status === 'filled' || existing[0].status === 'uploaded') {
+      return res.status(409).json({ success: false, message: 'Consent has already been completed for this booking.' });
+    }
+    token = existing[0].token;
+  } else {
+    token = randomToken(24);
+    await sql`
+      INSERT INTO consents (booking_id, token, template_id, status)
+      VALUES (${bookingId}, ${token}, ${tplLookup.template.id}, 'pending')
+    `;
+  }
+
+  const consentUrl = `${appBaseUrl(req)}/consent/${token}`;
+  try {
+    await sendMail({
+      to: booking.email,
+      subject: `Action needed: complete your consent form (${booking.booking_number || `Booking #${booking.id}`})`,
+      html: consentLinkEmail(booking, consentUrl),
+    });
+  } catch (err) {
+    console.error('Consent resend email failed:', err);
+    return res.status(502).json({ success: false, message: 'Could not send the email. Please check SMTP settings.' });
+  }
+
+  return res.status(200).json({ success: true, sent_to: booking.email });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const action = String(req.query.action || '');
   try {
@@ -441,6 +531,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'bookings': return handleBookings(req, res);
       case 'consents': return handleConsents(req, res);
       case 'consent-upload': return handleConsentUpload(req, res);
+      case 'consent-resend': return handleConsentResend(req, res);
+      case 'consents-by-client': return handleConsentsByClient(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });
     }
   } catch (err) {
