@@ -110,7 +110,7 @@ const Faq = () => {
           <h2 className="text-3xl font-serif mb-4">Still have questions?</h2>
           <p className="text-black/70 mb-8 max-w-md mx-auto">Our team is happy to assist you with any specific medical or beauty enquiries you may have.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="tel:+16478191892" className="px-8 py-4 bg-spa-ink text-white rounded-xl text-xs uppercase tracking-widest font-bold flex items-center gap-2 hover:scale-105 transition-all">
+            <a href="tel:+16478191892" className="px-8 py-4 bg-[#111111] border border-spa-border text-white rounded-xl text-xs uppercase tracking-widest font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-sm">
                Call Us Directly
             </a>
             <button className="px-8 py-4 border border-black/20 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-black/5 transition-all">

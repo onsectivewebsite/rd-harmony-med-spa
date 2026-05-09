@@ -58,7 +58,7 @@ const ServiceDetail: React.FC = () => {
             alt={service.name}
             className="w-full h-full object-cover object-center scale-105"
           />
-          <div className="absolute inset-0 bg-spa-ink/60" />
+          <div className="absolute inset-0 bg-[#111111]/60" />
         </div>
         
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4 mt-16">
@@ -96,7 +96,7 @@ const ServiceDetail: React.FC = () => {
             <h3 className="font-serif text-lg text-spa-ink font-medium">{service.name}</h3>
             <p className="text-xs text-spa-ink/60 uppercase tracking-widest">{displayPrice} • {service.duration}</p>
           </div>
-          <Link to="/booking" className="w-full md:w-auto text-center px-8 py-3 bg-spa-ink text-white rounded-full text-xs uppercase tracking-widest font-bold hover:bg-spa-dark transition-colors">
+          <Link to="/booking" className="w-full md:w-auto text-center px-8 py-3 bg-[#111111] border border-spa-border text-white rounded-full text-xs uppercase tracking-widest font-bold hover:bg-spa-primary hover:border-spa-primary transition-colors">
             Book Now
           </Link>
         </div>
@@ -172,7 +172,7 @@ const ServiceDetail: React.FC = () => {
             
             {/* 5. TECHNOLOGY / PRODUCTS */}
             {(service.technology || service.productsUsed) && (
-              <div className="bg-spa-ink text-white p-8 rounded-[2rem]">
+              <div className="bg-[#111111] border border-spa-border text-white p-8 rounded-[2rem]">
                 <h3 className="text-xl font-serif mb-6 flex items-center gap-3 text-spa-accent">
                   <Beaker size={20} /> Technology & Products
                 </h3>
@@ -278,7 +278,7 @@ const ServiceDetail: React.FC = () => {
 
       {/* NEW: TESTIMONIALS SECTION */}
       {service.testimonials && service.testimonials.length > 0 && (
-        <section className="bg-spa-ink text-white py-24 overflow-hidden relative">
+        <section className="bg-[#111111] text-white py-24 overflow-hidden relative border-y border-spa-border">
           <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
             <div className="absolute top-0 left-10 w-64 h-64 border border-white rounded-full translate-x-[-50%] translate-y-[-50%]" />
             <div className="absolute bottom-0 right-10 w-96 h-96 border border-white rounded-full translate-x-[50%] translate-y-[50%]" />
@@ -340,7 +340,7 @@ const ServiceDetail: React.FC = () => {
       )}
 
       {/* 10. FINAL CTA SECTION */}
-      <section className="bg-spa-ink py-32 text-center px-4 relative overflow-hidden">
+      <section className="bg-[#111111] border-t border-spa-border py-32 text-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5" />
         <div className="max-w-3xl mx-auto relative z-10">
           <h2 className="text-4xl md:text-6xl font-serif text-white mb-8">

@@ -271,18 +271,12 @@ const Home = () => {
       </section>
 
       {/* Mobile Service CTA */}
-      <section className="py-32 bg-emerald-500 text-black">
+      <section className="py-16 md:py-32 bg-emerald-500 text-black">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-6xl font-serif mb-8">Spa Quality at Your Doorstep</h2>
           <p className="text-black/70 text-lg max-w-2xl mx-auto mb-12">
-            We offer mobile services for our premium injectable treatments including Botox, Xeomin, and Dysport. Experience luxury in the comfort of your home.
+            We exclusively offer our Intravenous (IV) treatments as mobile services. Experience premium wellness infusions in the comfort of your own home. All other aesthetic treatments are performed in our clinic.
           </p>
-          <Link
-            to="/booking"
-            className="bg-spa-ink text-white px-12 py-5 rounded-full text-sm uppercase tracking-widest font-bold hover:bg-spa-ink/90 transition-all inline-block"
-          >
-            Request Mobile Service
-          </Link>
         </div>
       </section>
 

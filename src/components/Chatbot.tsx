@@ -26,7 +26,7 @@ const Chatbot = () => {
 
   const knowledgeBase: { [key: string]: { text: string, suggestions?: string[] } } = {
     'facials': {
-      text: "We offer several advanced facials: Regular ($90), Hydrafacial ($150), Oxygeneo ($225), Microdermabrasion ($120), Dermaplanning ($100), and Chemical Peels ($130). Which one would you like to know more about?",
+      text: "We offer several advanced facials: Regular ($90), Hydrafacial ($249), Oxygeneo ($299), Microdermabrasion ($199), Dermaplanning ($100), and Chemical Peels ($249). Which one would you like to know more about?",
       suggestions: ['Hydrafacial', 'Oxygeneo', 'Chemical Peel']
     },
     'botox': {
@@ -42,15 +42,15 @@ const Chatbot = () => {
       suggestions: ['Book Dysport', 'Differences']
     },
     'microneedling': {
-      text: "Microneedling is $225 per session, or a Package of 3 for $550. We also offer it with premium boosters (Salmon DNA/NAD+/Exosomes) for $425.",
+      text: "Microneedling is $299 per session, or a Package of 3 for $550. We also offer it with premium boosters (Salmon DNA/NAD+/Exosomes) for $425.",
       suggestions: ['Pkg of 3 Deals', 'Boosters Info']
     },
     'prp': {
-      text: "PRP Face is $400, PRP Hair is $375, and PRP Under Eye is $220. Packages of 3 are available for all. Note: A $45 annual doctor's fee applies.",
+      text: "PRP Face is $499, PRP Hair is $499, and PRP Under Eye is $499. Packages of 3 are available for all. Note: A $45 annual doctor's fee applies.",
       suggestions: ['PRP Hair', 'PRP Face', 'Under Eye']
     },
     'under eye': {
-      text: "PRP for Dark Under-Eye Circles uses your own plasma to revitalize the delicate skin. It's $220/session, or a package of 3 for $600.",
+      text: "PRP for Dark Under-Eye Circles uses your own plasma to revitalize the delicate skin. It's $499/session, or a package of 3 for $600.",
       suggestions: ['Book Under-Eye PRP', 'PRP Face']
     },
     'electrolysis': {
@@ -58,7 +58,7 @@ const Chatbot = () => {
       suggestions: ['Book Electrolysis', 'Waxing Options']
     },
     'iv therapy': {
-      text: "Our IV drips include Wellness ($220), Glutathione ($190), Calories Burn ($250), and Iron Infusion ($275). Most have 'Package of 3' discounts!",
+      text: "Our IV drips include Wellness ($220), Glutathione + Vitamin C ($289), Calories Burn ($250), and Iron Infusion ($275). Most have 'Package of 3' discounts!",
       suggestions: ['IV Wellness', 'Iron Infusion', 'Glutathione']
     },
     'iron': {
