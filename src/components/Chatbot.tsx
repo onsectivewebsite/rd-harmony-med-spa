@@ -26,7 +26,7 @@ const Chatbot = () => {
 
   const knowledgeBase: { [key: string]: { text: string, suggestions?: string[] } } = {
     'facials': {
-      text: "We offer several advanced facials: Regular ($90), Hydrafacial ($249), Oxygeneo ($299), Microdermabrasion ($199), Dermaplanning ($100), and Chemical Peels ($249). Which one would you like to know more about?",
+      text: "We offer several advanced facials: Regular ($90), Hydrafacial ($59 PROMO), Oxygeneo ($299), Microdermabrasion ($199), Dermaplanning ($100), and Chemical Peels ($249). Which one would you like to know more about?",
       suggestions: ['Hydrafacial', 'Oxygeneo', 'Chemical Peel']
     },
     'botox': {

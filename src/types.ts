@@ -15,6 +15,8 @@ export interface Service {
   heroSubtitle?: string;
   duration: string;
   price: string;
+  promoPrice?: string;
+  originalPrice?: string;
   category: 'Treatment' | 'Consultation' | 'Injection' | 'IV Therapy' | 'Skincare' | 'Other' | 'Threading & Waxing' | 'Medical' | 'Injectables';
   description?: string;
   isMobileAvailable?: boolean;

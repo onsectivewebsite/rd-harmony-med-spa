@@ -123,6 +123,62 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Active Promotion Section */}
+      <section className="py-20 bg-[#111111] border-t border-b border-spa-border overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="relative bg-emerald-950/20 rounded-[3rem] border border-emerald-500/30 p-8 md:p-16 overflow-hidden">
+            {/* Decorative Elements */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 rounded-full text-emerald-400 text-[10px] uppercase tracking-[0.3em] font-bold mb-6">
+                  <Sparkles size={12} /> Special Offer
+                </div>
+                <h2 className="text-4xl md:text-6xl font-serif text-spa-ink mb-6">
+                  HydraFacial <br />
+                  <span className="italic text-emerald-500">Flash Sale</span>
+                </h2>
+                <p className="text-spa-ink/60 text-lg mb-8 max-w-md">
+                  Experience our signature 3-in-1 rejuvenation treatment at an exclusive price. Limited slots available this month!
+                </p>
+                
+                <div className="flex items-baseline gap-4 mb-10">
+                  <span className="text-6xl font-serif text-spa-ink">$59</span>
+                  <span className="text-2xl text-spa-ink/30 line-through font-light">$249</span>
+                  <span className="bg-emerald-500 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                    Save 75%
+                  </span>
+                </div>
+                
+                <Link
+                  to="/booking"
+                  className="inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-5 rounded-full text-xs uppercase tracking-widest font-bold transition-all shadow-xl shadow-emerald-600/20 hover:scale-105"
+                >
+                  Claim This Offer <ArrowRight size={16} />
+                </Link>
+              </div>
+              
+              <div className="relative group">
+                <div className="aspect-square rounded-[2rem] overflow-hidden border-4 border-emerald-500/20 shadow-2xl">
+                  <img 
+                    src="/images/facial_hydrafacial.jpg" 
+                    alt="Hydrafacial Promotion"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  />
+                </div>
+                {/* Badge */}
+                <div className="absolute -top-6 -right-6 w-32 h-32 bg-emerald-600 rounded-full flex flex-col items-center justify-center text-white shadow-xl rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                   <span className="text-[10px] uppercase font-bold tracking-tighter">Active</span>
+                   <span className="text-2xl font-serif">Now</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Services */}
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-4">
