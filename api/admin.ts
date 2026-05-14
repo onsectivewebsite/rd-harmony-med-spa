@@ -253,7 +253,7 @@ async function handleBookings(req: VercelRequest, res: VercelResponse) {
       INSERT INTO bookings
         (name, email, phone, service, service_type, appointment_date, appointment_time, price, notes)
       VALUES
-        (${name}, ${email || 'walkin@rdharmonymedspa.com'}, ${phone}, ${service}, ${serviceType},
+        (${name}, ${email || 'walkin@gmail.com'}, ${phone}, ${service}, ${serviceType},
          ${date}::date, ${time}::time, ${price || null}, ${notes || null})
       RETURNING id
     `) as Array<{ id: number }>;

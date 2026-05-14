@@ -1,7 +1,7 @@
 const BIZ_NAME = 'RD Harmony Med Spa';
 const BIZ_PHONE = '(647) 819-1892';
 const BIZ_ADDRESS = '78 Jones St, Oakville, ON L6L 6C5';
-const BIZ_EMAIL = 'info@rdharmonymedspa.com';
+const BIZ_EMAIL = 'rdharmonymedspa@gmail.com';
 const BIZ_WEBSITE = 'https://rdharmonymedspa.com';
 
 export interface BookingData {
