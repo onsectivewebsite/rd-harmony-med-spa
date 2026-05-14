@@ -16,6 +16,7 @@ const Navbar = () => {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Services', path: '/services' },
+    { name: 'Promotions', path: '/#promotions' },
     { name: 'Memberships', path: '/memberships' },
     { name: 'Consultation', path: '/free-consultation' },
     { name: 'Testimonials', path: '/testimonials' },
@@ -43,11 +44,14 @@ const Navbar = () => {
                 key={item.name}
                 to={item.path}
                 className={cn(
-                  "text-xs uppercase tracking-widest font-medium transition-colors hover:text-emerald-500",
+                  "relative text-xs uppercase tracking-widest font-medium transition-colors hover:text-emerald-500 flex items-center gap-1",
                   location.pathname === item.path ? "text-emerald-500" : "text-spa-ink/60"
                 )}
               >
                 {item.name}
+                {item.name === 'Promotions' && (
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                )}
               </Link>
             ))}
             <Link
@@ -86,11 +90,14 @@ const Navbar = () => {
                   to={item.path}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "block text-sm uppercase tracking-widest font-medium py-2",
+                    "flex items-center gap-2 text-sm uppercase tracking-widest font-medium py-2",
                     location.pathname === item.path ? "text-emerald-500" : "text-spa-ink/60"
                   )}
                 >
                   {item.name}
+                  {item.name === 'Promotions' && (
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  )}
                 </Link>
               ))}
               <Link

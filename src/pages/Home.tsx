@@ -124,7 +124,7 @@ const Home = () => {
       </section>
 
       {/* Active Promotion Section */}
-      <section className="py-20 bg-[#111111] border-t border-b border-spa-border overflow-hidden">
+      <section id="promotions" className="py-20 bg-[#111111] border-t border-b border-spa-border overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <div className="relative bg-emerald-950/20 rounded-[3rem] border border-emerald-500/30 p-8 md:p-16 overflow-hidden">
             {/* Decorative Elements */}
