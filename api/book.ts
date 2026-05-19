@@ -104,32 +104,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       consentUrl = `${appBaseUrl(req)}/consent/${consentToken}`;
     }
 
+    const bizInbox = process.env.MAIL_TO_BIZ || 'rdharmonymedspa@gmail.com';
+    const bccBiz = bizInbox && bizInbox.toLowerCase() !== emailS ? bizInbox : undefined;
+
     const mailResults = await Promise.allSettled([
       sendMail({
         to: emailS,
+        bcc: bccBiz,
         subject: `Booking Confirmed (${bookingNumber}) - RD Harmony Med Spa`,
         html: bookingConfirmationEmail(bookingData, consentUrl),
       }),
       sendMail({
-        to: process.env.MAIL_TO_BIZ || emailS,
+        to: bizInbox,
         subject: `New Booking ${bookingNumber}: ${serviceS} - ${nameS}`,
         html: bookingNotificationEmail(bookingData),
         replyTo: emailS,
       }),
     ]);
 
-    if (mailResults[0].status === 'rejected') {
-      console.error('Customer confirmation email failed:', mailResults[0].reason);
-    }
-    if (mailResults[1].status === 'rejected') {
-      console.error('Business notification email failed:', mailResults[1].reason);
-    }
+    const customerErr =
+      mailResults[0].status === 'rejected'
+        ? mailResults[0].reason instanceof Error
+          ? mailResults[0].reason.message
+          : String(mailResults[0].reason)
+        : null;
+    const bizErr =
+      mailResults[1].status === 'rejected'
+        ? mailResults[1].reason instanceof Error
+          ? mailResults[1].reason.message
+          : String(mailResults[1].reason)
+        : null;
+
+    if (customerErr) console.error('Customer confirmation email failed:', customerErr);
+    if (bizErr) console.error('Business notification email failed:', bizErr);
 
     return res.status(200).json({
       success: true,
       booking_id: bookingId,
       booking_number: bookingNumber,
       email_sent: mailResults[0].status === 'fulfilled',
+      email_error: customerErr || bizErr || undefined,
       message: 'Appointment booked successfully.',
     });
   } catch (err) {

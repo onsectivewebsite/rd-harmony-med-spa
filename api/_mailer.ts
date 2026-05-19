@@ -25,6 +25,8 @@ export async function sendMail(opts: {
   subject: string;
   html: string;
   replyTo?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
 }): Promise<void> {
   const from = process.env.MAIL_FROM || process.env.SMTP_USER!;
   await getTransporter().sendMail({
@@ -33,5 +35,7 @@ export async function sendMail(opts: {
     subject: opts.subject,
     html: opts.html,
     replyTo: opts.replyTo,
+    cc: opts.cc,
+    bcc: opts.bcc,
   });
 }

@@ -37,14 +37,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const bizInbox = process.env.MAIL_TO_BIZ || 'rdharmonymedspa@gmail.com';
+    const bccBiz = bizInbox && bizInbox.toLowerCase() !== enquiry.email ? bizInbox : undefined;
+
     const results = await Promise.allSettled([
       sendMail({
         to: enquiry.email,
+        bcc: bccBiz,
         subject: 'Thanks for reaching out - RD Harmony Med Spa',
         html: enquiryConfirmationEmail(enquiry),
       }),
       sendMail({
-        to: process.env.MAIL_TO_BIZ || enquiry.email,
+        to: bizInbox,
         subject: `New Enquiry from ${enquiry.name}`,
         html: enquiryNotificationEmail(enquiry),
         replyTo: enquiry.email,
