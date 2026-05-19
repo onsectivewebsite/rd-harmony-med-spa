@@ -1,12 +1,28 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { SERVICES } from '../constants';
+import { Service } from '../types';
 import { Smartphone, Clock, Tag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const THREADING_UMBRELLA_ID = 'threading-waxing';
+const THREADING_UMBRELLA: Service = {
+  id: THREADING_UMBRELLA_ID,
+  name: 'Threading & Waxing',
+  duration: '10–45 Minutes',
+  // Marketing headline price. To make this dynamic, swap to the min of all
+  // T&W prices via constants + customPrices on render.
+  price: 'Starting from $10',
+  category: 'Threading & Waxing',
+  isMobileAvailable: false,
+  description:
+    'Brow shaping, upper lip, full face, arms, legs, Brazilian and more — precision threading and gentle medical-grade waxing for every need.',
+  image: '/images/svc_eyebrow_threading.jpg',
+};
+
 const Services = () => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [allServices, setAllServices] = useState(SERVICES);
+  const [allServices, setAllServices] = useState<Service[]>(SERVICES);
   const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
 
   React.useEffect(() => {
@@ -19,10 +35,28 @@ const Services = () => {
       .catch(() => {});
   }, []);
 
-  const categories = ['All', ...new Set(allServices.map(s => s.category))];
+  // Collapse every Threading & Waxing entry into one umbrella card so the
+  // services grid stays scannable; individual options live on the detail page.
+  const displayServices = React.useMemo(() => {
+    const out: Service[] = [];
+    let umbrellaInserted = false;
+    for (const s of allServices) {
+      if (s.category === 'Threading & Waxing') {
+        if (!umbrellaInserted) {
+          out.push(THREADING_UMBRELLA);
+          umbrellaInserted = true;
+        }
+        continue;
+      }
+      out.push(s);
+    }
+    return out;
+  }, [allServices]);
+
+  const categories = ['All', ...new Set(displayServices.map(s => s.category))];
   const filteredServices = activeCategory === 'All'
-    ? allServices
-    : allServices.filter(s => s.category === activeCategory);
+    ? displayServices
+    : displayServices.filter(s => s.category === activeCategory);
 
   return (
     <div className="bg-spa-bg min-h-screen pt-32 pb-20">
@@ -97,15 +131,24 @@ const Services = () => {
                     to={`/services/${service.id}`}
                     className="flex-1 py-3 border border-spa-border hover:border-spa-border/60 text-spa-ink text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"
                   >
-                    Details
+                    {service.id === THREADING_UMBRELLA_ID ? 'View Options' : 'Details'}
                   </Link>
-                  <Link
-                    to="/booking"
-                    state={{ serviceId: service.id }}
-                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"
-                  >
-                    Book
-                  </Link>
+                  {service.id === THREADING_UMBRELLA_ID ? (
+                    <Link
+                      to={`/services/${service.id}`}
+                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"
+                    >
+                      Book
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/booking"
+                      state={{ serviceId: service.id }}
+                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"
+                    >
+                      Book
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.div>

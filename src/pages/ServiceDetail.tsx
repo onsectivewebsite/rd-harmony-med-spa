@@ -51,6 +51,54 @@ const ServiceDetail: React.FC = () => {
     return <Navigate to="/free-consultation" replace />;
   }
 
+  if (id === 'threading-waxing') {
+    const items = SERVICES.filter(s => s.category === 'Threading & Waxing');
+    return (
+      <div className="min-h-screen bg-spa-bg pt-32 pb-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <header className="mb-12 text-center">
+            <span className="text-emerald-600 text-[10px] uppercase tracking-[0.5em] font-bold mb-4 block">Treatment Menu</span>
+            <h1 className="text-5xl md:text-6xl font-serif text-spa-ink mb-4">Threading &amp; Waxing</h1>
+            <p className="text-spa-ink/50 max-w-2xl mx-auto font-light">
+              Precision threading and gentle medical-grade waxing. Pick the area you'd like to book —
+              every option below routes through to our standard booking flow.
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {items.map(item => {
+              const price = livePrices[item.id] || item.price;
+              return (
+                <div
+                  key={item.id}
+                  className="border border-spa-border rounded-2xl p-6 bg-[#111111] hover:border-emerald-500/40 transition-all flex flex-col gap-4"
+                >
+                  <div>
+                    <h3 className="text-xl font-serif text-spa-ink mb-1">{item.name}</h3>
+                    <p className="text-spa-ink/40 text-sm font-light">{item.description}</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-4 text-spa-ink/40 text-xs">
+                      <span className="flex items-center gap-1.5"><Clock size={14} className="text-emerald-500" /> {item.duration}</span>
+                      <span className="flex items-center gap-1.5"><Tag size={14} className="text-emerald-500" /> {price}</span>
+                    </div>
+                    <Link
+                      to="/booking"
+                      state={{ serviceId: item.id }}
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all"
+                    >
+                      Book
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!service) {
     return <Navigate to="/services" replace />;
   }
