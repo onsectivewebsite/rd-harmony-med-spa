@@ -221,12 +221,22 @@ const Booking = () => {
                   onChange={e => setFormData({...formData, service: e.target.value})}
                 >
                   <option value="" disabled className="bg-[#111111]">Choose a treatment</option>
-                  {allServices.map(s => {
+                  {allServices.filter(s => s.category !== 'Threading & Waxing').map(s => {
                     const price = customPrices[s.id] || s.price;
                     return (
                       <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
                     );
                   })}
+                  {allServices.some(s => s.category === 'Threading & Waxing') && (
+                    <optgroup label="Threading & Waxing — Starting from $10" className="bg-[#111111]">
+                      {allServices.filter(s => s.category === 'Threading & Waxing').map(s => {
+                        const price = customPrices[s.id] || s.price;
+                        return (
+                          <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
+                        );
+                      })}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 
