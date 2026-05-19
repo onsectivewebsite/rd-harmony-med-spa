@@ -109,6 +109,14 @@ export function ensureSchema() {
       `;
       await sql`CREATE INDEX IF NOT EXISTS consents_booking_id_idx ON consents(booking_id)`;
 
+      await sql`
+        CREATE TABLE IF NOT EXISTS service_prices (
+          service_id TEXT PRIMARY KEY,
+          price TEXT NOT NULL,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
       const username = process.env.ADMIN_USERNAME || 'admin';
       const email = process.env.ADMIN_EMAIL || process.env.MAIL_TO_BIZ || '';
       const existing = (await sql`SELECT id FROM admin_users WHERE username = ${username} LIMIT 1`) as Array<{ id: number }>;

@@ -41,7 +41,10 @@ const Booking = () => {
     const combined = [...SERVICES, ...customAdded];
     setAllServices(combined);
 
-    setCustomPrices(JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}'));
+    fetch('/api/service-prices')
+      .then(r => r.json())
+      .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
+      .catch(() => {});
     const state = location.state as { serviceId?: string } | null;
     if (state?.serviceId) {
       const service = combined.find(s => s.id === state.serviceId);

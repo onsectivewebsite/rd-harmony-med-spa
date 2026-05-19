@@ -140,7 +140,10 @@ const Admin = () => {
       loadBookings(token);
     }
 
-    setCustomPrices(JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}'));
+    fetch('/api/service-prices')
+      .then(r => r.json())
+      .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
+      .catch(() => {});
     const savedCustomServices = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
     setAllServices([...SERVICES, ...savedCustomServices]);
 
@@ -270,10 +273,42 @@ const Admin = () => {
     setCustomPrices({ ...customPrices, [serviceId]: newPrice });
   };
 
-  const savePricing = () => {
-    localStorage.setItem('rd_harmony_service_prices', JSON.stringify(customPrices));
-    setShowSaveSuccess(true);
-    setTimeout(() => setShowSaveSuccess(false), 2000);
+  const [savingPricing, setSavingPricing] = useState(false);
+  const [pricingError, setPricingError] = useState('');
+
+  const savePricing = async () => {
+    setPricingError('');
+    setSavingPricing(true);
+    try {
+      // Drop entries that match the default service price so we only persist real overrides.
+      const cleaned: Record<string, string> = {};
+      for (const s of allServices) {
+        const override = customPrices[s.id];
+        if (typeof override === 'string' && override.trim() && override.trim() !== s.price) {
+          cleaned[s.id] = override.trim();
+        }
+      }
+      const res = await fetch('/api/service-prices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ prices: cleaned }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) {
+        setPricingError(data?.message || 'Failed to save pricing. Please try again.');
+        return;
+      }
+      setCustomPrices(cleaned);
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 2000);
+    } catch {
+      setPricingError('Network error saving pricing.');
+    } finally {
+      setSavingPricing(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -1016,14 +1051,17 @@ const Admin = () => {
                   <p className="text-spa-ink/50">Update base pricing, or add entirely new custom services to your booking engine.</p>
                 </div>
                 <div className="flex gap-4">
-                  <button onClick={savePricing} className="bg-emerald-600 text-white hover:bg-emerald-500 px-6 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md">
-                    {showSaveSuccess ? <><CheckCircle2 size={14} /> Saved!</> : <><Save size={14} /> Save Pricing</>}
+                  <button onClick={savePricing} disabled={savingPricing} className="bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed px-6 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md">
+                    {showSaveSuccess ? <><CheckCircle2 size={14} /> Saved!</> : savingPricing ? <><Save size={14} /> Saving…</> : <><Save size={14} /> Save Pricing</>}
                   </button>
                   <button onClick={() => setShowAddServiceModal(true)} className="bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all">
                     <Plus size={14} /> Add Service
                   </button>
                 </div>
               </div>
+              {pricingError && (
+                <div className="mb-6 text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{pricingError}</div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  {allServices.map(s => (
                    <div key={s.id} className="border border-spa-border rounded-2xl p-6 bg-[#1A1A1A] flex justify-between items-center">

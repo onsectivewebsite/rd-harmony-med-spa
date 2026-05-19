@@ -7,15 +7,23 @@ const ServiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
 
+  const [livePrices, setLivePrices] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch('/api/service-prices')
+      .then(r => r.json())
+      .then(d => { if (d?.success && d.prices) setLivePrices(d.prices); })
+      .catch(() => {});
+  }, []);
+
   const { service, displayPrice } = React.useMemo(() => {
     const customAdded = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
     const combined = [...SERVICES, ...customAdded];
     const foundService = combined.find((s: any) => s.id === id);
     if (!foundService) return { service: null, displayPrice: '' };
-    
-    const prices = JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}');
-    return { service: foundService, displayPrice: prices[foundService.id] || foundService.price };
-  }, [id]);
+
+    return { service: foundService, displayPrice: livePrices[foundService.id] || foundService.price };
+  }, [id, livePrices]);
 
   useEffect(() => {
     const handleScroll = () => {

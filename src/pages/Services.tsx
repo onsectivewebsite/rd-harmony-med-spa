@@ -12,9 +12,11 @@ const Services = () => {
   React.useEffect(() => {
     const custom = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
     setAllServices([...SERVICES, ...custom]);
-    
-    const prices = JSON.parse(localStorage.getItem('rd_harmony_service_prices') || '{}');
-    setCustomPrices(prices);
+
+    fetch('/api/service-prices')
+      .then(r => r.json())
+      .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
+      .catch(() => {});
   }, []);
 
   const categories = ['All', ...new Set(allServices.map(s => s.category))];
