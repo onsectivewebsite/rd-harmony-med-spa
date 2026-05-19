@@ -17,6 +17,9 @@ const TIME_SLOTS: { value: string; label: string }[] = (() => {
   return slots;
 })();
 
+const THREADING_UMBRELLA_VALUE = '__threading_waxing__';
+const THREADING_UMBRELLA_LABEL = 'Threading & Waxing — Starting from $10';
+
 const Booking = () => {
   const location = useLocation();
   const [submitted, setSubmitted] = useState(false);
@@ -35,6 +38,22 @@ const Booking = () => {
   const [loading, setLoading] = useState(false);
   const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
   const [allServices, setAllServices] = useState(SERVICES);
+  // Whether the umbrella "Threading & Waxing" entry has been chosen in the
+  // main dropdown. Tracked separately because the actual `formData.service`
+  // holds the specific sub-service (e.g. "Brazilian Waxing") that goes to the
+  // backend.
+  const [threadingMode, setThreadingMode] = useState(false);
+
+  const threadingServices = React.useMemo(
+    () => allServices.filter(s => s.category === 'Threading & Waxing'),
+    [allServices],
+  );
+  const nonThreadingServices = React.useMemo(
+    () => allServices.filter(s => s.category !== 'Threading & Waxing'),
+    [allServices],
+  );
+  const isThreadingService = (name: string) =>
+    threadingServices.some(s => s.name === name);
 
   useEffect(() => {
     const customAdded = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
@@ -46,26 +65,29 @@ const Booking = () => {
       .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
       .catch(() => {});
     const state = location.state as { serviceId?: string } | null;
+    let preselected: typeof combined[number] | undefined;
     if (state?.serviceId) {
-      const service = combined.find(s => s.id === state.serviceId);
-      if (service) {
-        setFormData(prev => ({ ...prev, service: service.name }));
-      }
+      preselected = combined.find(s => s.id === state.serviceId);
     } else {
       const params = new URLSearchParams(location.search);
       const serviceId = params.get('service');
-      if (serviceId) {
-        const service = combined.find(s => s.id === serviceId);
-        if (service) {
-          setFormData(prev => ({ ...prev, service: service.name }));
-        }
-      }
+      if (serviceId) preselected = combined.find(s => s.id === serviceId);
+    }
+    if (preselected) {
+      setFormData(prev => ({ ...prev, service: preselected!.name }));
+      if (preselected.category === 'Threading & Waxing') setThreadingMode(true);
     }
   }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (threadingMode && !isThreadingService(formData.service)) {
+      setError('Please choose which threading or waxing service you\'d like.');
+      return;
+    }
+
     setLoading(true);
 
     const chosenService = allServices.find(s => s.name === formData.service);
@@ -217,28 +239,50 @@ const Booking = () => {
                 <select
                   required
                   className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
-                  value={formData.service}
-                  onChange={e => setFormData({...formData, service: e.target.value})}
+                  value={threadingMode ? THREADING_UMBRELLA_VALUE : formData.service}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (v === THREADING_UMBRELLA_VALUE) {
+                      setThreadingMode(true);
+                      setFormData(prev => ({ ...prev, service: '' }));
+                    } else {
+                      setThreadingMode(false);
+                      setFormData(prev => ({ ...prev, service: v }));
+                    }
+                  }}
                 >
                   <option value="" disabled className="bg-[#111111]">Choose a treatment</option>
-                  {allServices.filter(s => s.category !== 'Threading & Waxing').map(s => {
+                  {nonThreadingServices.map(s => {
                     const price = customPrices[s.id] || s.price;
                     return (
                       <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
                     );
                   })}
-                  {allServices.some(s => s.category === 'Threading & Waxing') && (
-                    <optgroup label="Threading & Waxing — Starting from $10" className="bg-[#111111]">
-                      {allServices.filter(s => s.category === 'Threading & Waxing').map(s => {
-                        const price = customPrices[s.id] || s.price;
-                        return (
-                          <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
-                        );
-                      })}
-                    </optgroup>
+                  {threadingServices.length > 0 && (
+                    <option value={THREADING_UMBRELLA_VALUE} className="bg-[#111111]">{THREADING_UMBRELLA_LABEL}</option>
                   )}
                 </select>
               </div>
+
+              {threadingMode && (
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-spa-ink/50 font-bold ml-4">Choose Threading or Waxing Area</label>
+                  <select
+                    required
+                    className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
+                    value={isThreadingService(formData.service) ? formData.service : ''}
+                    onChange={e => setFormData(prev => ({ ...prev, service: e.target.value }))}
+                  >
+                    <option value="" disabled className="bg-[#111111]">Pick an area</option>
+                    {threadingServices.map(s => {
+                      const price = customPrices[s.id] || s.price;
+                      return (
+                        <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <button
