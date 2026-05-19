@@ -37,8 +37,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const bizInbox = process.env.MAIL_TO_BIZ || 'rdharmonymedspa@gmail.com';
-    const bccBiz = bizInbox && bizInbox.toLowerCase() !== enquiry.email ? bizInbox : undefined;
+    // Hardcoded so a stale MAIL_TO_BIZ env var can't redirect mail to an old inbox.
+    const bizInbox = 'rdharmonymedspa@gmail.com';
+    const bccBiz = bizInbox.toLowerCase() !== enquiry.email ? bizInbox : undefined;
 
     const results = await Promise.allSettled([
       sendMail({
