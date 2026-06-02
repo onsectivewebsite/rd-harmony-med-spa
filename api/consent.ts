@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, ensureSchema } from './_db.js';
 import { TEMPLATES, templateForServiceName, type ConsentTemplate } from './_consent.js';
-import { decodeDataUrl, uploadBytes, fetchBlob } from './_blob.js';
+import { decodeDataUrl, uploadBytes, fetchBlob, safeServedType } from './_blob.js';
 import { buildConsentPdf } from './_pdf.js';
 import { parseBody } from './_http.js';
 
@@ -64,8 +64,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!fetched) {
         return res.status(404).json({ success: false, message: 'File not found' });
       }
-      res.setHeader('Content-Type', consent.file_mime || fetched.contentType);
-      res.setHeader('Content-Disposition', 'inline; filename="consent-form.pdf"');
+      const safe = safeServedType(consent.file_mime || fetched.contentType);
+      res.setHeader('Content-Type', safe.contentType);
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+      res.setHeader(
+        'Content-Disposition',
+        `${safe.inline ? 'inline' : 'attachment'}; filename="consent-form.pdf"`,
+      );
       res.setHeader('Cache-Control', 'private, no-store');
       return res.status(200).send(fetched.bytes);
     }

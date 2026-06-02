@@ -15,7 +15,7 @@ import {
 } from './_auth.js';
 import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
-import { uploadBytes, fetchBlob } from './_blob.js';
+import { uploadBytes, fetchBlob, safeServedType } from './_blob.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -447,8 +447,11 @@ async function handleConsentFile(req: VercelRequest, res: VercelResponse) {
   const fetched = await fetchBlob(row.file_url);
   if (!fetched) return res.status(404).json({ success: false, message: 'File not found' });
 
-  res.setHeader('Content-Type', row.file_mime || fetched.contentType);
-  res.setHeader('Content-Disposition', 'inline');
+  const safe = safeServedType(row.file_mime || fetched.contentType);
+  res.setHeader('Content-Type', safe.contentType);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+  res.setHeader('Content-Disposition', `${safe.inline ? 'inline' : 'attachment'}; filename="consent-file"`);
   res.setHeader('Cache-Control', 'private, no-store');
   return res.status(200).send(fetched.bytes);
 }

@@ -47,6 +47,18 @@ export async function fetchBlob(urlOrPathname: string): Promise<FetchedBlob | nu
   };
 }
 
+// Only these stored types are safe to render inline same-origin. Anything else
+// is forced to download as an opaque octet-stream so a stored Content-Type can
+// never be used to execute script in our origin.
+const INLINE_SAFE_MIMES = new Set(['application/pdf', 'image/png', 'image/jpeg']);
+
+export function safeServedType(
+  mime: string | null | undefined,
+): { contentType: string; inline: boolean } {
+  if (mime && INLINE_SAFE_MIMES.has(mime)) return { contentType: mime, inline: true };
+  return { contentType: 'application/octet-stream', inline: false };
+}
+
 export function decodeDataUrl(dataUrl: string): { mime: string; bytes: Uint8Array } | null {
   const m = /^data:([\w/+.-]+);base64,(.+)$/.exec(dataUrl);
   if (!m) return null;
