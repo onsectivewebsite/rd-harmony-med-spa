@@ -508,6 +508,26 @@ const Admin = () => {
     });
   };
 
+  // Consent files live in a private Blob store, so they must be fetched with the
+  // admin token and opened as an object URL rather than linked directly.
+  const viewConsentFile = async (consentId: number) => {
+    try {
+      const res = await fetch(`/api/admin?action=consent-file&id=${consentId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) {
+        alert('Could not load the consent file. Please try again.');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      alert('Could not load the consent file. Please try again.');
+    }
+  };
+
   const formatAnswer = (field: { type: string; options?: string[] }, value: unknown): string => {
     if (value == null) return '—';
     if (field.type === 'yesno') return value === true ? 'Yes' : value === false ? 'No' : String(value);
@@ -1219,9 +1239,9 @@ const Admin = () => {
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full border ${badge.cls}`}>{badge.label}</span>
                               {c.file_url && (
-                                <a href={c.file_url} target="_blank" rel="noopener noreferrer" className="text-[10px] uppercase tracking-widest font-bold text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1">
+                                <button onClick={() => viewConsentFile(c.id)} className="text-[10px] uppercase tracking-widest font-bold text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1">
                                   <FileText size={11} /> View
-                                </a>
+                                </button>
                               )}
                               {c.template && c.form_data && (
                                 <button

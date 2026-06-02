@@ -15,7 +15,7 @@ import {
 } from './_auth.js';
 import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
-import { uploadBytes } from './_blob.js';
+import { uploadBytes, fetchBlob } from './_blob.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -430,6 +430,29 @@ async function handleConsentUpload(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ success: true, file_url: url });
 }
 
+async function handleConsentFile(req: VercelRequest, res: VercelResponse) {
+  const session = getSession(req);
+  if (!session) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Method not allowed' });
+
+  const id = Number(req.query.id);
+  if (!id) return res.status(400).json({ success: false, message: 'id is required' });
+
+  const rows = (await sql`
+    SELECT file_url, file_mime FROM consents WHERE id = ${id} LIMIT 1
+  `) as Array<{ file_url: string | null; file_mime: string | null }>;
+  const row = rows[0];
+  if (!row || !row.file_url) return res.status(404).json({ success: false, message: 'File not found' });
+
+  const fetched = await fetchBlob(row.file_url);
+  if (!fetched) return res.status(404).json({ success: false, message: 'File not found' });
+
+  res.setHeader('Content-Type', row.file_mime || fetched.contentType);
+  res.setHeader('Content-Disposition', 'inline');
+  res.setHeader('Cache-Control', 'private, no-store');
+  return res.status(200).send(fetched.bytes);
+}
+
 async function handleConsentsByClient(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
   if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Method not allowed' });
@@ -531,6 +554,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'bookings': return handleBookings(req, res);
       case 'consents': return handleConsents(req, res);
       case 'consent-upload': return handleConsentUpload(req, res);
+      case 'consent-file': return handleConsentFile(req, res);
       case 'consent-resend': return handleConsentResend(req, res);
       case 'consents-by-client': return handleConsentsByClient(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });

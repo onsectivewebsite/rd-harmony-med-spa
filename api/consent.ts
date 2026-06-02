@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, ensureSchema } from './_db.js';
 import { TEMPLATES, templateForServiceName, type ConsentTemplate } from './_consent.js';
-import { decodeDataUrl, uploadBytes } from './_blob.js';
+import { decodeDataUrl, uploadBytes, fetchBlob } from './_blob.js';
 import { buildConsentPdf } from './_pdf.js';
 import { parseBody } from './_http.js';
 
@@ -52,6 +52,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const consent = consents[0];
     if (!consent) {
       return res.status(404).json({ success: false, message: 'Consent link not found or expired' });
+    }
+
+    // Stream the completed consent file (private blob) to the form owner. The
+    // valid consent token is the authorization here.
+    if (req.method === 'GET' && (req.query.file === '1' || req.query.file === 'true')) {
+      if (!consent.file_url) {
+        return res.status(404).json({ success: false, message: 'No file is attached to this consent yet' });
+      }
+      const fetched = await fetchBlob(consent.file_url);
+      if (!fetched) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      res.setHeader('Content-Type', consent.file_mime || fetched.contentType);
+      res.setHeader('Content-Disposition', 'inline; filename="consent-form.pdf"');
+      res.setHeader('Cache-Control', 'private, no-store');
+      return res.status(200).send(fetched.bytes);
     }
 
     const bookings = (await sql`

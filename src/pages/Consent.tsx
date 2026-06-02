@@ -80,7 +80,7 @@ const Consent = () => {
         setTemplate(d.template);
         setBooking(d.booking);
         setStatus(d.status);
-        setFilledFileUrl(d.file_url || null);
+        setFilledFileUrl(d.file_url ? `/api/consent?token=${encodeURIComponent(token)}&file=1` : null);
         if (d.template && d.booking) {
           setAnswers({
             full_name: d.booking.name || '',
@@ -202,7 +202,7 @@ const Consent = () => {
         setSubmitting(false);
         return;
       }
-      setFilledFileUrl(data.file_url || null);
+      setFilledFileUrl(data.file_url ? `/api/consent?token=${encodeURIComponent(token)}&file=1` : null);
       setDone(true);
     } catch {
       setFormError('Could not reach the server. Please try again.');
