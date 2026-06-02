@@ -638,8 +638,20 @@ const Admin = () => {
     const win = window.open('', '_blank');
     if (!win) return;
     const invoiceNumber = appt.bookingNumber || `INV-${appt.id}`;
+    // Parse the numeric amount from the price string (e.g. "$550", "$59 PROMO",
+    // "$1,299.00") and add 13% Ontario HST on top.
+    const priceMatch = String(appt.price || '').match(/[\d,]+(\.\d+)?/);
+    const subtotal = priceMatch ? parseFloat(priceMatch[0].replace(/,/g, '')) : 0;
+    const hst = subtotal * 0.13;
+    const total = subtotal + hst;
+    const money = (n: number) => `$${n.toFixed(2)}`;
+    // Escape values interpolated into the invoice HTML — name/email/service etc.
+    // originate from the public booking form, so they must not be trusted.
+    const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string
+    ));
     win.document.write(`
-      <html><head><title>Invoice - ${invoiceNumber}</title>
+      <html><head><title>Invoice - ${esc(invoiceNumber)}</title>
       <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1a1a1a; }
         .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
@@ -661,21 +673,23 @@ const Admin = () => {
           <div class="details">
             <div>
               <h3>Invoice To:</h3>
-              ${appt.name}<br>
-              ${appt.phone}<br>
-              ${appt.email}
+              ${esc(appt.name)}<br>
+              ${esc(appt.phone)}<br>
+              ${esc(appt.email)}
             </div>
             <div style="text-align: right;">
               <h3>Invoice Details:</h3>
-              Invoice #: ${invoiceNumber}<br>
-              Date: ${appt.date}<br>
-              Time: ${appt.time}
+              Invoice #: ${esc(invoiceNumber)}<br>
+              Date: ${esc(appt.date)}<br>
+              Time: ${esc(appt.time)}
             </div>
           </div>
           <table>
-            <tr class="heading"><td>Treatment Description</td><td style="text-align: right;">Amount Paid</td></tr>
-            <tr class="item"><td>${appt.service}<br><small style="color: #666">${appt.type}</small></td><td style="text-align: right;">${appt.price || '$0.00'}</td></tr>
-            <tr class="total"><td></td><td style="text-align: right;">Total: ${appt.price || '$0.00'}</td></tr>
+            <tr class="heading"><td>Treatment Description</td><td style="text-align: right;">Amount</td></tr>
+            <tr class="item"><td>${esc(appt.service)}<br><small style="color: #666">${esc(appt.type)}</small></td><td style="text-align: right;">${money(subtotal)}</td></tr>
+            <tr class="subtotal"><td></td><td style="text-align: right;">Subtotal: ${money(subtotal)}</td></tr>
+            <tr class="subtotal"><td></td><td style="text-align: right;">HST (13%): ${money(hst)}</td></tr>
+            <tr class="total"><td></td><td style="text-align: right;">Total: ${money(total)}</td></tr>
           </table>
           <div class="footer">
             Thank you for choosing RD Harmony Med Spa.<br>
