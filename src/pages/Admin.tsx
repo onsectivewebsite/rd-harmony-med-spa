@@ -659,7 +659,7 @@ const Admin = () => {
           </table>
           <div class="footer">
             Thank you for choosing RD Harmony Med Spa.<br>
-            For any questions, contact us at rdharmonymedspa@gmail.com or (647) 819-1892.
+            For any questions, contact us at rdharmonymedspa@gmail.com or (647) 507-6081.
           </div>
         </div>
         <script>window.print(); setTimeout(() => window.close(), 500);</script>

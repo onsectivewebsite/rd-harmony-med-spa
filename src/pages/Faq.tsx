@@ -13,11 +13,11 @@ const Faq = () => {
         },
         {
           q: "What are your opening hours?",
-          a: "We are open Monday to Saturday from 10:00 AM to 7:00 PM. Sunday is available by appointment only."
+          a: "We are open Monday to Friday from 10:00 AM to 7:00 PM, and Saturday and Sunday from 9:00 AM to 4:00 PM."
         },
         {
           q: "How do I book an appointment?",
-          a: "You can book directly through our website's 'Book Now' button, or call us at (647) 819-1892."
+          a: "You can book directly through our website's 'Book Now' button, or call us at (647) 507-6081."
         }
       ]
     },
@@ -110,7 +110,7 @@ const Faq = () => {
           <h2 className="text-3xl font-serif mb-4">Still have questions?</h2>
           <p className="text-black/70 mb-8 max-w-md mx-auto">Our team is happy to assist you with any specific medical or beauty enquiries you may have.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="tel:+16478191892" className="px-8 py-4 bg-[#111111] border border-spa-border text-white rounded-xl text-xs uppercase tracking-widest font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-sm">
+            <a href="tel:+16475076081" className="px-8 py-4 bg-[#111111] border border-spa-border text-white rounded-xl text-xs uppercase tracking-widest font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-sm">
                Call Us Directly
             </a>
             <button className="px-8 py-4 border border-black/20 rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-black/5 transition-all">

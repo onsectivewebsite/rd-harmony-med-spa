@@ -90,7 +90,7 @@ const Chatbot = () => {
       suggestions: ['View Services', 'Package Deals']
     },
     'booking': {
-      text: "Booking is easy! Use the 'Book Now' button on our site or call/text us at (647) 819-1892 to secure your spot.",
+      text: "Booking is easy! Use the 'Book Now' button on our site or call/text us at (647) 507-6081 to secure your spot.",
       suggestions: ['Online Booking', 'Call Now']
     }
   };

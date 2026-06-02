@@ -353,7 +353,7 @@ const Home = () => {
                 </div>
                 <div className="flex items-center gap-4 text-spa-ink/70">
                   <Smartphone size={18} className="text-emerald-600" />
-                  <span>(647) 819-1892</span>
+                  <span>(647) 507-6081</span>
                 </div>
               </div>
                 <Link

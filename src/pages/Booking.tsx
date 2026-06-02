@@ -166,7 +166,7 @@ const Booking = () => {
                 </div>
                 <div>
                   <h4 className="text-spa-ink font-medium mb-1">Flexible Scheduling</h4>
-                  <p className="text-spa-ink/40 text-sm">Available Monday to Saturday, 9 AM - 7 PM.</p>
+                  <p className="text-spa-ink/40 text-sm">Available Mon - Fri 10 AM - 7 PM, Sat &amp; Sun 9 AM - 4 PM.</p>
                 </div>
               </div>
               <div className="flex items-start gap-6">

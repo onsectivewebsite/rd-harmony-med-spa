@@ -1,5 +1,5 @@
 const BIZ_NAME = 'RD Harmony Med Spa';
-const BIZ_PHONE = '(647) 819-1892';
+const BIZ_PHONE = '(647) 507-6081';
 const BIZ_ADDRESS = '78 Jones St, Oakville, ON L6L 6C5';
 const BIZ_EMAIL = 'rdharmonymedspa@gmail.com';
 const BIZ_WEBSITE = 'https://rdharmonymedspa.com';
@@ -32,9 +32,19 @@ function esc(s: string): string {
 }
 
 function formatDate(input: string | Date): string {
-  const d = input instanceof Date ? input : new Date(`${input}T00:00:00`);
+  // appointment_date is a calendar date (no time/zone). Parse the Y-M-D parts and
+  // anchor at UTC noon so timezone conversion can never shift it to the day before.
+  let d: Date;
+  if (input instanceof Date) {
+    d = input;
+  } else {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(input).trim());
+    d = m
+      ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12))
+      : new Date(input);
+  }
   return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Toronto',
+    timeZone: 'UTC',
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   }).format(d);
 }
