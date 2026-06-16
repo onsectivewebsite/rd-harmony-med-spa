@@ -20,6 +20,7 @@ interface Appointment {
   price?: string;
   consentStatus?: 'pending' | 'filled' | 'uploaded' | null;
   consentFileUrl?: string | null;
+  consentId?: number | null;
 }
 
 type AuthStep = 'password' | 'otp' | 'forgot' | 'reset';
@@ -43,6 +44,7 @@ function normalizeBooking(raw: any): Appointment {
     price: raw.price || undefined,
     consentStatus: raw.consent_status || null,
     consentFileUrl: raw.consent_file_url || null,
+    consentId: raw.consent_id ?? null,
   };
 }
 
@@ -509,21 +511,38 @@ const Admin = () => {
   };
 
   // Consent files live in a private Blob store, so they must be fetched with the
-  // admin token and opened as an object URL rather than linked directly.
-  const viewConsentFile = async (consentId: number) => {
+  // admin token and opened as an object URL rather than linked directly. The new
+  // tab is opened synchronously on the click so popup blockers don't kill it
+  // while the authenticated fetch is in flight.
+  const viewConsentFile = async (consentId?: number | null) => {
+    if (!consentId) return;
+    // No 'noopener' here: that flag makes window.open() return null, and we need
+    // the handle to redirect the tab once the authenticated fetch resolves. The
+    // tab only ever loads our own blob: URL, so there is no opener risk.
+    const tab = window.open('', '_blank');
     try {
       const res = await fetch(`/api/admin?action=consent-file&id=${consentId}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (!res.ok) {
+        tab?.close();
         alert('Could not load the consent file. Please try again.');
         return;
       }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      if (tab) {
+        tab.location.href = url;
+      } else {
+        // Popup was blocked — fall back to downloading the file in this tab.
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'consent-file';
+        a.click();
+      }
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch {
+      tab?.close();
       alert('Could not load the consent file. Please try again.');
     }
   };
@@ -949,14 +968,12 @@ const Admin = () => {
                                 </span>
                                 <div className="flex gap-1.5">
                                   {appt.consentFileUrl && (
-                                    <a
-                                      href={appt.consentFileUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                                    <button
+                                      onClick={() => viewConsentFile(appt.consentId)}
                                       className="text-[10px] uppercase tracking-widest font-bold text-emerald-500 hover:text-emerald-400 inline-flex items-center gap-1"
                                     >
                                       <FileText size={11} /> View
-                                    </a>
+                                    </button>
                                   )}
                                   <button
                                     onClick={() => triggerConsentUpload(appt.id)}

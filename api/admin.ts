@@ -220,13 +220,14 @@ async function handleBookings(req: VercelRequest, res: VercelResponse) {
              to_char(b.appointment_date, 'YYYY-MM-DD') AS appointment_date,
              to_char(b.appointment_time, 'HH24:MI')   AS appointment_time,
              b.price, b.notes, b.status, b.created_at,
+             c.id         AS consent_id,
              c.status     AS consent_status,
              c.file_url   AS consent_file_url,
              c.file_mime  AS consent_file_mime
         FROM bookings b
         LEFT JOIN consents c ON c.booking_id = b.id
        ORDER BY b.created_at DESC
-    `) as Array<BookingRow & { consent_status: string | null; consent_file_url: string | null; consent_file_mime: string | null }>;
+    `) as Array<BookingRow & { consent_id: number | null; consent_status: string | null; consent_file_url: string | null; consent_file_mime: string | null }>;
     return res.status(200).json({ success: true, bookings: rows });
   }
 
