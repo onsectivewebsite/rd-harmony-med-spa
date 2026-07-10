@@ -8,6 +8,19 @@ export interface StepFlow {
   desc?: string;
 }
 
+export interface Offer {
+  id: string;
+  serviceId?: string; // Links to a Service for the "View Treatment" CTA
+  title: string; // Promotional/ad name shown to customers
+  subtitle?: string; // e.g. the underlying treatment name
+  description: string;
+  image: string;
+  originalPrice?: string; // Struck-through "before" price
+  offerPrice: string; // Discounted price
+  badge?: string; // e.g. "Limited Time Offer"
+  highlights?: string[];
+}
+
 export interface Service {
   id: string;
   name: string;

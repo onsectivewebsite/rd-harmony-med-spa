@@ -21,7 +21,7 @@ const Testimonials = lazy(() => import('./pages/Testimonials'));
 const FreeConsultation = lazy(() => import('./pages/FreeConsultation'));
 const ServiceDetail = lazy(() => import('./pages/ServiceDetail'));
 const Consent = lazy(() => import('./pages/Consent'));
-const Memberships = lazy(() => import('./pages/Memberships'));
+const Offers = lazy(() => import('./pages/Offers'));
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -58,7 +58,7 @@ export default function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/free-consultation" element={<FreeConsultation />} />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/memberships" element={<Memberships />} />
+              <Route path="/offers" element={<Offers />} />
               <Route path="/consent/:token" element={<Consent />} />
             </Routes>
           </Suspense>

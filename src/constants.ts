@@ -1,4 +1,24 @@
-import { Service } from './types';
+import { Service, Offer } from './types';
+
+export const OFFERS: Offer[] = [
+  {
+    id: 'non-surgical-facelift',
+    serviceId: 'microdermabrasion',
+    title: 'Non-Surgical Facelift',
+    subtitle: 'Microdermabrasion Treatment',
+    description: 'Lift, firm, and refresh your skin without surgery or downtime. Our Microdermabrasion treatment gently exfoliates dead skin cells, smooths texture, and reveals a brighter, more youthful glow — now at a special promotional price.',
+    image: '/images/facial_microdermabrasion.jpg',
+    originalPrice: '$199',
+    offerPrice: '$99',
+    badge: 'Limited Time Offer',
+    highlights: [
+      'Smooths and refines skin texture',
+      'Brightens dull, uneven skin tone',
+      'Non-invasive with no downtime',
+      'Boosts absorption of skincare products'
+    ]
+  }
+];
 
 export const SERVICES: Service[] = [
   {
