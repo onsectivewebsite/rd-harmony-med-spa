@@ -158,6 +158,38 @@ const ServiceDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* PACKAGE OPTIONS */}
+      {service.options && service.options.length > 0 && (
+        <section className="max-w-5xl mx-auto px-4 pt-24">
+          <div className="text-center mb-12">
+            <span className="text-spa-primary text-[10px] uppercase tracking-[0.5em] font-bold block mb-4">Choose Your Package</span>
+            <h2 className="text-3xl md:text-5xl font-serif text-spa-ink">Two Ways to Experience {service.name}</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {service.options.map(opt => (
+              <div
+                key={opt.id}
+                className="bg-[#111111] border border-spa-border rounded-[2rem] p-8 flex flex-col hover:border-spa-primary/40 transition-all"
+              >
+                <h3 className="text-2xl font-serif text-spa-ink mb-2">{opt.name}</h3>
+                <div className="flex items-center gap-4 text-spa-ink/50 text-xs mb-5">
+                  <span className="flex items-center gap-1.5"><Tag size={14} className="text-spa-primary" /> {opt.price}</span>
+                  {opt.duration && <span className="flex items-center gap-1.5"><Clock size={14} className="text-spa-primary" /> {opt.duration}</span>}
+                </div>
+                {opt.description && <p className="text-spa-ink/60 text-sm leading-relaxed mb-8 flex-grow">{opt.description}</p>}
+                <Link
+                  to="/booking"
+                  state={{ serviceId: service.id, optionId: opt.id }}
+                  className="mt-auto text-center px-6 py-4 bg-spa-primary text-white text-xs uppercase tracking-widest font-bold rounded-xl hover:bg-spa-accent transition-all"
+                >
+                  Book {opt.name}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           

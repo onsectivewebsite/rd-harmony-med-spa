@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import { SERVICES } from '../constants';
-import { Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, CalendarPlus } from 'lucide-react';
 
 const TIME_SLOTS: { value: string; label: string }[] = (() => {
   const slots: { value: string; label: string }[] = [];
@@ -19,6 +19,73 @@ const TIME_SLOTS: { value: string; label: string }[] = (() => {
 
 const THREADING_UMBRELLA_VALUE = '__threading_waxing__';
 const THREADING_UMBRELLA_LABEL = 'Threading & Waxing — Starting from $10';
+
+const DEPOSIT_POLICY = {
+  title: 'Booking Deposit & Cancellation Policy',
+  points: [
+    'A 20% deposit is required at the time of booking to secure your appointment.',
+    "If you need to cancel or reschedule your appointment with less than 24 hours' notice for the first time, your deposit will be credited toward your next appointment and can be used when you reschedule.",
+    "If a second appointment is cancelled or rescheduled with less than 24 hours' notice, the 20% deposit will be forfeited and is non-refundable.",
+  ],
+  note: 'We appreciate your understanding and cooperation, as last-minute cancellations impact our ability to accommodate other clients.',
+};
+
+const DepositPolicy = () => (
+  <div className="bg-[#111111] border border-emerald-500/20 rounded-2xl p-6 text-left">
+    <div className="flex items-center gap-3 mb-4">
+      <ShieldCheck size={18} className="text-emerald-400 shrink-0" />
+      <h4 className="text-spa-ink font-medium text-sm">{DEPOSIT_POLICY.title}</h4>
+    </div>
+    <ul className="space-y-3">
+      {DEPOSIT_POLICY.points.map((point, i) => (
+        <li key={i} className="flex items-start gap-2 text-spa-ink/50 text-xs leading-relaxed">
+          <span className="text-emerald-400 mt-0.5">&bull;</span>
+          <span>{point}</span>
+        </li>
+      ))}
+    </ul>
+    <p className="text-spa-ink/40 text-xs italic leading-relaxed mt-4 pt-4 border-t border-spa-border">
+      {DEPOSIT_POLICY.note}
+    </p>
+  </div>
+);
+
+const BIZ_ADDRESS = '78 Jones St, Oakville, ON L6L 6C5';
+
+function parseDurationMinutes(d?: string): number {
+  if (!d) return 60;
+  const m = /(\d+)/.exec(d);
+  return m ? Number(m[1]) : 60;
+}
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+function toCalStamp(date: Date): string {
+  return (
+    date.getFullYear().toString() +
+    pad(date.getMonth() + 1) +
+    pad(date.getDate()) +
+    'T' + pad(date.getHours()) + pad(date.getMinutes()) + '00'
+  );
+}
+
+// Builds a prefilled Google Calendar event link (no sign-in / OAuth required).
+function buildGoogleCalendarUrl(opts: {
+  title: string; date: string; time: string; durationMinutes: number; details?: string; location?: string;
+}): string {
+  const [y, mo, d] = opts.date.split('-').map(Number);
+  const [h, mi] = opts.time.split(':').map(Number);
+  const start = new Date(y, mo - 1, d, h, mi);
+  const end = new Date(start.getTime() + opts.durationMinutes * 60000);
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: opts.title,
+    dates: `${toCalStamp(start)}/${toCalStamp(end)}`,
+  });
+  if (opts.details) params.set('details', opts.details);
+  if (opts.location) params.set('location', opts.location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
 
 const Booking = () => {
   const location = useLocation();
@@ -55,6 +122,29 @@ const Booking = () => {
   const isThreadingService = (name: string) =>
     threadingServices.some(s => s.name === name);
 
+  // Flattened list of bookable entries. A service with `options` (e.g. Hydrafacial
+  // tiers) expands into one entry per option; every other service stays a single
+  // entry. The `value` is what gets stored in formData.service and sent to the API.
+  const bookableItems = React.useMemo(() => {
+    const items: { value: string; label: string; price: string; duration?: string }[] = [];
+    for (const s of nonThreadingServices) {
+      if (s.options && s.options.length > 0) {
+        for (const opt of s.options) {
+          items.push({
+            value: opt.name,
+            label: `${opt.name} - ${opt.price}`,
+            price: opt.price,
+            duration: opt.duration || s.duration,
+          });
+        }
+      } else {
+        const price = customPrices[s.id] || s.price;
+        items.push({ value: s.name, label: `${s.name} - ${price}`, price, duration: s.duration });
+      }
+    }
+    return items;
+  }, [nonThreadingServices, customPrices]);
+
   useEffect(() => {
     const customAdded = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
     const combined = [...SERVICES, ...customAdded];
@@ -64,18 +154,25 @@ const Booking = () => {
       .then(r => r.json())
       .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
       .catch(() => {});
-    const state = location.state as { serviceId?: string } | null;
+    const state = location.state as { serviceId?: string; optionId?: string } | null;
     let preselected: typeof combined[number] | undefined;
+    let optionId: string | null = null;
     if (state?.serviceId) {
       preselected = combined.find(s => s.id === state.serviceId);
+      optionId = state.optionId ?? null;
     } else {
       const params = new URLSearchParams(location.search);
       const serviceId = params.get('service');
       if (serviceId) preselected = combined.find(s => s.id === serviceId);
+      optionId = params.get('option');
     }
     if (preselected) {
-      setFormData(prev => ({ ...prev, service: preselected!.name }));
       if (preselected.category === 'Threading & Waxing') setThreadingMode(true);
+      // For a tiered service, preselect the chosen option (or the first one).
+      const opt = preselected.options
+        ? (optionId && preselected.options.find(o => o.id === optionId)) || preselected.options[0]
+        : undefined;
+      setFormData(prev => ({ ...prev, service: opt ? opt.name : preselected!.name }));
     }
   }, [location]);
 
@@ -90,8 +187,14 @@ const Booking = () => {
 
     setLoading(true);
 
-    const chosenService = allServices.find(s => s.name === formData.service);
-    const servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
+    const chosenItem = bookableItems.find(i => i.value === formData.service);
+    let servicePrice = '0';
+    if (chosenItem) {
+      servicePrice = chosenItem.price;
+    } else {
+      const chosenService = allServices.find(s => s.name === formData.service);
+      servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
+    }
 
     try {
       const response = await fetch('/api/book', {
@@ -118,6 +221,17 @@ const Booking = () => {
   };
 
   if (submitted) {
+    const selectedItem = bookableItems.find(i => i.value === formData.service);
+    const selectedService = allServices.find(s => s.name === formData.service);
+    const durationMinutes = parseDurationMinutes(selectedItem?.duration || selectedService?.duration);
+    const calendarUrl = buildGoogleCalendarUrl({
+      title: `${formData.service} — RD Harmony Med Spa`,
+      date: formData.date,
+      time: formData.time,
+      durationMinutes,
+      details: `Your ${formData.service} appointment at RD Harmony Med Spa.${bookingNumber ? ` Booking #${bookingNumber}.` : ''}`,
+      location: BIZ_ADDRESS,
+    });
     return (
       <div className="min-h-screen bg-spa-bg flex items-center justify-center px-4">
         <motion.div
@@ -137,6 +251,17 @@ const Booking = () => {
           <p className="text-spa-ink/50 mb-8 leading-relaxed">
             Thank you, {formData.name}. Your appointment for {formData.service} on {formData.date} at {formData.time} has been confirmed. A confirmation email has been sent to {formData.email}.
           </p>
+          <a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl text-xs uppercase tracking-widest font-bold transition-all mb-8"
+          >
+            <CalendarPlus size={16} /> Add to Google Calendar
+          </a>
+          <div className="mb-8">
+            <DepositPolicy />
+          </div>
           <button
             onClick={() => { setSubmitted(false); setBookingNumber(''); }}
             className="text-emerald-600 text-xs uppercase tracking-widest font-bold hover:text-spa-ink transition-colors"
@@ -178,6 +303,10 @@ const Booking = () => {
                   <p className="text-spa-ink/40 text-sm">Receive a text or email confirmation within minutes.</p>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-12">
+              <DepositPolicy />
             </div>
           </div>
 
@@ -252,12 +381,9 @@ const Booking = () => {
                   }}
                 >
                   <option value="" disabled className="bg-[#111111]">Choose a treatment</option>
-                  {nonThreadingServices.map(s => {
-                    const price = customPrices[s.id] || s.price;
-                    return (
-                      <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
-                    );
-                  })}
+                  {bookableItems.map(item => (
+                    <option key={item.value} value={item.value} className="bg-[#111111]">{item.label}</option>
+                  ))}
                   {threadingServices.length > 0 && (
                     <option value={THREADING_UMBRELLA_VALUE} className="bg-[#111111]">{THREADING_UMBRELLA_LABEL}</option>
                   )}

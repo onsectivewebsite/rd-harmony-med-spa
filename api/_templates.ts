@@ -81,6 +81,30 @@ ${esc(BIZ_PHONE)} &bull; <a href="mailto:${esc(BIZ_EMAIL)}" style="color:#6b7280
 </body></html>`;
 }
 
+function gcalStamps(date: string, time: string, durationMin: number): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  const [y, mo, d] = date.split('-').map(Number);
+  const [h, mi] = time.split(':').map(Number);
+  const start = new Date(Date.UTC(y, mo - 1, d, h, mi));
+  const end = new Date(start.getTime() + durationMin * 60000);
+  const fmt = (dt: Date) =>
+    `${dt.getUTCFullYear()}${p(dt.getUTCMonth() + 1)}${p(dt.getUTCDate())}T${p(dt.getUTCHours())}${p(dt.getUTCMinutes())}00`;
+  return `${fmt(start)}/${fmt(end)}`;
+}
+
+// Prefilled Google Calendar event link (no sign-in required). Defaults to a
+// 60-minute block since the appointment duration is not stored per booking.
+function googleCalendarLink(b: BookingData): string {
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `${b.service} — ${BIZ_NAME}`,
+    dates: gcalStamps(b.appointment_date, b.appointment_time, 60),
+    details: `Your ${b.service} appointment at ${BIZ_NAME}.${b.booking_number ? ` Booking #${b.booking_number}.` : ''}`,
+    location: BIZ_ADDRESS,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function detailsTable(rows: Array<[string, string]>): string {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#f9fafb;border-radius:8px;overflow:hidden;">
 ${rows.map(([k, v]) => `<tr>
@@ -121,11 +145,34 @@ Thank you for booking with <strong>${esc(BIZ_NAME)}</strong>. Your appointment h
 </p>
 ${b.booking_number ? `<p style="margin:0 0 12px;font-size:14px;color:#374151;">Please keep your booking number for reference: <strong>${esc(b.booking_number)}</strong>.</p>` : ''}
 ${detailsTable(rows)}
+<p style="text-align:center;margin:20px 0;">
+<a href="${esc(googleCalendarLink(b))}" style="display:inline-block;padding:12px 24px;background:#10b981;color:#ffffff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">+ Add to Google Calendar</a>
+</p>
 ${consentBlock}
+${depositPolicyBlock()}
 <p style="margin:16px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
 Need to reschedule or cancel? Please call us at <strong>${esc(BIZ_PHONE)}</strong> at least 24 hours before your appointment.
 </p>
   `);
+}
+
+function depositPolicyBlock(): string {
+  const points = [
+    'A 20% deposit is required at the time of booking to secure your appointment.',
+    'If you need to cancel or reschedule your appointment with less than 24 hours&rsquo; notice for the first time, your deposit will be credited toward your next appointment and can be used when you reschedule.',
+    'If a second appointment is cancelled or rescheduled with less than 24 hours&rsquo; notice, the 20% deposit will be forfeited and is non-refundable.',
+  ];
+  return `
+<div style="margin:24px 0;padding:20px;background:#f9fafb;border:1px solid #f3f4f6;border-radius:12px;">
+<p style="margin:0 0 12px;font-size:14px;color:#111827;font-weight:700;">Booking Deposit &amp; Cancellation Policy</p>
+<ul style="margin:0;padding:0 0 0 18px;">
+${points.map(p => `<li style="margin:0 0 8px;font-size:13px;color:#374151;line-height:1.6;">${p}</li>`).join('')}
+</ul>
+<p style="margin:12px 0 0;font-size:12px;color:#6b7280;line-height:1.6;font-style:italic;">
+We appreciate your understanding and cooperation, as last-minute cancellations impact our ability to accommodate other clients.
+</p>
+</div>
+  `;
 }
 
 export function bookingNotificationEmail(b: BookingData): string {

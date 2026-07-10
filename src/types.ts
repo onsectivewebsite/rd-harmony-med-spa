@@ -8,6 +8,23 @@ export interface StepFlow {
   desc?: string;
 }
 
+export interface ServiceOption {
+  id: string; // Unique within the service; used to preselect in booking
+  name: string; // e.g. "Signature", "Deluxe"
+  price: string;
+  duration?: string;
+  description?: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  category?: string;
+  price?: string;
+  description?: string;
+  image?: string;
+}
+
 export interface Offer {
   id: string;
   serviceId?: string; // Links to a Service for the "View Treatment" CTA
@@ -32,6 +49,7 @@ export interface Service {
   originalPrice?: string;
   category: 'Treatment' | 'Consultation' | 'Injection' | 'IV Therapy' | 'Skincare' | 'Other' | 'Threading & Waxing' | 'Medical' | 'Injectables';
   description?: string;
+  options?: ServiceOption[]; // Price tiers / packages (e.g. Signature vs Deluxe)
   isMobileAvailable?: boolean;
   image?: string;
   benefits?: string[];

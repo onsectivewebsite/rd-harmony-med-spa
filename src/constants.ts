@@ -1,4 +1,16 @@
-import { Service, Offer } from './types';
+import { Service, Offer, Product } from './types';
+
+// Placeholder retail products — replace names, prices, descriptions, and images
+// with the real product line (e.g. Bioline). Add an `image` path under
+// /public/images to show a photo instead of the lettered placeholder.
+export const PRODUCTS: Product[] = [
+  { id: 'gentle-cleanser', name: 'Gentle Cleanser', category: 'Cleanser', price: '$45', description: 'Sample product — replace with your retail cleanser details.' },
+  { id: 'hydrating-serum', name: 'Hydrating Serum', category: 'Serum', price: '$75', description: 'Sample product — replace with your retail serum details.' },
+  { id: 'daily-moisturizer', name: 'Daily Moisturizer', category: 'Moisturizer', price: '$60', description: 'Sample product — replace with your retail moisturizer details.' },
+  { id: 'spf-30', name: 'Mineral SPF 30', category: 'Sun Care', price: '$40', description: 'Sample product — replace with your retail SPF details.' },
+  { id: 'vitamin-c', name: 'Vitamin C Booster', category: 'Treatment', price: '$85', description: 'Sample product — replace with your retail treatment details.' },
+  { id: 'night-cream', name: 'Renewal Night Cream', category: 'Moisturizer', price: '$70', description: 'Sample product — replace with your retail night cream details.' },
+];
 
 export const OFFERS: Offer[] = [
   {
@@ -105,6 +117,22 @@ export const SERVICES: Service[] = [
     price: '$249',
     category: 'Skincare',
     isMobileAvailable: false,
+    options: [
+      {
+        id: 'signature',
+        name: 'Signature Hydrafacial',
+        price: '$249',
+        duration: '60 Minutes',
+        description: 'Our essential 3-in-1 treatment: deep cleanse, exfoliation, and hydration for an instant, healthy glow.',
+      },
+      {
+        id: 'deluxe',
+        name: 'Deluxe Hydrafacial',
+        price: '$349',
+        duration: '75 Minutes',
+        description: 'The Signature treatment enhanced with targeted boosters and LED light therapy for maximum rejuvenation.',
+      },
+    ],
     description: 'Hydrafacial is an advanced, non-invasive medical-grade facial treatment designed to deeply cleanse, exfoliate, extract impurities, and infuse the skin with intensive hydration.',
     longDescription: 'Hydrafacial is an advanced, non-invasive medical-grade facial treatment designed to deeply cleanse, exfoliate, extract impurities, and infuse the skin with intensive hydration — all in one session. Unlike traditional facials, Hydrafacial uses patented vortex technology that works like a vacuum to gently remove debris from pores while simultaneously delivering nourishing serums deep into the skin. At RD Harmony Med Spa, we enhance your Hydrafacial experience using Bioline professional skincare boosters, ensuring superior hydration, repair, and long-lasting glow. This treatment is suitable for all skin types and delivers immediate, visible results with no downtime, making it one of the most popular and effective facial treatments available today.',
     image: '/images/facial_hydrafacial.jpg',
