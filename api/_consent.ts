@@ -191,6 +191,7 @@ const SERVICE_TO_TEMPLATE: Record<string, string> = {
   'hydrafacial': 'skincare',
   'oxygeneo-facial': 'skincare',
   'microdermabrasion': 'skincare',
+  'non-surgical-facelift': 'skincare',
   'dermaplanning': 'skincare',
   'chemical-peel': 'skincare',
   'threading-eyebrow': 'threading',
@@ -240,7 +241,7 @@ export function templateForServiceName(serviceName: string): { id: string; templ
       return { id, template: tplId ? TEMPLATES[tplId] : null };
     }
   }
-  if (norm.includes('facial') || norm.includes('peel') || norm.includes('hydrafacial') || norm.includes('microderm') || norm.includes('dermaplan')) {
+  if (norm.includes('facial') || norm.includes('facelift') || norm.includes('peel') || norm.includes('hydrafacial') || norm.includes('microderm') || norm.includes('dermaplan')) {
     return { id: '', template: TEMPLATES.skincare };
   }
   if (norm.includes('threading')) return { id: '', template: TEMPLATES.threading };

@@ -15,19 +15,19 @@ export const PRODUCTS: Product[] = [
 export const OFFERS: Offer[] = [
   {
     id: 'non-surgical-facelift',
-    serviceId: 'microdermabrasion',
+    serviceId: 'non-surgical-facelift',
     title: 'Non-Surgical Facelift',
-    subtitle: 'Microdermabrasion Treatment',
-    description: 'Lift, firm, and refresh your skin without surgery or downtime. Our Microdermabrasion treatment gently exfoliates dead skin cells, smooths texture, and reveals a brighter, more youthful glow — now at a special promotional price.',
-    image: '/images/facial_microdermabrasion.jpg',
-    originalPrice: '$199',
+    subtitle: 'Microdermabrasion + Tripolar Radiofrequency',
+    description: 'Lift, firm, and rejuvenate your skin without surgery or downtime. This treatment pairs microdermabrasion to smooth and refresh the skin with tripolar radiofrequency to stimulate collagen, tighten, and lift — now at a special promotional price.',
+    image: '/images/skin_care_clinical.jpg',
+    originalPrice: '$249',
     offerPrice: '$99',
     badge: 'Limited Time Offer',
     highlights: [
-      'Smooths and refines skin texture',
-      'Brightens dull, uneven skin tone',
-      'Non-invasive with no downtime',
-      'Boosts absorption of skincare products'
+      'Smoother, firmer, more youthful-looking skin',
+      'Exfoliates and deeply cleanses the skin',
+      'Stimulates collagen to tighten and lift',
+      'Non-invasive with no surgery or downtime'
     ]
   }
 ];
@@ -440,6 +440,34 @@ export const SERVICES: Service[] = [
     isMobileAvailable: false,
     image: '/images/beauty_proc.jpg',
     description: 'A non-invasive skin tightening treatment using tripolar radiofrequency technology to stimulate collagen and firm the skin.'
+  },
+  {
+    id: 'non-surgical-facelift',
+    name: 'Non-Surgical Facelift Treatment',
+    heroTitle: 'Lift. Firm. Rejuvenate — Without Surgery.',
+    heroSubtitle: 'Lift. Firm. Rejuvenate — Without Surgery.',
+    duration: '75 Minutes',
+    price: '$249',
+    category: 'Skincare',
+    isMobileAvailable: false,
+    image: '/images/skin_care_clinical.jpg',
+    description: 'A non-surgical facelift combining microdermabrasion with tripolar radiofrequency for smoother, firmer, and more youthful-looking skin.',
+    longDescription: 'Microdermabrasion gently exfoliates the outer layer of dead skin cells, deeply cleanses the skin, and improves texture, leaving your skin fresh and radiant. Tripolar radiofrequency is then used to gently heat the deeper layers of the skin, stimulating collagen production and helping to tighten and lift the skin for a firmer, more youthful appearance. This combination helps improve skin texture, tone, elasticity, and overall facial rejuvenation without surgery or downtime.',
+    benefits: [
+      'Smoother, firmer, more youthful-looking skin',
+      'Gently exfoliates dead skin cells and deeply cleanses',
+      'Improves skin texture, tone, and elasticity',
+      'Stimulates collagen production',
+      'Tightens and lifts the skin',
+      'Overall facial rejuvenation without surgery or downtime'
+    ],
+    stepFlow: [
+      { title: 'Step 1: Microdermabrasion', desc: 'Gently exfoliates the outer layer of dead skin cells, deeply cleanses the skin, and improves texture, leaving your skin fresh and radiant.' },
+      { title: 'Step 2: Tripolar Radiofrequency', desc: 'Gently heats the deeper layers of the skin, stimulating collagen production and helping to tighten and lift the skin for a firmer, more youthful appearance.' }
+    ],
+    downtime: 'No surgery and no downtime. Resume daily activities immediately.',
+    metaTitle: 'Non-Surgical Facelift Treatment | Microdermabrasion & Radiofrequency | RD Harmony Med Spa',
+    metaDescription: 'A non-surgical facelift combining microdermabrasion and tripolar radiofrequency to improve skin texture, tone, elasticity, and overall facial rejuvenation — no surgery, no downtime.'
   },
   {
     id: 'lifting-stone-facial',
