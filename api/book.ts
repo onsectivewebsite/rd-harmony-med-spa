@@ -9,6 +9,9 @@ import {
 import { templateForServiceName } from './_consent.js';
 import { randomToken } from './_auth.js';
 import { appBaseUrl } from './_http.js';
+import { isCalendarConfigured, createCalendarEvent } from './_calendar.js';
+
+const BIZ_ADDRESS = '78 Jones St, Oakville, ON L6L 6C5';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ success: false, message: 'Invalid request body' });
   }
 
-  const { name, email, phone, service, type, date, time, price, message } = body as Record<string, unknown>;
+  const { name, email, phone, service, type, date, time, price, message, durationMinutes } = body as Record<string, unknown>;
 
   for (const [k, v] of Object.entries({ name, email, phone, service, date, time })) {
     if (typeof v !== 'string' || !v.trim()) {
@@ -39,6 +42,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const priceS = typeof price === 'string' ? price.trim() : '';
   const notesS = typeof message === 'string' ? message.trim() : '';
   const serviceType = type === 'Mobile' ? 'Mobile' : 'In-Clinic';
+  const durMin = Number(durationMinutes);
+  const eventDuration = Number.isFinite(durMin) && durMin > 0 ? Math.min(durMin, 8 * 60) : 60;
 
   if (!EMAIL_RE.test(emailS)) {
     return res.status(400).json({ success: false, message: 'Invalid email address' });
@@ -108,20 +113,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const bizInbox = 'rdharmonymedspa@gmail.com';
     const bccBiz = bizInbox.toLowerCase() !== emailS ? bizInbox : undefined;
 
-    const mailResults = await Promise.allSettled([
-      sendMail({
-        to: emailS,
-        bcc: bccBiz,
-        subject: `Booking Confirmed (${bookingNumber}) - RD Harmony Med Spa`,
-        html: bookingConfirmationEmail(bookingData, consentUrl),
-      }),
-      sendMail({
-        to: bizInbox,
-        subject: `New Booking ${bookingNumber}: ${serviceS} - ${nameS}`,
-        html: bookingNotificationEmail(bookingData),
-        replyTo: emailS,
-      }),
+    const calendarTask: Promise<string | null> = isCalendarConfigured()
+      ? createCalendarEvent({
+          summary: `${serviceS} — ${nameS}`,
+          description:
+            `Booking #${bookingNumber}\n` +
+            `Client: ${nameS}\n` +
+            `Phone: ${phoneS}\n` +
+            `Email: ${emailS}\n` +
+            `Type: ${serviceType}\n` +
+            `Price: ${priceS || 'N/A'}` +
+            (notesS ? `\nNotes: ${notesS}` : ''),
+          location: serviceType === 'Mobile' ? (notesS || 'Mobile service') : BIZ_ADDRESS,
+          date: dateS,
+          time: timeS,
+          durationMinutes: eventDuration,
+        })
+      : Promise.resolve(null);
+
+    const [mailResults, calendarResult] = await Promise.all([
+      Promise.allSettled([
+        sendMail({
+          to: emailS,
+          bcc: bccBiz,
+          subject: `Booking Confirmed (${bookingNumber}) - RD Harmony Med Spa`,
+          html: bookingConfirmationEmail(bookingData, consentUrl),
+        }),
+        sendMail({
+          to: bizInbox,
+          subject: `New Booking ${bookingNumber}: ${serviceS} - ${nameS}`,
+          html: bookingNotificationEmail(bookingData),
+          replyTo: emailS,
+        }),
+      ]),
+      calendarTask.then(
+        (): { ok: boolean; error: string | null } => ({ ok: true, error: null }),
+        (err: unknown): { ok: boolean; error: string | null } => ({
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      ),
     ]);
+
+    if (!calendarResult.ok) console.error('Google Calendar event failed:', calendarResult.error);
 
     const customerErr =
       mailResults[0].status === 'rejected'
@@ -145,6 +179,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       booking_number: bookingNumber,
       email_sent: mailResults[0].status === 'fulfilled',
       email_error: customerErr || bizErr || undefined,
+      calendar_added: isCalendarConfigured() && calendarResult.ok,
       message: 'Appointment booked successfully.',
     });
   } catch (err) {

@@ -189,18 +189,22 @@ const Booking = () => {
 
     const chosenItem = bookableItems.find(i => i.value === formData.service);
     let servicePrice = '0';
+    let durationStr: string | undefined;
     if (chosenItem) {
       servicePrice = chosenItem.price;
+      durationStr = chosenItem.duration;
     } else {
       const chosenService = allServices.find(s => s.name === formData.service);
       servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
+      durationStr = chosenService?.duration;
     }
+    const durationMinutes = parseDurationMinutes(durationStr);
 
     try {
       const response = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, price: servicePrice }),
+        body: JSON.stringify({ ...formData, price: servicePrice, durationMinutes }),
       });
 
       const result = await response.json();
