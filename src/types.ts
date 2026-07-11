@@ -14,6 +14,7 @@ export interface ServiceOption {
   price: string;
   duration?: string;
   description?: string;
+  benefits?: string[]; // Tier-specific highlights shown on the option card
 }
 
 export interface Product {

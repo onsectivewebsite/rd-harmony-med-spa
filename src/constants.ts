@@ -124,6 +124,12 @@ export const SERVICES: Service[] = [
         price: '$249',
         duration: '60 Minutes',
         description: 'Our essential 3-in-1 treatment: deep cleanse, exfoliation, and hydration for an instant, healthy glow.',
+        benefits: [
+          'Deep cleanse and gentle exfoliation',
+          'Painless extraction to unclog and refine pores',
+          'Intensive hydration for an instant, healthy glow',
+          'Suitable for all skin types with no downtime',
+        ],
       },
       {
         id: 'deluxe',
@@ -131,6 +137,12 @@ export const SERVICES: Service[] = [
         price: '$349',
         duration: '75 Minutes',
         description: 'The Signature treatment enhanced with targeted boosters and LED light therapy for maximum rejuvenation.',
+        benefits: [
+          'Everything in the Signature Hydrafacial',
+          'Targeted serum boosters for your specific skin concern',
+          'LED light therapy to calm, brighten, and rejuvenate',
+          'Maximum collagen support for firmer, more radiant skin',
+        ],
       },
     ],
     description: 'Hydrafacial is an advanced, non-invasive medical-grade facial treatment designed to deeply cleanse, exfoliate, extract impurities, and infuse the skin with intensive hydration.',

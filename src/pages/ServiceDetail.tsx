@@ -103,6 +103,17 @@ const ServiceDetail: React.FC = () => {
     return <Navigate to="/services" replace />;
   }
 
+  // For a tiered service (e.g. Hydrafacial) a single headline price is
+  // misleading, and any legacy admin override no longer applies — show the
+  // lowest tier as "From $X". Otherwise use the live (override-aware) price.
+  const priceNum = (p: string) => {
+    const m = /([\d.]+)/.exec(p);
+    return m ? parseFloat(m[1]) : Infinity;
+  };
+  const headlinePrice = service.options && service.options.length > 0
+    ? `From ${service.options.reduce((lo, o) => (priceNum(o.price) < priceNum(lo.price) ? o : lo)).price}`
+    : displayPrice;
+
   return (
     <div className="min-h-screen bg-spa-bg overflow-x-hidden pt-20">
       
@@ -135,7 +146,7 @@ const ServiceDetail: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-white/90 bg-[#111111]/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
               <Tag size={16} className="text-spa-accent" />
-              <span className="font-medium tracking-wide text-lg">{displayPrice}</span>
+              <span className="font-medium tracking-wide text-lg">{headlinePrice}</span>
             </div>
           </div>
           
@@ -150,7 +161,7 @@ const ServiceDetail: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="hidden md:block">
             <h3 className="font-serif text-lg text-spa-ink font-medium">{service.name}</h3>
-            <p className="text-xs text-spa-ink/60 uppercase tracking-widest">{displayPrice} • {service.duration}</p>
+            <p className="text-xs text-spa-ink/60 uppercase tracking-widest">{headlinePrice} • {service.duration}</p>
           </div>
           <Link to="/booking" className="w-full md:w-auto text-center px-8 py-3 bg-[#111111] border border-spa-border text-white rounded-full text-xs uppercase tracking-widest font-bold hover:bg-spa-primary hover:border-spa-primary transition-colors">
             Book Now
@@ -176,7 +187,17 @@ const ServiceDetail: React.FC = () => {
                   <span className="flex items-center gap-1.5"><Tag size={14} className="text-spa-primary" /> {opt.price}</span>
                   {opt.duration && <span className="flex items-center gap-1.5"><Clock size={14} className="text-spa-primary" /> {opt.duration}</span>}
                 </div>
-                {opt.description && <p className="text-spa-ink/60 text-sm leading-relaxed mb-8 flex-grow">{opt.description}</p>}
+                {opt.description && <p className="text-spa-ink/60 text-sm leading-relaxed mb-6">{opt.description}</p>}
+                {opt.benefits && opt.benefits.length > 0 && (
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    {opt.benefits.map((b, i) => (
+                      <li key={i} className="flex items-start gap-3 text-spa-ink/70 text-sm">
+                        <Check size={16} strokeWidth={3} className="text-spa-primary shrink-0 mt-0.5" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <Link
                   to="/booking"
                   state={{ serviceId: service.id, optionId: opt.id }}
