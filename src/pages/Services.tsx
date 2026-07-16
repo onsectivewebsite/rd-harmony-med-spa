@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { SERVICES } from '../constants';
 import { Service } from '../types';
 import { Smartphone, Clock, Tag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/ContentContext';
+import { Price } from '../components/Price';
 
 const THREADING_UMBRELLA_ID = 'threading-waxing';
 const THREADING_UMBRELLA: Service = {
@@ -36,18 +37,7 @@ type DisplayItem = {
 
 const Services = () => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [allServices, setAllServices] = useState<Service[]>(SERVICES);
-  const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
-
-  React.useEffect(() => {
-    const custom = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
-    setAllServices([...SERVICES, ...custom]);
-
-    fetch('/api/service-prices')
-      .then(r => r.json())
-      .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
-      .catch(() => {});
-  }, []);
+  const { services: allServices, pricingFor } = useContent();
 
   // Build the cards shown in the grid. Two special cases:
   //  - Threading & Waxing collapses into one umbrella card (options live on the
@@ -98,14 +88,14 @@ const Services = () => {
         name: s.name,
         description: s.description,
         duration: s.duration,
-        price: customPrices[s.id] || s.price,
+        price: s.price,
         category: s.category,
         image: s.image,
         isMobileAvailable: s.isMobileAvailable,
       });
     }
     return out;
-  }, [allServices, customPrices]);
+  }, [allServices]);
 
   const categories = ['All', ...new Set(displayItems.map(i => i.category))];
   const filteredServices = activeCategory === 'All'
@@ -176,7 +166,8 @@ const Services = () => {
                     <Clock size={14} className="text-emerald-500" /> {item.duration}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Tag size={14} className="text-emerald-500" /> {item.price}
+                    <Tag size={14} className="text-emerald-500" />
+                    <Price info={item.optionId ? { price: item.price, onOffer: false } : pricingFor('service', item.serviceId, item.price)} />
                   </div>
                 </div>
 
