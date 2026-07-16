@@ -231,6 +231,33 @@ Three new tabs (replacing the current localStorage add-service tab):
    surfaces.
 4. **Products** — admin Products tab CRUD.
 
+## 13b. Future Phase — Automated Review-Request Campaign
+
+Separate feature (build AFTER the CMS phases), reusing the existing cron + email
+infrastructure (`api/send-reminders.ts`, `api/_templates.ts`, `CRON_SECRET`).
+
+**Decisions (confirmed):**
+- First email goes out **1 day after the appointment date**.
+- Then **up to 3 weekly follow-ups**, then stop (initial + 3 = 4 emails max per booking).
+- Review link stored in a **`GOOGLE_REVIEW_URL`** env var (owner provides the direct
+  write-review link, e.g. `https://g.page/r/…/review`). No hardcoded URL.
+- Stop rule is count/time-based (we cannot detect whether a client actually left a Google
+  review without the Places API + fuzzy matching — out of scope).
+
+**Design sketch:**
+- New daily cron endpoint `api/send-review-requests.ts` (guarded by `CRON_SECRET`,
+  registered in `vercel.json`).
+- Track progress per booking: add `review_stage` (int, 0–4) and `review_next_at`
+  (timestamptz) columns to `bookings` (or a small `review_requests` table). Stage 0 = not
+  started; the cron sends the next email when `review_next_at <= now` and increments the
+  stage, scheduling the next at +7 days until stage 4.
+- Suppress duplicates: don't email the same client address more than once per 7 days even
+  if they have multiple bookings.
+- New template `reviewRequestEmail(booking, reviewUrl, isFollowUp)` — friendly ask with a
+  prominent "Leave us a review" button and an unsubscribe/stop line.
+- Only applies to bookings from feature launch onward (a backfill of past clients is
+  optional and off by default).
+
 ## 14. Open Defaults (chosen; override if desired)
 
 - Offers support an **optional** time window; blank = runs until toggled off.

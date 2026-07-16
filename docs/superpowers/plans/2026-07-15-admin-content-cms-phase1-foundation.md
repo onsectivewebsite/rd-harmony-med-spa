@@ -857,3 +857,4 @@ git push origin main
 - **Phase 2:** Admin Services CRUD + Service Builder + TipTap WYSIWYG + image-upload endpoint (Vercel Blob public) + Filerobot photo editor.
 - **Phase 3:** Offers admin CRUD + wire offer engine end-to-end.
 - **Phase 4:** Products admin CRUD.
+- **Phase 5:** Automated review-request campaign (daily cron, 1 day post-appointment + 3 weekly follow-ups, `GOOGLE_REVIEW_URL` env var). See spec §13b.
