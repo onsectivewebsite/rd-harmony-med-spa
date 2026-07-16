@@ -79,11 +79,3 @@ export async function ensureContentSchema(): Promise<void> {
   )`;
   ensured = true;
 }
-
-export function sanitizeHtml(html: string): string {
-  return String(html)
-    .replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
-    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-    .replace(/javascript:/gi, '');
-}
