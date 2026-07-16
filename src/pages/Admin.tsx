@@ -278,6 +278,40 @@ const Admin = () => {
   const [savingPricing, setSavingPricing] = useState(false);
   const [pricingError, setPricingError] = useState('');
 
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState('');
+  const [seedIsError, setSeedIsError] = useState(false);
+
+  const seedContent = async () => {
+    setSeedMsg('');
+    setSeedIsError(false);
+    setSeeding(true);
+    try {
+      const res = await fetch('/api/admin?action=seed-content', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSeedIsError(true);
+        setSeedMsg(data?.message || 'Failed to seed content. Please try again.');
+        return;
+      }
+      if (data?.seeded === true) {
+        setSeedMsg(`Seeded ✓ (services: ${data?.services ?? 0}, products: ${data?.products ?? 0}, offers: ${data?.offers ?? 0})`);
+      } else if (data?.seeded === false) {
+        setSeedMsg('Already seeded — no changes');
+      } else {
+        setSeedMsg('Seed request completed.');
+      }
+    } catch {
+      setSeedIsError(true);
+      setSeedMsg('Network error seeding content.');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const savePricing = async () => {
     setPricingError('');
     setSavingPricing(true);
@@ -1096,12 +1130,15 @@ const Admin = () => {
 
           {activeTab === 'services' && (
             <div className="p-8">
-              <div className="flex justify-between items-end mb-8">
+              <div className="flex justify-between items-end mb-2">
                 <div>
                   <h3 className="text-xl font-serif text-spa-ink mb-1">Services & Pricing</h3>
                   <p className="text-spa-ink/50">Update base pricing, or add entirely new custom services to your booking engine.</p>
                 </div>
                 <div className="flex gap-4">
+                  <button onClick={seedContent} disabled={seeding} className="bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed px-6 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md">
+                    {seeding ? <><Upload size={14} /> Seeding…</> : <><Upload size={14} /> Seed Content To Database</>}
+                  </button>
                   <button onClick={savePricing} disabled={savingPricing} className="bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed px-6 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md">
                     {showSaveSuccess ? <><CheckCircle2 size={14} /> Saved!</> : savingPricing ? <><Save size={14} /> Saving…</> : <><Save size={14} /> Save Pricing</>}
                   </button>
@@ -1110,6 +1147,10 @@ const Admin = () => {
                   </button>
                 </div>
               </div>
+              <p className="text-right text-xs text-spa-ink/40 mb-6">Run once to load services, offers &amp; products into the database. Safe to click again (no-op if already seeded).</p>
+              {seedMsg && (
+                <div className={`mb-6 text-sm rounded-xl px-4 py-3 border ${seedIsError ? 'text-red-500 bg-red-500/10 border-red-500/20' : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'}`}>{seedMsg}</div>
+              )}
               {pricingError && (
                 <div className="mb-6 text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{pricingError}</div>
               )}
