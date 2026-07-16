@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Superpowers subagent-driven-development scratch (ledger, briefs, reports, diffs)
+.superpowers/
