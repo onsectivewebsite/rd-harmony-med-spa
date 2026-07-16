@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
-import { SERVICES } from '../constants';
+import { useContent } from '../context/ContentContext';
 import { Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, CalendarPlus } from 'lucide-react';
 
 const TIME_SLOTS: { value: string; label: string }[] = (() => {
@@ -103,8 +103,7 @@ const Booking = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [customPrices, setCustomPrices] = useState<Record<string, string>>({});
-  const [allServices, setAllServices] = useState(SERVICES);
+  const { services, pricingFor } = useContent();
   // Whether the umbrella "Threading & Waxing" entry has been chosen in the
   // main dropdown. Tracked separately because the actual `formData.service`
   // holds the specific sub-service (e.g. "Brazilian Waxing") that goes to the
@@ -112,12 +111,12 @@ const Booking = () => {
   const [threadingMode, setThreadingMode] = useState(false);
 
   const threadingServices = React.useMemo(
-    () => allServices.filter(s => s.category === 'Threading & Waxing'),
-    [allServices],
+    () => services.filter(s => s.category === 'Threading & Waxing'),
+    [services],
   );
   const nonThreadingServices = React.useMemo(
-    () => allServices.filter(s => s.category !== 'Threading & Waxing'),
-    [allServices],
+    () => services.filter(s => s.category !== 'Threading & Waxing'),
+    [services],
   );
   const isThreadingService = (name: string) =>
     threadingServices.some(s => s.name === name);
@@ -138,32 +137,24 @@ const Booking = () => {
           });
         }
       } else {
-        const price = customPrices[s.id] || s.price;
+        const price = pricingFor('service', s.id, s.price).price;
         items.push({ value: s.name, label: `${s.name} - ${price}`, price, duration: s.duration });
       }
     }
     return items;
-  }, [nonThreadingServices, customPrices]);
+  }, [nonThreadingServices, pricingFor]);
 
   useEffect(() => {
-    const customAdded = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
-    const combined = [...SERVICES, ...customAdded];
-    setAllServices(combined);
-
-    fetch('/api/service-prices')
-      .then(r => r.json())
-      .then(d => { if (d?.success && d.prices) setCustomPrices(d.prices); })
-      .catch(() => {});
     const state = location.state as { serviceId?: string; optionId?: string } | null;
-    let preselected: typeof combined[number] | undefined;
+    let preselected: typeof services[number] | undefined;
     let optionId: string | null = null;
     if (state?.serviceId) {
-      preselected = combined.find(s => s.id === state.serviceId);
+      preselected = services.find(s => s.id === state.serviceId);
       optionId = state.optionId ?? null;
     } else {
       const params = new URLSearchParams(location.search);
       const serviceId = params.get('service');
-      if (serviceId) preselected = combined.find(s => s.id === serviceId);
+      if (serviceId) preselected = services.find(s => s.id === serviceId);
       optionId = params.get('option');
     }
     if (preselected) {
@@ -174,7 +165,7 @@ const Booking = () => {
         : undefined;
       setFormData(prev => ({ ...prev, service: opt ? opt.name : preselected!.name }));
     }
-  }, [location]);
+  }, [location, services]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,8 +185,8 @@ const Booking = () => {
       servicePrice = chosenItem.price;
       durationStr = chosenItem.duration;
     } else {
-      const chosenService = allServices.find(s => s.name === formData.service);
-      servicePrice = chosenService ? (customPrices[chosenService.id] || chosenService.price) : '0';
+      const chosenService = services.find(s => s.name === formData.service);
+      servicePrice = chosenService ? pricingFor('service', chosenService.id, chosenService.price).price : '0';
       durationStr = chosenService?.duration;
     }
     const durationMinutes = parseDurationMinutes(durationStr);
@@ -226,7 +217,7 @@ const Booking = () => {
 
   if (submitted) {
     const selectedItem = bookableItems.find(i => i.value === formData.service);
-    const selectedService = allServices.find(s => s.name === formData.service);
+    const selectedService = services.find(s => s.name === formData.service);
     const durationMinutes = parseDurationMinutes(selectedItem?.duration || selectedService?.duration);
     const calendarUrl = buildGoogleCalendarUrl({
       title: `${formData.service} — RD Harmony Med Spa`,
@@ -405,7 +396,7 @@ const Booking = () => {
                   >
                     <option value="" disabled className="bg-[#111111]">Pick an area</option>
                     {threadingServices.map(s => {
-                      const price = customPrices[s.id] || s.price;
+                      const price = pricingFor('service', s.id, s.price).price;
                       return (
                         <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
                       );
