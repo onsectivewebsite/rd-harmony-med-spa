@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
       services: services.map(s => ({ ...toCamelService(s), pricing: pricing('service', s.id, s.price) })),
       products: products.map(p => ({ ...toCamelProduct(p), pricing: pricing('product', p.id, p.price) })),
-      offers: offers.map(toCamelOffer),
+      offers: activeOffers.map(toCamelOffer),
     });
   } catch (err) {
     console.error('content error:', err);
@@ -48,6 +48,11 @@ function toCamelService(s: ServiceRow) {
     results: s.results || undefined, downtime: s.downtime || undefined, frequency: s.frequency || undefined,
     recovery: s.recovery || undefined, isMobileAvailable: s.is_mobile_available,
     metaTitle: s.meta_title || undefined, metaDescription: s.meta_description || undefined,
+    productsUsed: s.products_used || undefined,
+    experience: s.experience || undefined,
+    testimonials: s.testimonials,
+    precautions: s.precautions,
+    skinConcern: s.skin_concern,
   };
 }
 function toCamelProduct(p: ProductRow) {

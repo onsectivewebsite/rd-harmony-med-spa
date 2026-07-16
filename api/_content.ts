@@ -10,6 +10,11 @@ export interface ServiceRow {
   results: string | null; downtime: string | null; frequency: string | null;
   recovery: string | null; is_mobile_available: boolean; active: boolean;
   sort_order: number; meta_title: string | null; meta_description: string | null;
+  products_used: string | null;
+  experience: string | null;
+  testimonials: unknown[];
+  precautions: string[];
+  skin_concern: string[];
 }
 export interface ProductRow {
   id: string; name: string; category: string | null; price: string | null;
@@ -45,6 +50,11 @@ export async function ensureContentSchema(): Promise<void> {
     active boolean NOT NULL DEFAULT true,
     sort_order integer NOT NULL DEFAULT 0,
     meta_title text, meta_description text,
+    products_used text,
+    experience text,
+    testimonials jsonb NOT NULL DEFAULT '[]'::jsonb,
+    precautions jsonb NOT NULL DEFAULT '[]'::jsonb,
+    skin_concern jsonb NOT NULL DEFAULT '[]'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`;
@@ -78,6 +88,11 @@ export async function ensureContentSchema(): Promise<void> {
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`;
+  await sql`ALTER TABLE services ADD COLUMN IF NOT EXISTS products_used text`;
+  await sql`ALTER TABLE services ADD COLUMN IF NOT EXISTS experience text`;
+  await sql`ALTER TABLE services ADD COLUMN IF NOT EXISTS testimonials jsonb NOT NULL DEFAULT '[]'::jsonb`;
+  await sql`ALTER TABLE services ADD COLUMN IF NOT EXISTS precautions jsonb NOT NULL DEFAULT '[]'::jsonb`;
+  await sql`ALTER TABLE services ADD COLUMN IF NOT EXISTS skin_concern jsonb NOT NULL DEFAULT '[]'::jsonb`;
   ensured = true;
 }
 
@@ -97,7 +112,8 @@ export async function seedContent() {
       id, name, category, price, duration, image, hero_title, hero_subtitle,
       description, long_description, benefits, ideal_for, step_flow, post_care,
       faqs, options, technology, results, downtime, frequency, recovery,
-      is_mobile_available, active, sort_order, meta_title, meta_description
+      is_mobile_available, active, sort_order, meta_title, meta_description,
+      products_used, experience, testimonials, precautions, skin_concern
     ) VALUES (
       ${s.id}, ${s.name}, ${s.category}, ${overrides[s.id] || s.price || ''}, ${s.duration || ''},
       ${s.image || null}, ${s.heroTitle || null}, ${s.heroSubtitle || null},
@@ -108,7 +124,11 @@ export async function seedContent() {
       ${s.technology || null}, ${s.results || null}, ${s.downtime || null},
       ${s.frequency || null}, ${s.recovery || null},
       ${!!s.isMobileAvailable}, true, ${sOrder++},
-      ${s.metaTitle || null}, ${s.metaDescription || null}
+      ${s.metaTitle || null}, ${s.metaDescription || null},
+      ${s.productsUsed || null}, ${s.experience || null},
+      ${JSON.stringify(s.testimonials || [])}::jsonb,
+      ${JSON.stringify(s.precautions || [])}::jsonb,
+      ${JSON.stringify(s.skinConcern || [])}::jsonb
     ) ON CONFLICT (id) DO NOTHING`;
   }
   let pOrder = 0;
