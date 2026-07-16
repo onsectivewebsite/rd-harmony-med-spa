@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
+import { useContent } from '../context/ContentContext';
+import { Price } from '../components/Price';
 
 const Products = () => {
+  const { products, pricingFor } = useContent();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -44,7 +46,7 @@ const Products = () => {
       {/* Products Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {PRODUCTS.map((product, idx) => (
+          {products.map((product, idx) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 30 }}
@@ -82,7 +84,7 @@ const Products = () => {
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-spa-border">
                   {product.price && (
                     <span className="flex items-center gap-1.5 text-spa-ink font-medium">
-                      <Tag size={14} className="text-emerald-500" /> {product.price}
+                      <Tag size={14} className="text-emerald-500" /> <Price info={pricingFor('product', product.id, product.price || '')} />
                     </span>
                   )}
                   <Link
