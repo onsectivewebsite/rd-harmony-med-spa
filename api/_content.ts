@@ -1,4 +1,5 @@
 import { sql } from './_db.js';
+import { SEED_SERVICES, SEED_PRODUCTS, SEED_OFFERS } from './_seed-data.js';
 
 export interface ServiceRow {
   id: string; name: string; category: string; price: string; duration: string;
@@ -78,4 +79,52 @@ export async function ensureContentSchema(): Promise<void> {
     updated_at timestamptz NOT NULL DEFAULT now()
   )`;
   ensured = true;
+}
+
+export async function seedContent() {
+  await ensureContentSchema();
+  const existing = (await sql`SELECT count(*)::int AS n FROM services`) as Array<{ n: number }>;
+  if (existing[0].n > 0) return { seeded: false, services: 0, products: 0, offers: 0 };
+
+  // Existing DB price overrides win over the constant price during seed.
+  const overrideRows = (await sql`SELECT service_id, price FROM service_prices`) as Array<{ service_id: string; price: string }>;
+  const overrides: Record<string, string> = {};
+  for (const r of overrideRows) overrides[r.service_id] = r.price;
+
+  let sOrder = 0;
+  for (const s of SEED_SERVICES as any[]) {
+    await sql`INSERT INTO services (
+      id, name, category, price, duration, image, hero_title, hero_subtitle,
+      description, long_description, benefits, ideal_for, step_flow, post_care,
+      faqs, options, technology, results, downtime, frequency, recovery,
+      is_mobile_available, active, sort_order, meta_title, meta_description
+    ) VALUES (
+      ${s.id}, ${s.name}, ${s.category}, ${overrides[s.id] || s.price || ''}, ${s.duration || ''},
+      ${s.image || null}, ${s.heroTitle || null}, ${s.heroSubtitle || null},
+      ${s.description || null}, ${s.longDescription || null},
+      ${JSON.stringify(s.benefits || [])}::jsonb, ${JSON.stringify(s.idealFor || [])}::jsonb,
+      ${JSON.stringify(s.stepFlow || [])}::jsonb, ${JSON.stringify(s.postCare || [])}::jsonb,
+      ${JSON.stringify(s.faqs || [])}::jsonb, ${JSON.stringify(s.options || [])}::jsonb,
+      ${s.technology || null}, ${s.results || null}, ${s.downtime || null},
+      ${s.frequency || null}, ${s.recovery || null},
+      ${!!s.isMobileAvailable}, true, ${sOrder++},
+      ${s.metaTitle || null}, ${s.metaDescription || null}
+    ) ON CONFLICT (id) DO NOTHING`;
+  }
+  let pOrder = 0;
+  for (const p of SEED_PRODUCTS as any[]) {
+    await sql`INSERT INTO products (id, name, category, price, description, image, active, sort_order)
+      VALUES (${p.id}, ${p.name}, ${p.category || null}, ${p.price || null}, ${p.description || null},
+        ${p.image || null}, true, ${pOrder++}) ON CONFLICT (id) DO NOTHING`;
+  }
+  for (const o of SEED_OFFERS as any[]) {
+    await sql`INSERT INTO offers (id, item_type, item_id, title, subtitle, description, image,
+        original_price, offer_price, badge, highlights, active, starts_at, ends_at)
+      VALUES (${o.id}, ${o.serviceId ? 'service' : null}, ${o.serviceId || null}, ${o.title},
+        ${o.subtitle || null}, ${o.description || null}, ${o.image || null},
+        ${o.originalPrice || null}, ${o.offerPrice || ''}, ${o.badge || null},
+        ${JSON.stringify(o.highlights || [])}::jsonb, true, null, null)
+      ON CONFLICT (id) DO NOTHING`;
+  }
+  return { seeded: true, services: SEED_SERVICES.length, products: SEED_PRODUCTS.length, offers: SEED_OFFERS.length };
 }
