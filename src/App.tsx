@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
+import { ContentProvider } from './context/ContentContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
@@ -42,32 +43,34 @@ const PageLoader = () => (
 
 export default function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="min-h-screen bg-spa-bg text-spa-ink flex flex-col font-sans transition-colors duration-500">
-        <Navbar />
-        <main className="flex-grow">
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:id" element={<ServiceDetail />} />
-              <Route path="/booking" element={<Booking />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/testimonials" element={<Testimonials />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/free-consultation" element={<FreeConsultation />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/offers" element={<Offers />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/consent/:token" element={<Consent />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <Footer />
-        <Chatbot />
-      </div>
-    </Router>
+    <ContentProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="min-h-screen bg-spa-bg text-spa-ink flex flex-col font-sans transition-colors duration-500">
+          <Navbar />
+          <main className="flex-grow">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetail />} />
+                <Route path="/booking" element={<Booking />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/testimonials" element={<Testimonials />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/free-consultation" element={<FreeConsultation />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/offers" element={<Offers />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/consent/:token" element={<Consent />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <Footer />
+          <Chatbot />
+        </div>
+      </Router>
+    </ContentProvider>
   );
 }
