@@ -1,29 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
-import { SERVICES } from '../constants';
+import { useContent } from '../context/ContentContext';
+import { Price } from '../components/Price';
 import { Clock, Tag, Stethoscope, Droplets, CheckCircle2, ChevronDown, Check, Beaker, Zap, Moon } from 'lucide-react';
 
 const ServiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
+  const { services, pricingFor } = useContent();
 
-  const [livePrices, setLivePrices] = useState<Record<string, string>>({});
+  const { service } = React.useMemo(() => {
+    const foundService = services.find((s: any) => s.id === id);
+    if (!foundService) return { service: null };
 
-  useEffect(() => {
-    fetch('/api/service-prices')
-      .then(r => r.json())
-      .then(d => { if (d?.success && d.prices) setLivePrices(d.prices); })
-      .catch(() => {});
-  }, []);
-
-  const { service, displayPrice } = React.useMemo(() => {
-    const customAdded = JSON.parse(localStorage.getItem('rd_harmony_custom_added_services') || '[]');
-    const combined = [...SERVICES, ...customAdded];
-    const foundService = combined.find((s: any) => s.id === id);
-    if (!foundService) return { service: null, displayPrice: '' };
-
-    return { service: foundService, displayPrice: livePrices[foundService.id] || foundService.price };
-  }, [id, livePrices]);
+    return { service: foundService };
+  }, [id, services]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +43,7 @@ const ServiceDetail: React.FC = () => {
   }
 
   if (id === 'threading-waxing') {
-    const items = SERVICES.filter(s => s.category === 'Threading & Waxing');
+    const items = services.filter(s => s.category === 'Threading & Waxing');
     return (
       <div className="min-h-screen bg-spa-bg pt-32 pb-20">
         <div className="max-w-6xl mx-auto px-4">
@@ -67,7 +58,7 @@ const ServiceDetail: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {items.map(item => {
-              const price = livePrices[item.id] || item.price;
+              const pi = pricingFor('service', item.id, item.price);
               return (
                 <div
                   key={item.id}
@@ -80,7 +71,7 @@ const ServiceDetail: React.FC = () => {
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-4 text-spa-ink/40 text-xs">
                       <span className="flex items-center gap-1.5"><Clock size={14} className="text-emerald-500" /> {item.duration}</span>
-                      <span className="flex items-center gap-1.5"><Tag size={14} className="text-emerald-500" /> {price}</span>
+                      <span className="flex items-center gap-1.5"><Tag size={14} className="text-emerald-500" /> <Price info={pi} /></span>
                     </div>
                     <Link
                       to="/booking"
@@ -104,15 +95,16 @@ const ServiceDetail: React.FC = () => {
   }
 
   // For a tiered service (e.g. Hydrafacial) a single headline price is
-  // misleading, and any legacy admin override no longer applies — show the
-  // lowest tier as "From $X". Otherwise use the live (override-aware) price.
+  // misleading — show the lowest tier as "From $X" (no offer strikethrough
+  // on a tiered headline). Otherwise render the offer-aware context price.
   const priceNum = (p: string) => {
     const m = /([\d.]+)/.exec(p);
     return m ? parseFloat(m[1]) : Infinity;
   };
-  const headlinePrice = service.options && service.options.length > 0
-    ? `From ${service.options.reduce((lo, o) => (priceNum(o.price) < priceNum(lo.price) ? o : lo)).price}`
-    : displayPrice;
+  const pi = pricingFor('service', service.id, service.price);
+  const headline = service.options && service.options.length > 0
+    ? <span>From {service.options.reduce((lo, o) => (priceNum(o.price) < priceNum(lo.price) ? o : lo)).price}</span>
+    : <Price info={pi} />;
 
   return (
     <div className="min-h-screen bg-spa-bg overflow-x-hidden pt-20">
@@ -146,7 +138,7 @@ const ServiceDetail: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-white/90 bg-[#111111]/5 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/10">
               <Tag size={16} className="text-spa-accent" />
-              <span className="font-medium tracking-wide text-lg">{headlinePrice}</span>
+              <span className="font-medium tracking-wide text-lg">{headline}</span>
             </div>
           </div>
           
@@ -161,7 +153,7 @@ const ServiceDetail: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="hidden md:block">
             <h3 className="font-serif text-lg text-spa-ink font-medium">{service.name}</h3>
-            <p className="text-xs text-spa-ink/60 uppercase tracking-widest">{headlinePrice} • {service.duration}</p>
+            <p className="text-xs text-spa-ink/60 uppercase tracking-widest">{headline} • {service.duration}</p>
           </div>
           <Link to="/booking" className="w-full md:w-auto text-center px-8 py-3 bg-[#111111] border border-spa-border text-white rounded-full text-xs uppercase tracking-widest font-bold hover:bg-spa-primary hover:border-spa-primary transition-colors">
             Book Now
