@@ -546,6 +546,13 @@ async function handleConsentResend(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ success: true, sent_to: booking.email });
 }
 
+async function handleSeedContent(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const { seedContent } = await import('./_content.js');
+  const result = await seedContent();
+  return res.status(200).json({ success: true, ...result });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const action = String(req.query.action || '');
   try {
@@ -561,6 +568,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'consent-file': return handleConsentFile(req, res);
       case 'consent-resend': return handleConsentResend(req, res);
       case 'consents-by-client': return handleConsentsByClient(req, res);
+      case 'seed-content': return handleSeedContent(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });
     }
   } catch (err) {

@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Sparkles, ArrowRight, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { OFFERS } from '../constants';
+import { useContent } from '../context/ContentContext';
 
 const Offers = () => {
+  const { offers } = useContent();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -44,7 +45,7 @@ const Offers = () => {
       {/* Offers Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {OFFERS.map((offer, idx) => (
+          {offers.map((offer, idx) => (
             <motion.div
               key={offer.id}
               initial={{ opacity: 0, y: 30 }}
