@@ -22,6 +22,24 @@ export async function uploadBytes(
   return result.url;
 }
 
+// Uploads to the PUBLIC Blob store so the resulting URL can be linked directly
+// from the site (e.g. service/product images). Never use this for consent
+// files or any other sensitive upload — those must stay on the private path
+// via uploadBytes above.
+export async function uploadPublicImage(
+  pathname: string,
+  bytes: Buffer,
+  contentType: string,
+): Promise<string> {
+  const result = await put(pathname, bytes, {
+    access: 'public',
+    contentType,
+    token: blobToken(),
+    addRandomSuffix: true,
+  });
+  return result.url;
+}
+
 export interface FetchedBlob {
   bytes: Buffer;
   contentType: string;
