@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, Settings, Printer, Save, MessageSquare, ShieldCheck, KeyRound, Pencil, Download, X, Upload, FileText, Clock as ClockIcon, Send, Search } from 'lucide-react';
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
+import { useAdminContent } from './admin/useAdminContent';
+import ServiceEditor from './admin/ServiceEditor';
+import type { Service } from '../types';
 
 interface Appointment {
   id: string;
@@ -64,7 +67,10 @@ const Admin = () => {
   const [resetPassword, setResetPassword] = useState('');
   const [resetConfirm, setResetConfirm] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'appointments'|'clients'|'reviews'|'services'|'finances'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments'|'clients'|'reviews'|'services'|'finances'|'content'>('appointments');
+  const content = useAdminContent(authToken);
+  // undefined = editor closed, null = creating a new service, Service = editing an existing one.
+  const [editingService, setEditingService] = useState<Service | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [bookingsError, setBookingsError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -897,6 +903,7 @@ const Admin = () => {
         <button onClick={() => setActiveTab('finances')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'finances' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><DollarSign size={18} /> Cash Manager</button>
         <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'reviews' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><MessageSquare size={18} /> Review Manager</button>
         <button onClick={() => setActiveTab('services')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'services' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><Settings size={18} /> Pricing Config</button>
+        <button onClick={() => setActiveTab('content')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === 'content' ? 'bg-emerald-900/20 text-emerald-600' : 'text-spa-ink/60 hover:bg-[#1A1A1A]'}`}><FileText size={18} /> Content</button>
 
         <div className="mt-auto">
           <button onClick={handleSignOut} className="w-full flex justify-center py-3 border border-spa-border rounded-xl text-xs font-bold text-spa-ink/50 hover:text-spa-ink transition-all">SIGN OUT</button>
@@ -1172,6 +1179,115 @@ const Admin = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'content' && (
+            <div className="p-8">
+              {content.seeded === null && (
+                <div className="py-20 text-center text-spa-ink/40 italic">Loading…</div>
+              )}
+
+              {content.seeded === false && (
+                <div className="max-w-xl mx-auto text-center py-16">
+                  <h3 className="text-2xl font-serif text-spa-ink mb-4">Content editing is not active</h3>
+                  <p className="text-spa-ink/60 mb-8 leading-relaxed">
+                    Your site is currently showing its built-in content. Click Activate to copy all current services, offers, and products into the database so you can edit them. Nothing is lost, and this is safe to run once.
+                  </p>
+                  {content.error && (
+                    <div className="mb-6 text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{content.error}</div>
+                  )}
+                  <button
+                    onClick={() => content.activate()}
+                    disabled={content.loading}
+                    className="bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed px-8 py-4 rounded-xl text-[10px] uppercase tracking-widest font-bold inline-flex items-center gap-2 transition-all shadow-md"
+                  >
+                    <Upload size={14} /> {content.loading ? 'Activating…' : 'Activate content editing'}
+                  </button>
+                </div>
+              )}
+
+              {content.seeded === true && (
+                <div>
+                  <div className="flex justify-between items-end mb-6">
+                    <div>
+                      <h3 className="text-xl font-serif text-spa-ink mb-1">Services</h3>
+                      <p className="text-spa-ink/50">Manage the services shown on your public site.</p>
+                    </div>
+                    <button
+                      onClick={() => setEditingService(null)}
+                      className="bg-emerald-600 text-white hover:bg-emerald-500 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md"
+                    >
+                      <Plus size={14} /> New Service
+                    </button>
+                  </div>
+                  {content.error && (
+                    <div className="mb-6 text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{content.error}</div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {content.services.map(s => (
+                      <div key={s.id} className={`border border-spa-border rounded-2xl p-6 bg-[#1A1A1A] transition-opacity ${s.active === false ? 'opacity-50' : ''}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-lg text-spa-ink">{s.name}</h4>
+                              {s.active === false && (
+                                <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border border-spa-border text-spa-ink/50">Hidden</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-spa-ink/40 uppercase tracking-widest">{s.category}</p>
+                          </div>
+                          <div className="text-emerald-500 font-medium">{s.price}</div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-spa-border">
+                          <label className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={s.active !== false}
+                              disabled={content.loading}
+                              onChange={() => content.setActive(s, !(s.active !== false))}
+                              className="accent-emerald-500"
+                            />
+                            Active
+                          </label>
+                          <button
+                            onClick={() => setEditingService(s)}
+                            className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 hover:text-emerald-500 flex items-center gap-1"
+                          >
+                            <Pencil size={12} /> Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm('Hide this service from the website? You can re-enable it anytime.')) {
+                                content.remove(s.id, false);
+                              }
+                            }}
+                            disabled={content.loading}
+                            className="text-[10px] uppercase tracking-widest font-bold text-red-500/80 hover:text-red-500 flex items-center gap-1 disabled:opacity-40"
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
+                          <button
+                            onClick={() => {
+                              const typed = window.prompt('Type DELETE to permanently remove this service. This cannot be undone.');
+                              if (typed === 'DELETE') {
+                                content.remove(s.id, true);
+                              }
+                            }}
+                            disabled={content.loading}
+                            className="ml-auto text-[10px] uppercase tracking-widest font-bold text-spa-ink/30 hover:text-red-500 disabled:opacity-40"
+                          >
+                            Delete permanently
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {content.services.length === 0 && (
+                      <p className="text-spa-ink/40 italic p-4 text-center col-span-2">No services yet.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
 
@@ -1399,6 +1515,18 @@ const Admin = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {editingService !== undefined && (
+        <ServiceEditor
+          initial={editingService}
+          uploadImage={content.uploadImage}
+          onCancel={() => setEditingService(undefined)}
+          onSave={async (s) => {
+            await content.saveService(s);
+            setEditingService(undefined);
+          }}
+        />
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }

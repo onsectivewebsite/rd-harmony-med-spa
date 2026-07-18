@@ -15,7 +15,9 @@ import {
 } from './_auth.js';
 import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
-import { uploadBytes, fetchBlob, safeServedType } from './_blob.js';
+import { uploadBytes, fetchBlob, safeServedType, uploadPublicImage } from './_blob.js';
+import type { ServiceInput } from './_content.js';
+import { toAdminService, ensureContentSchema } from './_content.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -546,11 +548,67 @@ async function handleConsentResend(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ success: true, sent_to: booking.email });
 }
 
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+async function handleImageUpload(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const body = parseBody(req);
+  const filename = typeof body.filename === 'string' ? body.filename : '';
+  const contentType = typeof body.contentType === 'string' ? body.contentType : '';
+  const dataBase64 = typeof body.dataBase64 === 'string' ? body.dataBase64 : '';
+  if (!ALLOWED_IMAGE_TYPES.has(contentType)) {
+    return res.status(400).json({ success: false, message: 'Only JPEG, PNG, or WebP images are allowed.' });
+  }
+  const bytes = Buffer.from(dataBase64, 'base64');
+  if (bytes.length === 0) return res.status(400).json({ success: false, message: 'Empty image.' });
+  if (bytes.length > 5 * 1024 * 1024) return res.status(400).json({ success: false, message: 'Image exceeds 5 MB.' });
+  const safeName = (filename || 'image').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
+  const key = `service-images/${Date.now()}-${safeName}`;
+  const url = await uploadPublicImage(key, bytes, contentType);
+  return res.status(200).json({ success: true, url });
+}
+
 async function handleSeedContent(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
   const { seedContent } = await import('./_content.js');
   const result = await seedContent();
   return res.status(200).json({ success: true, ...result });
+}
+
+async function handleServiceList(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const { listAllServices } = await import('./_content.js');
+  const services = (await listAllServices()).map(toAdminService);
+  return res.status(200).json({ success: true, services });
+}
+
+async function handleServiceSave(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const body = (parseBody(req) || {}) as Record<string, unknown>;
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+
+  await ensureContentSchema();
+  const cnt = (await sql`SELECT count(*)::int AS n FROM services`) as Array<{ n: number }>;
+  if (cnt[0].n === 0) return res.status(400).json({ success: false, message: 'Activate content editing first — seed the database before adding or editing services.' });
+
+  const { upsertService } = await import('./_content.js');
+  const service = await upsertService({ ...body, name } as ServiceInput);
+  return res.status(200).json({ success: true, service });
+}
+
+async function handleServiceDelete(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const body = parseBody(req) || {};
+  const id = typeof body.id === 'string' ? body.id.trim() : '';
+  if (!id) return res.status(400).json({ success: false, message: 'id is required' });
+
+  const { deleteService, setServiceActive } = await import('./_content.js');
+  if (body.hard === true) {
+    await deleteService(id);
+  } else {
+    await setServiceActive(id, false);
+  }
+  return res.status(200).json({ success: true });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -569,6 +627,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'consent-resend': return handleConsentResend(req, res);
       case 'consents-by-client': return handleConsentsByClient(req, res);
       case 'seed-content': return handleSeedContent(req, res);
+      case 'image-upload': return handleImageUpload(req, res);
+      case 'service-list': return handleServiceList(req, res);
+      case 'service-save': return handleServiceSave(req, res);
+      case 'service-delete': return handleServiceDelete(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });
     }
   } catch (err) {

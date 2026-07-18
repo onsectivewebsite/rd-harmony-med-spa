@@ -73,4 +73,6 @@ export interface Service {
   skinConcern?: ('Acne' | 'Anti-aging' | 'Pigmentation' | 'Hair Loss' | 'Dryness' | 'General Wellness' | 'Uneven Tone' | 'Dullness')[]; // For Filtering
   testimonials?: { quote: string; author: string }[];
   precautions?: string[];
+  active?: boolean;
+  sortOrder?: number;
 }
