@@ -210,7 +210,7 @@ export async function upsertService(input: ServiceInput): Promise<ServiceRow> {
     id = candidate;
   }
 
-  const active = input.active === undefined ? true : input.active;
+  const rawActive = input.active ?? null;
   const sortOrder = input.sortOrder === undefined ? 0 : input.sortOrder;
 
   const rows = (await sql`
@@ -229,7 +229,7 @@ export async function upsertService(input: ServiceInput): Promise<ServiceRow> {
       ${JSON.stringify(input.faqs || [])}::jsonb, ${JSON.stringify(input.options || [])}::jsonb,
       ${input.technology ?? null}, ${input.results ?? null}, ${input.downtime ?? null},
       ${input.frequency ?? null}, ${input.recovery ?? null},
-      ${!!input.isMobileAvailable}, ${active}, ${sortOrder},
+      ${!!input.isMobileAvailable}, COALESCE(${rawActive}::boolean, true), ${sortOrder},
       ${input.metaTitle ?? null}, ${input.metaDescription ?? null},
       ${input.productsUsed ?? null}, ${input.experience ?? null},
       ${JSON.stringify(input.testimonials || [])}::jsonb,
@@ -258,7 +258,7 @@ export async function upsertService(input: ServiceInput): Promise<ServiceRow> {
       frequency = EXCLUDED.frequency,
       recovery = EXCLUDED.recovery,
       is_mobile_available = EXCLUDED.is_mobile_available,
-      active = EXCLUDED.active,
+      active = COALESCE(${rawActive}::boolean, services.active),
       sort_order = EXCLUDED.sort_order,
       meta_title = EXCLUDED.meta_title,
       meta_description = EXCLUDED.meta_description,
