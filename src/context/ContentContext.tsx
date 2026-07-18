@@ -28,7 +28,20 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .then(r => r.json())
       .then(d => {
         if (!alive || !d?.success) return;
-        setState({ services: d.services, offers: d.offers, products: d.products, loading: false, source: 'api' });
+        // An unseeded database returns success with empty arrays. Do NOT let that
+        // blank the site — only adopt the API content once it actually has
+        // services; otherwise keep the built-in constants as the source.
+        if (!Array.isArray(d.services) || d.services.length === 0) {
+          setState(s => ({ ...s, loading: false }));
+          return;
+        }
+        setState({
+          services: d.services,
+          offers: Array.isArray(d.offers) ? d.offers : OFFERS,
+          products: Array.isArray(d.products) ? d.products : PRODUCTS,
+          loading: false,
+          source: 'api',
+        });
       })
       .catch(() => { if (alive) setState(s => ({ ...s, loading: false })); });
     return () => { alive = false; };
