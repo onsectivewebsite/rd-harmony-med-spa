@@ -17,7 +17,7 @@ import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
 import { uploadBytes, fetchBlob, safeServedType, uploadPublicImage } from './_blob.js';
 import type { ServiceInput } from './_content.js';
-import { toAdminService } from './_content.js';
+import { toAdminService, ensureContentSchema } from './_content.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -586,6 +586,10 @@ async function handleServiceSave(req: VercelRequest, res: VercelResponse) {
   const body = (parseBody(req) || {}) as Record<string, unknown>;
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+
+  await ensureContentSchema();
+  const cnt = (await sql`SELECT count(*)::int AS n FROM services`) as Array<{ n: number }>;
+  if (cnt[0].n === 0) return res.status(400).json({ success: false, message: 'Activate content editing first — seed the database before adding or editing services.' });
 
   const { upsertService } = await import('./_content.js');
   const service = await upsertService({ ...body, name } as ServiceInput);

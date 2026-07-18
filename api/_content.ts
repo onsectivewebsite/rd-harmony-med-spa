@@ -132,7 +132,7 @@ export async function ensureContentSchema(): Promise<void> {
 export async function seedContent() {
   await ensureContentSchema();
   const existing = (await sql`SELECT count(*)::int AS n FROM services`) as Array<{ n: number }>;
-  if (existing[0].n > 0) return { seeded: false, services: 0, products: 0, offers: 0 };
+  const wasEmpty = existing[0].n === 0;
 
   // Existing DB price overrides win over the constant price during seed.
   const overrideRows = (await sql`SELECT service_id, price FROM service_prices`) as Array<{ service_id: string; price: string }>;
@@ -179,7 +179,7 @@ export async function seedContent() {
         ${JSON.stringify(o.highlights || [])}::jsonb, true, null, null)
       ON CONFLICT (id) DO NOTHING`;
   }
-  return { seeded: true, services: SEED_SERVICES.length, products: SEED_PRODUCTS.length, offers: SEED_OFFERS.length };
+  return { seeded: wasEmpty, services: SEED_SERVICES.length, products: SEED_PRODUCTS.length, offers: SEED_OFFERS.length };
 }
 
 function slugifyServiceName(name: string): string {
