@@ -1,6 +1,39 @@
 import { sql } from './_db.js';
 import { SEED_SERVICES, SEED_PRODUCTS, SEED_OFFERS } from './_seed-data.js';
 
+export interface ServiceInput {
+  id?: string;
+  name: string;
+  category: string;
+  price: string;
+  duration: string;
+  image?: string | null;
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
+  description?: string | null;
+  longDescription?: string | null;
+  benefits?: string[];
+  idealFor?: string[];
+  stepFlow?: unknown[];
+  postCare?: string[];
+  faqs?: unknown[];
+  options?: unknown[];
+  technology?: string | null;
+  results?: string | null;
+  downtime?: string | null;
+  frequency?: string | null;
+  recovery?: string | null;
+  isMobileAvailable?: boolean;
+  active?: boolean;
+  sortOrder?: number;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  productsUsed?: string | null;
+  experience?: string | null;
+  testimonials?: unknown[];
+  precautions?: string[];
+  skinConcern?: string[];
+}
 export interface ServiceRow {
   id: string; name: string; category: string; price: string; duration: string;
   image: string | null; hero_title: string | null; hero_subtitle: string | null;
@@ -147,4 +180,106 @@ export async function seedContent() {
       ON CONFLICT (id) DO NOTHING`;
   }
   return { seeded: true, services: SEED_SERVICES.length, products: SEED_PRODUCTS.length, offers: SEED_OFFERS.length };
+}
+
+function slugifyServiceName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+export async function listAllServices(): Promise<ServiceRow[]> {
+  await ensureContentSchema();
+  return (await sql`SELECT * FROM services ORDER BY sort_order, name`) as ServiceRow[];
+}
+
+export async function upsertService(input: ServiceInput): Promise<ServiceRow> {
+  await ensureContentSchema();
+
+  const isNew = !input.id || !input.id.trim();
+  let id = input.id && input.id.trim() ? input.id.trim() : slugifyServiceName(input.name);
+
+  if (isNew) {
+    const base = id;
+    let candidate = base;
+    let suffix = 2;
+    // Avoid colliding with an existing row when the id was auto-generated from the name.
+    while (true) {
+      const found = (await sql`SELECT 1 FROM services WHERE id = ${candidate} LIMIT 1`) as unknown[];
+      if (found.length === 0) break;
+      candidate = `${base}-${suffix++}`;
+    }
+    id = candidate;
+  }
+
+  const active = input.active === undefined ? true : input.active;
+  const sortOrder = input.sortOrder === undefined ? 0 : input.sortOrder;
+
+  const rows = (await sql`
+    INSERT INTO services (
+      id, name, category, price, duration, image, hero_title, hero_subtitle,
+      description, long_description, benefits, ideal_for, step_flow, post_care,
+      faqs, options, technology, results, downtime, frequency, recovery,
+      is_mobile_available, active, sort_order, meta_title, meta_description,
+      products_used, experience, testimonials, precautions, skin_concern
+    ) VALUES (
+      ${id}, ${input.name}, ${input.category}, ${input.price}, ${input.duration},
+      ${input.image ?? null}, ${input.heroTitle ?? null}, ${input.heroSubtitle ?? null},
+      ${input.description ?? null}, ${input.longDescription ?? null},
+      ${JSON.stringify(input.benefits || [])}::jsonb, ${JSON.stringify(input.idealFor || [])}::jsonb,
+      ${JSON.stringify(input.stepFlow || [])}::jsonb, ${JSON.stringify(input.postCare || [])}::jsonb,
+      ${JSON.stringify(input.faqs || [])}::jsonb, ${JSON.stringify(input.options || [])}::jsonb,
+      ${input.technology ?? null}, ${input.results ?? null}, ${input.downtime ?? null},
+      ${input.frequency ?? null}, ${input.recovery ?? null},
+      ${!!input.isMobileAvailable}, ${active}, ${sortOrder},
+      ${input.metaTitle ?? null}, ${input.metaDescription ?? null},
+      ${input.productsUsed ?? null}, ${input.experience ?? null},
+      ${JSON.stringify(input.testimonials || [])}::jsonb,
+      ${JSON.stringify(input.precautions || [])}::jsonb,
+      ${JSON.stringify(input.skinConcern || [])}::jsonb
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      name = EXCLUDED.name,
+      category = EXCLUDED.category,
+      price = EXCLUDED.price,
+      duration = EXCLUDED.duration,
+      image = EXCLUDED.image,
+      hero_title = EXCLUDED.hero_title,
+      hero_subtitle = EXCLUDED.hero_subtitle,
+      description = EXCLUDED.description,
+      long_description = EXCLUDED.long_description,
+      benefits = EXCLUDED.benefits,
+      ideal_for = EXCLUDED.ideal_for,
+      step_flow = EXCLUDED.step_flow,
+      post_care = EXCLUDED.post_care,
+      faqs = EXCLUDED.faqs,
+      options = EXCLUDED.options,
+      technology = EXCLUDED.technology,
+      results = EXCLUDED.results,
+      downtime = EXCLUDED.downtime,
+      frequency = EXCLUDED.frequency,
+      recovery = EXCLUDED.recovery,
+      is_mobile_available = EXCLUDED.is_mobile_available,
+      active = EXCLUDED.active,
+      sort_order = EXCLUDED.sort_order,
+      meta_title = EXCLUDED.meta_title,
+      meta_description = EXCLUDED.meta_description,
+      products_used = EXCLUDED.products_used,
+      experience = EXCLUDED.experience,
+      testimonials = EXCLUDED.testimonials,
+      precautions = EXCLUDED.precautions,
+      skin_concern = EXCLUDED.skin_concern,
+      updated_at = now()
+    RETURNING *
+  `) as ServiceRow[];
+
+  return rows[0];
+}
+
+export async function setServiceActive(id: string, active: boolean): Promise<void> {
+  await ensureContentSchema();
+  await sql`UPDATE services SET active = ${active}, updated_at = now() WHERE id = ${id}`;
+}
+
+export async function deleteService(id: string): Promise<void> {
+  await ensureContentSchema();
+  await sql`DELETE FROM services WHERE id = ${id}`;
 }

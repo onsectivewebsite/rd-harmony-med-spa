@@ -16,6 +16,7 @@ import {
 import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
 import { uploadBytes, fetchBlob, safeServedType, uploadPublicImage } from './_blob.js';
+import type { ServiceInput } from './_content.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -572,6 +573,39 @@ async function handleSeedContent(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ success: true, ...result });
 }
 
+async function handleServiceList(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const { listAllServices } = await import('./_content.js');
+  const services = await listAllServices();
+  return res.status(200).json({ success: true, services });
+}
+
+async function handleServiceSave(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const body = (parseBody(req) || {}) as Record<string, unknown>;
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+
+  const { upsertService } = await import('./_content.js');
+  const service = await upsertService({ ...body, name } as ServiceInput);
+  return res.status(200).json({ success: true, service });
+}
+
+async function handleServiceDelete(req: VercelRequest, res: VercelResponse) {
+  if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const body = parseBody(req) || {};
+  const id = typeof body.id === 'string' ? body.id.trim() : '';
+  if (!id) return res.status(400).json({ success: false, message: 'id is required' });
+
+  const { deleteService, setServiceActive } = await import('./_content.js');
+  if (body.hard === true) {
+    await deleteService(id);
+  } else {
+    await setServiceActive(id, false);
+  }
+  return res.status(200).json({ success: true });
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const action = String(req.query.action || '');
   try {
@@ -589,6 +623,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'consents-by-client': return handleConsentsByClient(req, res);
       case 'seed-content': return handleSeedContent(req, res);
       case 'image-upload': return handleImageUpload(req, res);
+      case 'service-list': return handleServiceList(req, res);
+      case 'service-save': return handleServiceSave(req, res);
+      case 'service-delete': return handleServiceDelete(req, res);
       default: return res.status(404).json({ success: false, message: 'Unknown admin action' });
     }
   } catch (err) {
