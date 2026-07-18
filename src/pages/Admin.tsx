@@ -4,6 +4,8 @@ import { Trash2, Plus, CheckCircle2, Lock, Users, LayoutDashboard, DollarSign, S
 import { SERVICES } from '../constants';
 import { baseTestimonials } from '../data/testimonialData';
 import { useAdminContent } from './admin/useAdminContent';
+import ServiceEditor from './admin/ServiceEditor';
+import type { Service } from '../types';
 
 interface Appointment {
   id: string;
@@ -67,6 +69,8 @@ const Admin = () => {
 
   const [activeTab, setActiveTab] = useState<'appointments'|'clients'|'reviews'|'services'|'finances'|'content'>('appointments');
   const content = useAdminContent(authToken);
+  // undefined = editor closed, null = creating a new service, Service = editing an existing one.
+  const [editingService, setEditingService] = useState<Service | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [bookingsError, setBookingsError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1208,7 +1212,10 @@ const Admin = () => {
                       <h3 className="text-xl font-serif text-spa-ink mb-1">Services</h3>
                       <p className="text-spa-ink/50">Manage the services shown on your public site.</p>
                     </div>
-                    <button disabled className="bg-emerald-600/10 text-emerald-600/50 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 cursor-not-allowed">
+                    <button
+                      onClick={() => setEditingService(null)}
+                      className="bg-emerald-600 text-white hover:bg-emerald-500 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 transition-all shadow-md"
+                    >
                       <Plus size={14} /> New Service
                     </button>
                   </div>
@@ -1241,7 +1248,10 @@ const Admin = () => {
                             />
                             Active
                           </label>
-                          <button disabled className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/40 flex items-center gap-1 cursor-not-allowed">
+                          <button
+                            onClick={() => setEditingService(s)}
+                            className="text-[10px] uppercase tracking-widest font-bold text-spa-ink/60 hover:text-emerald-500 flex items-center gap-1"
+                          >
                             <Pencil size={12} /> Edit
                           </button>
                           <button
@@ -1505,6 +1515,18 @@ const Admin = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {editingService !== undefined && (
+        <ServiceEditor
+          initial={editingService}
+          uploadImage={content.uploadImage}
+          onCancel={() => setEditingService(undefined)}
+          onSave={async (s) => {
+            await content.saveService(s);
+            setEditingService(undefined);
+          }}
+        />
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
