@@ -191,6 +191,22 @@ export async function listAllServices(): Promise<ServiceRow[]> {
   return (await sql`SELECT * FROM services ORDER BY sort_order, name`) as ServiceRow[];
 }
 
+export function toAdminService(s: ServiceRow) {
+  return {
+    id: s.id, name: s.name, category: s.category, price: s.price, duration: s.duration,
+    image: s.image || undefined, heroTitle: s.hero_title || undefined, heroSubtitle: s.hero_subtitle || undefined,
+    description: s.description || undefined, longDescription: s.long_description || undefined,
+    benefits: s.benefits, idealFor: s.ideal_for, stepFlow: s.step_flow, postCare: s.post_care,
+    faqs: s.faqs, options: s.options, technology: s.technology || undefined,
+    results: s.results || undefined, downtime: s.downtime || undefined, frequency: s.frequency || undefined,
+    recovery: s.recovery || undefined, isMobileAvailable: s.is_mobile_available,
+    metaTitle: s.meta_title || undefined, metaDescription: s.meta_description || undefined,
+    productsUsed: s.products_used || undefined, experience: s.experience || undefined,
+    testimonials: s.testimonials, precautions: s.precautions, skinConcern: s.skin_concern,
+    active: s.active, sortOrder: s.sort_order,
+  };
+}
+
 export async function upsertService(input: ServiceInput): Promise<ServiceRow> {
   await ensureContentSchema();
 

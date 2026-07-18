@@ -17,6 +17,7 @@ import { parseBody } from './_http.js';
 import { templateForServiceName, TEMPLATES } from './_consent.js';
 import { uploadBytes, fetchBlob, safeServedType, uploadPublicImage } from './_blob.js';
 import type { ServiceInput } from './_content.js';
+import { toAdminService } from './_content.js';
 
 const OTP_TTL_MINUTES = 10;
 const RESET_TTL_MINUTES = 30;
@@ -576,7 +577,7 @@ async function handleSeedContent(req: VercelRequest, res: VercelResponse) {
 async function handleServiceList(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req)) return res.status(401).json({ success: false, message: 'Unauthorized' });
   const { listAllServices } = await import('./_content.js');
-  const services = await listAllServices();
+  const services = (await listAllServices()).map(toAdminService);
   return res.status(200).json({ success: true, services });
 }
 
