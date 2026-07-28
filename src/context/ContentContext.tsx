@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SERVICES, OFFERS, PRODUCTS } from '../constants';
 import type { Service, Offer, Product } from '../types';
-import type { PriceInfo } from '../lib/pricing';
+import { effectivePrice, type PriceInfo, type OfferLike } from '../lib/pricing';
 
 type ApiService = Service & { pricing?: PriceInfo };
 type ApiProduct = Product & { pricing?: PriceInfo };
@@ -50,8 +50,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const pricingFor = (type: 'service' | 'product', id: string, base: string): PriceInfo => {
     const list = type === 'service' ? state.services : state.products;
     const found = (list as Array<ApiService | ApiProduct>).find(i => i.id === id);
+    // API mode: the server precomputed offer-aware pricing.
     if (found && (found as ApiService).pricing) return (found as ApiService).pricing!;
-    return { price: base, onOffer: false };
+    // Fallback mode (e.g. unseeded DB / offline): compute the offer from the
+    // offers list ourselves so an active offer's price shows on service cards,
+    // detail pages, and the booking flow — not just the Offers section.
+    const offerLikes: OfferLike[] = state.offers.map(o => ({
+      itemType: 'service',
+      itemId: o.serviceId ?? null,
+      offerPrice: o.offerPrice,
+      originalPrice: o.originalPrice ?? null,
+      badge: o.badge ?? null,
+      active: true,
+      startsAt: null,
+      endsAt: null,
+    }));
+    return effectivePrice(type, id, base, offerLikes, new Date().toISOString());
   };
 
   return <ContentCtx.Provider value={{ ...state, pricingFor }}>{children}</ContentCtx.Provider>;

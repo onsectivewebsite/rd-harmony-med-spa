@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Star, ShieldCheck, MapPin, Smartphone, CreditCard, Sparkles } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, MapPin, Smartphone, CreditCard, Sparkles, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/ContentContext';
 
 const Home = () => {
   const position = { lat: 43.4418, lng: -79.6644 };
+  const { offers } = useContent();
   return (
     <div className="bg-spa-bg text-spa-ink">
       {/* Hero Section */}
@@ -122,6 +124,57 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Active Promotions */}
+      {offers.length > 0 && (
+        <section id="promotions" className="py-20 bg-[#111111] border-t border-b border-spa-border overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-2 text-emerald-500 text-[10px] uppercase tracking-[0.4em] font-bold mb-4">
+                <Sparkles size={14} /> Limited Time
+              </span>
+              <h2 className="text-4xl md:text-6xl font-serif text-spa-ink">Current Offers</h2>
+            </div>
+            <div className={`grid gap-8 ${offers.length === 1 ? 'max-w-2xl mx-auto' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+              {offers.map((offer) => (
+                <div
+                  key={offer.id}
+                  className="relative bg-emerald-950/20 rounded-[2rem] border border-emerald-500/30 p-8 flex flex-col overflow-hidden"
+                >
+                  <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+                  <div className="relative z-10 flex flex-col h-full">
+                    {offer.badge && (
+                      <span className="inline-flex items-center gap-1.5 self-start bg-emerald-500 text-black text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full mb-5">
+                        <Tag size={12} /> {offer.badge}
+                      </span>
+                    )}
+                    <h3 className="text-2xl font-serif text-spa-ink mb-1">{offer.title}</h3>
+                    {offer.subtitle && (
+                      <p className="text-spa-ink/50 text-xs uppercase tracking-widest font-medium mb-4">{offer.subtitle}</p>
+                    )}
+                    <div className="flex items-baseline gap-3 mb-6">
+                      <span className="text-5xl font-serif text-emerald-500">{offer.offerPrice}</span>
+                      {offer.originalPrice && (
+                        <span className="text-xl text-spa-ink/30 line-through font-light">{offer.originalPrice}</span>
+                      )}
+                    </div>
+                    {offer.description && (
+                      <p className="text-spa-ink/60 text-sm leading-relaxed mb-8 flex-grow">{offer.description}</p>
+                    )}
+                    <Link
+                      to={offer.serviceId ? '/booking' : '/services'}
+                      state={offer.serviceId ? { serviceId: offer.serviceId } : undefined}
+                      className="mt-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full text-xs uppercase tracking-widest font-bold transition-all"
+                    >
+                      Claim This Offer <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Services */}
       <section className="py-32">
