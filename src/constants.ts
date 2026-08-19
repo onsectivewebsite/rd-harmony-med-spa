@@ -188,19 +188,19 @@ export const SERVICES: Service[] = [
     heroTitle: 'Oxygenate. Revitalize. Transform Your Skin From Within.',
     heroSubtitle: 'Oxygenate. Revitalize. Transform Your Skin From Within.',
     duration: '60 Minutes',
-    price: '$200',
+    price: '$199',
     category: 'Skincare',
     isMobileAvailable: false,
     options: [
       {
         id: 'oxygeneo',
         name: 'OxyGeneo Facial',
-        price: '$200',
+        price: '$199',
       },
       {
         id: 'gold-glow',
         name: 'OxyGeneo Gold Glow Facial',
-        price: '$250',
+        price: '$249',
       },
     ],
     description: 'An advanced, clinically proven 3-in-1 skin rejuvenation treatment that goes beyond traditional facials by working both on the surface and deep within the skin.',
