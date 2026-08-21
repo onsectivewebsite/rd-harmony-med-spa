@@ -48,7 +48,7 @@ export interface Service {
   price: string;
   promoPrice?: string;
   originalPrice?: string;
-  category: 'Treatment' | 'Consultation' | 'Injection' | 'IV Therapy' | 'Skincare' | 'Other' | 'Threading & Waxing' | 'Medical' | 'Injectables';
+  category: 'Treatment' | 'Consultation' | 'Injection' | 'IV Therapy' | 'Skincare' | 'Other' | 'Threading & Waxing' | 'Medical' | 'Injectables' | 'Laser Hair Removal';
   description?: string;
   options?: ServiceOption[]; // Price tiers / packages (e.g. Signature vs Deluxe)
   isMobileAvailable?: boolean;
