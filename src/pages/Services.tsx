@@ -1,25 +1,44 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Service } from '../types';
 import { Smartphone, Clock, Tag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
 import { Price } from '../components/Price';
 
-const THREADING_UMBRELLA_ID = 'threading-waxing';
-const THREADING_UMBRELLA: Service = {
-  id: THREADING_UMBRELLA_ID,
-  name: 'Threading & Waxing',
-  duration: '10–45 Minutes',
-  // Marketing headline price. To make this dynamic, swap to the min of all
-  // T&W prices via constants + customPrices on render.
-  price: 'Starting from $10',
-  category: 'Threading & Waxing',
-  isMobileAvailable: false,
-  description:
-    'Brow shaping, upper lip, full face, arms, legs, Brazilian and more — precision threading and gentle medical-grade waxing for every need.',
-  image: '/images/svc_eyebrow_threading.jpg',
+type Umbrella = {
+  id: string;
+  category: string;
+  name: string;
+  duration: string;
+  price: string;
+  description: string;
+  image: string;
 };
+
+// Categories with many bookable variants collapse into ONE menu card on the
+// grid; the individual options live on a dedicated menu page (/services/<id>).
+const UMBRELLAS: Umbrella[] = [
+  {
+    id: 'threading-waxing',
+    category: 'Threading & Waxing',
+    name: 'Threading & Waxing',
+    duration: '10–45 Minutes',
+    price: 'Starting from $10',
+    description:
+      'Brow shaping, upper lip, full face, arms, legs, Brazilian and more — precision threading and gentle medical-grade waxing for every need.',
+    image: '/images/svc_eyebrow_threading.jpg',
+  },
+  {
+    id: 'laser-hair-removal',
+    category: 'Laser Hair Removal',
+    name: 'Laser Hair Removal',
+    duration: 'Varies',
+    price: 'Starting from $30',
+    description:
+      'Advanced laser hair removal for face and body — single areas, multi-area sessions, and full-body bundles for smooth, long-lasting results.',
+    image: '/images/laser_waxing.jpg',
+  },
+];
 
 type DisplayItem = {
   key: string;
@@ -32,7 +51,7 @@ type DisplayItem = {
   category: string;
   image?: string;
   isMobileAvailable?: boolean;
-  isThreadingUmbrella?: boolean;
+  isUmbrella?: boolean;
 };
 
 const Services = () => {
@@ -46,22 +65,23 @@ const Services = () => {
   //    card per tier so each package is bookable directly from the menu.
   const displayItems = React.useMemo<DisplayItem[]>(() => {
     const out: DisplayItem[] = [];
-    let umbrellaInserted = false;
+    const insertedUmbrellas = new Set<string>();
     for (const s of allServices) {
-      if (s.category === 'Threading & Waxing') {
-        if (!umbrellaInserted) {
+      const umbrella = UMBRELLAS.find(u => u.category === s.category);
+      if (umbrella) {
+        if (!insertedUmbrellas.has(umbrella.id)) {
           out.push({
-            key: THREADING_UMBRELLA_ID,
-            serviceId: THREADING_UMBRELLA_ID,
-            name: THREADING_UMBRELLA.name,
-            description: THREADING_UMBRELLA.description,
-            duration: THREADING_UMBRELLA.duration,
-            price: THREADING_UMBRELLA.price,
-            category: THREADING_UMBRELLA.category,
-            image: THREADING_UMBRELLA.image,
-            isThreadingUmbrella: true,
+            key: umbrella.id,
+            serviceId: umbrella.id,
+            name: umbrella.name,
+            description: umbrella.description,
+            duration: umbrella.duration,
+            price: umbrella.price,
+            category: umbrella.category,
+            image: umbrella.image,
+            isUmbrella: true,
           });
-          umbrellaInserted = true;
+          insertedUmbrellas.add(umbrella.id);
         }
         continue;
       }
@@ -176,9 +196,9 @@ const Services = () => {
                     to={`/services/${item.serviceId}`}
                     className="flex-1 py-3 border border-spa-border hover:border-spa-border/60 text-spa-ink text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"
                   >
-                    {item.isThreadingUmbrella ? 'View Options' : 'Details'}
+                    {item.isUmbrella ? 'View Options' : 'Details'}
                   </Link>
-                  {item.isThreadingUmbrella ? (
+                  {item.isUmbrella ? (
                     <Link
                       to={`/services/${item.serviceId}`}
                       className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] uppercase tracking-widest font-bold rounded-xl transition-all text-center"

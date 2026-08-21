@@ -4,6 +4,21 @@ import { useContent } from '../context/ContentContext';
 import { Price } from '../components/Price';
 import { Clock, Tag, Stethoscope, Droplets, CheckCircle2, ChevronDown, Check, Beaker, Zap, Moon } from 'lucide-react';
 
+// Categories that render as a "menu" page listing every variant (reached via
+// /services/<umbrella-id> from the collapsed umbrella card on the Services grid).
+const UMBRELLA_MENUS: Record<string, { title: string; category: string; blurb: string }> = {
+  'threading-waxing': {
+    title: 'Threading & Waxing',
+    category: 'Threading & Waxing',
+    blurb: "Precision threading and gentle medical-grade waxing. Pick the area you'd like to book — every option below routes through to our standard booking flow.",
+  },
+  'laser-hair-removal': {
+    title: 'Laser Hair Removal',
+    category: 'Laser Hair Removal',
+    blurb: 'Advanced laser hair removal for face and body. Pick an area, multi-area session, or full-body bundle below — every option routes through to our standard booking flow.',
+  },
+};
+
 const ServiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
@@ -42,17 +57,17 @@ const ServiceDetail: React.FC = () => {
     return <Navigate to="/free-consultation" replace />;
   }
 
-  if (id === 'threading-waxing') {
-    const items = services.filter(s => s.category === 'Threading & Waxing');
+  const umbrellaMenu = id ? UMBRELLA_MENUS[id] : undefined;
+  if (umbrellaMenu) {
+    const items = services.filter(s => s.category === umbrellaMenu.category);
     return (
       <div className="min-h-screen bg-spa-bg pt-32 pb-20">
         <div className="max-w-6xl mx-auto px-4">
           <header className="mb-12 text-center">
             <span className="text-emerald-600 text-[10px] uppercase tracking-[0.5em] font-bold mb-4 block">Treatment Menu</span>
-            <h1 className="text-5xl md:text-6xl font-serif text-spa-ink mb-4">Threading &amp; Waxing</h1>
+            <h1 className="text-5xl md:text-6xl font-serif text-spa-ink mb-4">{umbrellaMenu.title}</h1>
             <p className="text-spa-ink/50 max-w-2xl mx-auto font-light">
-              Precision threading and gentle medical-grade waxing. Pick the area you'd like to book —
-              every option below routes through to our standard booking flow.
+              {umbrellaMenu.blurb}
             </p>
           </header>
 

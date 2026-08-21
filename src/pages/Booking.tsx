@@ -17,8 +17,16 @@ const TIME_SLOTS: { value: string; label: string }[] = (() => {
   return slots;
 })();
 
-const THREADING_UMBRELLA_VALUE = '__threading_waxing__';
-const THREADING_UMBRELLA_LABEL = 'Threading & Waxing — Starting from $10';
+// Categories that collapse into a single dropdown entry with a second
+// "pick an area/option" step, keeping the flat list uncluttered.
+const UMBRELLA_CATEGORIES = ['Threading & Waxing', 'Laser Hair Removal'];
+const UMBRELLA_PREFIX = '__umbrella__';
+const umbrellaLabel = (cat: string) =>
+  cat === 'Threading & Waxing'
+    ? 'Threading & Waxing — Starting from $10'
+    : cat === 'Laser Hair Removal'
+    ? 'Laser Hair Removal — Starting from $30'
+    : cat;
 
 const DEPOSIT_POLICY = {
   title: 'Booking Deposit & Cancellation Policy',
@@ -108,25 +116,30 @@ const Booking = () => {
   // main dropdown. Tracked separately because the actual `formData.service`
   // holds the specific sub-service (e.g. "Brazilian Waxing") that goes to the
   // backend.
-  const [threadingMode, setThreadingMode] = useState(false);
+  // '' = no umbrella selected; otherwise the chosen umbrella category.
+  const [umbrellaMode, setUmbrellaMode] = useState('');
 
-  const threadingServices = React.useMemo(
-    () => services.filter(s => s.category === 'Threading & Waxing'),
+  const umbrellaCategoriesPresent = React.useMemo(
+    () => UMBRELLA_CATEGORIES.filter(cat => services.some(s => s.category === cat)),
     [services],
   );
-  const nonThreadingServices = React.useMemo(
-    () => services.filter(s => s.category !== 'Threading & Waxing'),
+  const umbrellaAreas = React.useMemo(
+    () => (umbrellaMode ? services.filter(s => s.category === umbrellaMode) : []),
+    [services, umbrellaMode],
+  );
+  const nonUmbrellaServices = React.useMemo(
+    () => services.filter(s => !UMBRELLA_CATEGORIES.includes(s.category)),
     [services],
   );
-  const isThreadingService = (name: string) =>
-    threadingServices.some(s => s.name === name);
+  const isUmbrellaService = (name: string) =>
+    services.some(s => UMBRELLA_CATEGORIES.includes(s.category) && s.name === name);
 
   // Flattened list of bookable entries. A service with `options` (e.g. Hydrafacial
   // tiers) expands into one entry per option; every other service stays a single
   // entry. The `value` is what gets stored in formData.service and sent to the API.
   const bookableItems = React.useMemo(() => {
     const items: { value: string; label: string; price: string; duration?: string }[] = [];
-    for (const s of nonThreadingServices) {
+    for (const s of nonUmbrellaServices) {
       if (s.options && s.options.length > 0) {
         for (const opt of s.options) {
           items.push({
@@ -142,7 +155,7 @@ const Booking = () => {
       }
     }
     return items;
-  }, [nonThreadingServices, pricingFor]);
+  }, [nonUmbrellaServices, pricingFor]);
 
   useEffect(() => {
     const state = location.state as { serviceId?: string; optionId?: string } | null;
@@ -158,7 +171,7 @@ const Booking = () => {
       optionId = params.get('option');
     }
     if (preselected) {
-      if (preselected.category === 'Threading & Waxing') setThreadingMode(true);
+      if (UMBRELLA_CATEGORIES.includes(preselected.category)) setUmbrellaMode(preselected.category);
       // For a tiered service, preselect the chosen option (or the first one).
       const opt = preselected.options
         ? (optionId && preselected.options.find(o => o.id === optionId)) || preselected.options[0]
@@ -171,8 +184,8 @@ const Booking = () => {
     e.preventDefault();
     setError('');
 
-    if (threadingMode && !isThreadingService(formData.service)) {
-      setError('Please choose which threading or waxing service you\'d like.');
+    if (umbrellaMode && !isUmbrellaService(formData.service)) {
+      setError(`Please choose which ${umbrellaMode} option you'd like.`);
       return;
     }
 
@@ -363,14 +376,14 @@ const Booking = () => {
                 <select
                   required
                   className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
-                  value={threadingMode ? THREADING_UMBRELLA_VALUE : formData.service}
+                  value={umbrellaMode ? `${UMBRELLA_PREFIX}${umbrellaMode}` : formData.service}
                   onChange={e => {
                     const v = e.target.value;
-                    if (v === THREADING_UMBRELLA_VALUE) {
-                      setThreadingMode(true);
+                    if (v.startsWith(UMBRELLA_PREFIX)) {
+                      setUmbrellaMode(v.slice(UMBRELLA_PREFIX.length));
                       setFormData(prev => ({ ...prev, service: '' }));
                     } else {
-                      setThreadingMode(false);
+                      setUmbrellaMode('');
                       setFormData(prev => ({ ...prev, service: v }));
                     }
                   }}
@@ -379,23 +392,23 @@ const Booking = () => {
                   {bookableItems.map(item => (
                     <option key={item.value} value={item.value} className="bg-[#111111]">{item.label}</option>
                   ))}
-                  {threadingServices.length > 0 && (
-                    <option value={THREADING_UMBRELLA_VALUE} className="bg-[#111111]">{THREADING_UMBRELLA_LABEL}</option>
-                  )}
+                  {umbrellaCategoriesPresent.map(cat => (
+                    <option key={cat} value={`${UMBRELLA_PREFIX}${cat}`} className="bg-[#111111]">{umbrellaLabel(cat)}</option>
+                  ))}
                 </select>
               </div>
 
-              {threadingMode && (
+              {umbrellaMode && (
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-spa-ink/50 font-bold ml-4">Choose Threading or Waxing Area</label>
+                  <label className="text-[10px] uppercase tracking-widest text-spa-ink/50 font-bold ml-4">Choose {umbrellaMode} Option</label>
                   <select
                     required
                     className="w-full bg-[#1A1A1A] border border-spa-border rounded-2xl py-4 px-4 text-spa-ink focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
-                    value={isThreadingService(formData.service) ? formData.service : ''}
+                    value={isUmbrellaService(formData.service) ? formData.service : ''}
                     onChange={e => setFormData(prev => ({ ...prev, service: e.target.value }))}
                   >
-                    <option value="" disabled className="bg-[#111111]">Pick an area</option>
-                    {threadingServices.map(s => {
+                    <option value="" disabled className="bg-[#111111]">Pick an option</option>
+                    {umbrellaAreas.map(s => {
                       const price = pricingFor('service', s.id, s.price).price;
                       return (
                         <option key={s.id} value={s.name} className="bg-[#111111]">{s.name} - {price}</option>
