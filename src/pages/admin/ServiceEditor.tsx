@@ -10,6 +10,7 @@ const CATEGORIES: Service['category'][] = [
   'Skincare',
   'Other',
   'Threading & Waxing',
+  'Laser Hair Removal',
   'Medical',
   'Injectables',
 ];
